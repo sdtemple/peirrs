@@ -12,7 +12,7 @@
 #' @return numeric: expectation of some pair-wise tau
 #'
 #' @export
-E.tau <- function(rk,rj,ik,ij,lambdak,lambdaj){
+tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj){
   
   # Hypoexponential CDF with two different rates
   hypo2.cdf <- function(x, lambdak, lambdaj){

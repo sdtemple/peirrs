@@ -37,17 +37,16 @@ peirr_tau_moments <- function(r, i, N){
       tau <- tau + tau_moment(rk, rj, ik, ij, gamma.estim, gamma.estim)
     }
   }
-}
 
-# these are where we have full infectious period
-full.r <- r[(!is.na(r)) & (!is.na(i))]
-full.i <- i[(!is.na(r)) & (!is.na(i))]
-
-# maximizes give conditional expectations
-beta.estim <- (n - 1) / (tau + (N - n) / gamma.estim * n)
-
-return(list(infection.rate=beta.estim*N, 
-            removal.rate=gamma.estim, 
-            R0=beta.estim*N/gamma.estim, 
-            tau.sum=tau))
+  # these are where we have full infectious period
+  full.r <- r[(!is.na(r)) & (!is.na(i))]
+  full.i <- i[(!is.na(r)) & (!is.na(i))]
+  
+  # maximizes give conditional expectations
+  beta.estim <- (n - 1) / (tau + (N - n) / gamma.estim * n)
+  
+  return(list(infection.rate=beta.estim*N, 
+              removal.rate=gamma.estim, 
+              R0=beta.estim*N/gamma.estim, 
+              tau.sum=tau))
 }
