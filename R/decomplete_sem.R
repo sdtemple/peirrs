@@ -6,10 +6,10 @@
 #' @param p expected proportion of complete pairs observed
 #' @param q probability infection time missing
 #' 
-#' @return matrix: infection times, removal times
+#' @return matrix: infection times, removal times, (optional: infection claseses)
 #' 
 #' @export 
-decomplete_gsem <- function(epi, p, q = 1){
+decomplete_sem <- function(epi, p, q = 1){
   r <- epi[,2]
   i <- epi[,1]
   n <- length(r)
@@ -22,5 +22,10 @@ decomplete_gsem <- function(epi, p, q = 1){
       }
     }
   }
-  return(cbind(i,r))
+  if(dim(epi)[2]==3){
+    # multitype model
+    return(cbind(i,r,epi[,3]))
+  } else{
+    return(cbind(i,r))
+  }
 }

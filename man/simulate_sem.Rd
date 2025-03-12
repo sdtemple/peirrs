@@ -4,10 +4,12 @@
 \alias{simulate_sem}
 \title{Simulate general stochastic epidemic model}
 \usage{
-simulate_sem(rates, N, m = 1)
+simulate_sem(beta, gamma, N, m = 1)
 }
 \arguments{
-\item{rates}{numeric vector: rates (beta, gamma)}
+\item{beta}{numeric: infection rate}
+
+\item{gamma}{numeric: removal rate}
 
 \item{N}{integer: population size}
 
