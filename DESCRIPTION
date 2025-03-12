@@ -1,0 +1,11 @@
+Package: peirrs
+Title: Pair-based Estimation of Infection and Removal Rates
+Version: 0.1
+Authors@R: 
+    person("Seth", "Temple", , "sethtem@umich.edu", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-7651-6527"))
+Description: Simulate and estimate parameters in stochastic epidemic models
+License: CC0 v1.0 Universal
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
