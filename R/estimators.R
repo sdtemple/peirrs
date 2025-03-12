@@ -57,7 +57,7 @@ mle_complete = function(r, i, N){
 #' @return numeric list (infection.rate, removal.rate, R0, tau.sum)
 #'  
 #' @export 
-peirr_tau <- function(r, i, N){
+peirr_tau_moments <- function(r, i, N){
 
     # estimate of removal rate
     gamma.estim <- mle_removal_rate(r,i)
@@ -111,7 +111,7 @@ peirr_tau <- function(r, i, N){
 #' @return numeric list (infection.rate, removal.rate, R0, tau.sum)
 #'  
 #' @export 
-peirr_likelihood <- function(r, i, N){
+peirr_informed_pbla <- function(r, i, N){
   
   # PBLA function with fixed removal rate
   pb <- function(beta.estim,pbla,gamma.estim,r,N){
@@ -141,7 +141,7 @@ peirr_likelihood <- function(r, i, N){
 #' @return numeric list (infection.rate, removal.rate, R0, tau.sum)
 #'  
 #' @export 
-peirr_pbla <- function(r, N){
+peirr_naive_pbla <- function(r, N){
   
   # jointly optimize the likelihood
   pbla.estimates <- nlm(pbla_gsem,c(1,1),pbla=pbla_std_gsem,r=r,N=N)
