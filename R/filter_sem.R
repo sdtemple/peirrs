@@ -15,6 +15,6 @@ filter_sem <- function(epi){
     classes <- epi[,3][is.finite(epi[,2])]
     return(cbind(i,r,classes))
   } else{
-    return(cbind(i,r,classes))    
+    return(cbind(i,r))    
   }
 }

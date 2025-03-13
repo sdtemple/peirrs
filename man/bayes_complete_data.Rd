@@ -2,9 +2,17 @@
 % Please edit documentation in R/bayes_complete_data.R
 \name{bayes_complete_data}
 \alias{bayes_complete_data}
-\title{Posterior samples for infection and removal rates given complete data}
+\title{Posterior parameters for infection and removal rates given complete data}
 \usage{
-bayes_complete_data(r, i, N)
+bayes_complete_data(
+  r,
+  i,
+  N,
+  infection.rate.rate.prior,
+  infection.rate.shape.prior,
+  removal.rate.rate.prior,
+  removal.rate.shape.prior
+)
 }
 \arguments{
 \item{r}{numeric vector: removal times}
@@ -12,10 +20,18 @@ bayes_complete_data(r, i, N)
 \item{i}{numeric vector: infection times}
 
 \item{N}{integer: population size}
+
+\item{infection.rate.rate.prior}{numeric}
+
+\item{infection.rate.shape.prior}{numeric}
+
+\item{removal.rate.rate.prior}{numeric}
+
+\item{removal.rate.shape.prior}{numeric}
 }
 \value{
-numeric list of posterior (infection.rate, removal.rate)
+numeric list of exact posterior and prior parameters
 }
 \description{
-Gibbs sample the infection and removal rates
+Parameters for independent Gibbs sampling of the infection and removal rates
 }
