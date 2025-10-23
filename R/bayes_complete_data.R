@@ -1,6 +1,8 @@
 #' Posterior parameters for infection and removal rates given complete data
 #' 
-#' Parameters for independent Gibbs sampling of the infection and removal rates 
+#' Parameters for independent Gibbs sampling of the infection and removal rates.
+#' You can sample from \code{rgamma()} with the posterior parameters to get the posterior distribution.
+#' For the infection rate, you should scale the result of \code{rgamma()} by the population size.
 #' 
 #' @param r numeric vector: removal times
 #' @param i numeric vector: infection times

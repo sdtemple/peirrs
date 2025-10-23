@@ -9,7 +9,7 @@
 #' @return numeric list (infection.rate, removal.rate, R0, tau.sum)
 #'  
 #' @export 
-peirr_informed_pbla <- function(r, i, N){
+peirr_pbla_infection_rate <- function(r, i, N){
   
   # PBLA function with fixed removal rate
   pb <- function(beta.estim,pbla,gamma.estim,r,N){

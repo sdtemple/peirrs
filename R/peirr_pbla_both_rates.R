@@ -8,7 +8,7 @@
 #' @return numeric list (infection.rate, removal.rate, R0, tau.sum)
 #'  
 #' @export 
-peirr_naive_pbla <- function(r, N){
+peirr_pbla_both_rates <- function(r, N){
   
   # jointly optimize the likelihood
   pbla.estimates <- nlm(pbla_gsem,
