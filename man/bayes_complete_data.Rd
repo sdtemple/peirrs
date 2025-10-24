@@ -8,10 +8,11 @@ bayes_complete_data(
   r,
   i,
   N,
-  infection.rate.rate.prior,
-  infection.rate.shape.prior,
-  removal.rate.rate.prior,
-  removal.rate.shape.prior
+  infection.rate.rate.prior = 1e-05,
+  infection.rate.shape.prior = 0.001,
+  removal.rate.rate.prior = 0.001,
+  removal.rate.shape.prior = 0.001,
+  num.posterior.samples = 10000
 )
 }
 \arguments{
@@ -28,10 +29,15 @@ bayes_complete_data(
 \item{removal.rate.rate.prior}{numeric}
 
 \item{removal.rate.shape.prior}{numeric}
+
+\item{num.posterior.samples}{numeric}
 }
 \value{
 numeric list of exact posterior and prior parameters
 }
 \description{
-Parameters for independent Gibbs sampling of the infection and removal rates
+Parameters for independent Gibbs sampling of the infection and removal rates.
+You can sample from \code{rgamma()} with the posterior parameters to get the posterior distribution.
+For the infection rate, you should scale the result of \code{rgamma()} by the population size.
+\code{infection.rate.samples} and \code{removal.rate.samples} contain the posterior samples.
 }

@@ -4,7 +4,7 @@
 \alias{simulate_sem}
 \title{Simulate general stochastic epidemic model}
 \usage{
-simulate_sem(beta, gamma, N, m = 1)
+simulate_sem(beta, gamma, N, m = 1, e = 0)
 }
 \arguments{
 \item{beta}{numeric: infection rate}
@@ -14,9 +14,11 @@ simulate_sem(beta, gamma, N, m = 1)
 \item{N}{integer: population size}
 
 \item{m}{integer: positive shape}
+
+\item{e}{numeric: fixed exposure period}
 }
 \value{
-matrix: infection times, removal times
+numeric list: matrix of (infection times, removal times), matrix of (St, It, Et, Rt, Time)
 }
 \description{
 Draw infectious periods for general stochastic epidemic.

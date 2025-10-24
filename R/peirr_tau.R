@@ -1,6 +1,7 @@
 #' Pair-based tau estimator of common infection and removal rates
 #' 
 #' Estimate infection and removal rates with tau-based expectation-maximization.
+#' The output value \code{tau.sum} is useful for debugging. 
 #' 
 #' @param r numeric vector: removal times
 #' @param i numeric vector: infection times
