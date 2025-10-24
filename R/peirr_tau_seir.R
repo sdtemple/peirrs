@@ -12,7 +12,7 @@
 #' @return numeric list (infection.rate, removal.rate, R0, tau.sum)
 #'  
 #' @export 
-peirr_tau_moments_seir <- function(r, i, N, e = 0){
+peirr_tau_seir <- function(r, i, N, e = 0){
   
   # # estimate of removal rate
   # gamma.estim <- mle_removal_rate(r,i)
