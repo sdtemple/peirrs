@@ -4,7 +4,7 @@
 \alias{decomplete_sem}
 \title{Missing epidemic data}
 \usage{
-decomplete_sem(epi, p, q = 1)
+decomplete_sem(epi, p = 0, q = 1)
 }
 \arguments{
 \item{epi}{infection and removal times}
@@ -14,7 +14,7 @@ decomplete_sem(epi, p, q = 1)
 \item{q}{probability infection time missing}
 }
 \value{
-matrix: infection times, removal times, (optional: infection claseses)
+matrix: infection times, removal times, (optional: infection classes)
 }
 \description{
 Impute NAs for infection and removal times

@@ -1,15 +1,15 @@
 #' Missing epidemic data
-#' 
+#'
 #' Impute NAs for infection and removal times
-#' 
+#'
 #' @param epi infection and removal times
 #' @param p expected proportion of complete pairs observed
 #' @param q probability infection time missing
-#' 
-#' @return matrix: infection times, removal times, (optional: infection claseses)
-#' 
-#' @export 
-decomplete_sem <- function(epi, p, q = 1){
+#'
+#' @return matrix: infection times, removal times, (optional: infection classes)
+#'
+#' @export
+decomplete_sem <- function(epi, p = 0, q = 1){
   r <- epi[,2]
   i <- epi[,1]
   n <- length(r)
