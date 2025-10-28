@@ -13,10 +13,13 @@ sort_sem <- function(epi){
   ind <- order(r)
   r <- r[ind]
   i <- i[ind]
-  if(dim(epi)[2]==3){
+  if(dim(epi)[2]==6){
     # multitype model
     classes <- epi[,3][ind]
-    return(cbind(i,r,classes))
+    ratesB <- epi[,4][ind]
+    classesG <- epi[,5][ind]
+    ratesG <- epi[,6][ind]
+    return(cbind(i,r,classes,ratesB,classesG,ratesG))
   } else{
     return(cbind(i,r))
   }

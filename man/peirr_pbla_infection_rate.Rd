@@ -4,7 +4,7 @@
 \alias{peirr_pbla_infection_rate}
 \title{PEIRR likelihood estimator of common infection rate and estimated removal rate}
 \usage{
-peirr_pbla_infection_rate(r, i, N)
+peirr_pbla_infection_rate(r, i, N, m = 1, A = 1, lag = 0, known.gamma = NULL)
 }
 \arguments{
 \item{r}{numeric vector: removal times}
@@ -12,6 +12,14 @@ peirr_pbla_infection_rate(r, i, N)
 \item{i}{numeric vector: infection times}
 
 \item{N}{integer: population size}
+
+\item{m}{positive integer shape}
+
+\item{A}{integer patient zeros}
+
+\item{lag}{numeric fixed lag}
+
+\item{known.gamma}{numeric: removal rate}
 }
 \value{
 numeric list (infection.rate, removal.rate, R0, tau.sum)

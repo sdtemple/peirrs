@@ -7,13 +7,20 @@
 Requires `devtools::install_github("sdtemple/pblas")` from R terminal.
 
 ### Next steps
+- [] Simulate a lot of data
+- [x] Simulator with different $\beta$ and $\gamma$
+- [x] Qualitatively check correctness
 - [] Multi type implementation of PBLA
-- [] Multi type implementation of tau-based estimator
-- [] Fixed exposure period implementation of tau-based estimator
-- [] Simulator with different $\beta$ and $\gamma$
-- [] Tau-based estimator with different $\beta$ and $\gamma$
-- [] Multi type Bayesian with complete data
+- [x] Multi type implementation of tau-based estimator
+- [x] Median imputation in tau moments when possible
 - [] Parametric bootstrap
+- [] Spatial tau-based estimator
+- [] Spatial simulator
+- [] Fixed exposure period implementation of tau-based estimator
+- [] Truncated exponential for online inference
+- [x] Multi type MLE with complete data
+- [] Multi type Bayesian with complete data
 - [] Python implementation?
 - [] EINNs?
 - [] Bayes?
+- [] Gaussian quadrature?

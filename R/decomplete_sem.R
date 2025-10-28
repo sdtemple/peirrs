@@ -22,9 +22,13 @@ decomplete_sem <- function(epi, p = 0, q = 1){
       }
     }
   }
-  if(dim(epi)[2]==3){
+  if(dim(epi)[2]==6){
     # multitype model
-    return(cbind(i,r,epi[,3]))
+    classes <- epi[,3][is.finite(epi[,2]) | is.finite(epi[,1])]
+    ratesB <- epi[,4][is.finite(epi[,2]) | is.finite(epi[,1])]
+    classesG <- epi[,5][is.finite(epi[,2]) | is.finite(epi[,1])]
+    ratesG <- epi[,6][is.finite(epi[,2]) | is.finite(epi[,1])]
+    return(cbind(i,r,classes,ratesB,classesG,ratesG))
   } else{
     return(cbind(i,r))
   }

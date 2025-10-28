@@ -4,12 +4,18 @@
 \alias{peirr_pbla_both_rates}
 \title{PBLA estimator of common infection rate and estimated removal rate}
 \usage{
-peirr_pbla_both_rates(r, N)
+peirr_pbla_both_rates(r, N, m = 1, A = 1, lag = 0)
 }
 \arguments{
 \item{r}{numeric vector: removal times}
 
 \item{N}{integer: population size}
+
+\item{m}{positive integer shape}
+
+\item{A}{integer patient zeros}
+
+\item{lag}{numeric fixed lag}
 }
 \value{
 numeric list (infection.rate, removal.rate, R0, tau.sum)

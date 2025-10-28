@@ -8,11 +8,12 @@
 #' @param ij numeric: infection time ij
 #' @param lambdak numeric: removal rate of k
 #' @param lambdaj numeric: removal rate of j
+#' @param med bool: use median imputation if true
 #'
 #' @return numeric: expectation of some pair-wise tau
 #'
 #' @export
-tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj){
+tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
   
   # Hypoexponential CDF with two different rates
   hypo2.cdf <- function(x, lambdak, lambdaj){
@@ -30,7 +31,8 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj){
   }
   
   # Expected tau: rk, rj, ik, ij observed
-  E.tau.rk.rj.ik.ij <- function(rk,rj,ik,ij,lambdak,lambdaj){
+  E.tau.rk.rj.ik.ij <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
+    # med does nothing
     val <- 0
     if(ij<ik){
       val <- 0        
@@ -43,7 +45,8 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj){
   }
   
   # Expected tau: rk, ik, ij observed
-  E.tau.rk.ik.ij <- function(rk,rj,ik,ij,lambdak,lambdaj){
+  E.tau.rk.ik.ij <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
+    # med does nothing
     val <- 0
     if(ij<ik){
       val <- 0        
@@ -56,7 +59,8 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj){
   }
   
   # Expected tau: rj, ik, ij observed
-  E.tau.rj.ik.ij <- function(rk,rj,ik,ij,lambdak,lambdaj){
+  E.tau.rj.ik.ij <- function(rk,rj,ik,ij,lambdak,lambdaj,med=T){
+    # med does nothing
     val <- 0
     if(ij<ik){
       val <- 0        
@@ -69,7 +73,8 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj){
   }
   
   # Expected tau: rk, rj, ik observed
-  E.tau.rk.rj.ik <- function(rk,rj,ik,ij,lambdak,lambdaj){
+  E.tau.rk.rj.ik <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
+    # med does nothing
     val <- 0
     if(rj < ik){
       val <- 0
@@ -85,18 +90,22 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj){
   }
   
   # Expected tau: rk, rj, ij observed
-  E.tau.rk.rj.ij <- function(rk,rj,ik,ij,lambdak,lambdaj){
+  E.tau.rk.rj.ij <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
+    median.scalar = 1
+    if(med){median.scalar=log(2)}
     val <- 0
     if(ij < rk){
       val <- (exp(lambdak*ij)-lambdak*ij - 1)*exp(-lambdak*rk)/lambdak
     } else{
-      val <- 1 / lambdak
+      val <- 1 / lambdak * median.scalar
     }
     return(val)
   }
   
   # Expected tau: rk, rj observed
-  E.tau.rk.rj <- function(rk,rj,ik,ij,lambdak,lambdaj){
+  E.tau.rk.rj <- function(rk,rj,ik,ij,lambdak,lambdaj,med=T){
+    median.scalar=1
+    if(med){median.scalar=log(2)}
     val <- 0
     if(rj < rk){
       H1 <- pexp(rk-rj,rate=lambdak,lower.tail=FALSE)*lambdaj/lambdak/(lambdak+lambdaj)
@@ -106,19 +115,19 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj){
       H3 <- pexp(rj-rk,rate=lambdaj,lower.tail=TRUE)/lambdak
       val <- H2 + H3
     }
-    return(val)
+    return(val*median.scalar)
   }
   
   # Expected tau: rk, ij observed
   # rj is not useful if ij is known
-  E.tau.rk.ij <- function(rk,rj,ik,ij,lambdak,lambdaj){
-    return(E.tau.rk.rj.ij(rk,rj,ik,ij,lambdak,lambdaj))
+  E.tau.rk.ij <- function(rk,rj,ik,ij,lambdak,lambdaj,med=T){
+    return(E.tau.rk.rj.ij(rk,rj,ik,ij,lambdak,lambdaj,med))
   }
   
   # Expected tau: ik, ij observed
   # rj is not useful if ij is known
-  E.tau.ik.ij <- function(rk,rj,ik,ij,lambdak,lambdaj){
-    return(E.tau.rj.ik.ij(rk,rj,ik,ij,lambdak,lambdaj))
+  E.tau.ik.ij <- function(rk,rj,ik,ij,lambdak,lambdaj,med=T){
+    return(E.tau.rj.ik.ij(rk,rj,ik,ij,lambdak,lambdaj,med))
   }
   
   
@@ -129,7 +138,8 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj){
   
   # Expected tau: rj, ik observed
   # This integral problem is extremely hard
-  E.tau.rj.ik <- function(rk,rj,ik,ij,lambdak,lambdaj){
+  E.tau.rj.ik <- function(rk,rj,ik,ij,lambdak,lambdaj,med=T){
+    # med does nothing
     val <- 0
     func1 <- function(x,rate1,rate2,rate3){
       return((1-(rate2-rate1)*x)*exp((rate2-rate1)*x))
@@ -211,55 +221,55 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj){
   if(is.na(ij)){
     if(is.na(ik)){
       itr <- itr + 1
-      val <- E.tau.rk.rj(rk, rj, ik, ij, lambdak, lambdaj)
+      val <- E.tau.rk.rj(rk, rj, ik, ij, lambdak, lambdaj, med)
     }
   }
   # case 2
   if(is.na(ij)){
     if(is.na(rk)){
       itr <- itr + 1
-      val <- E.tau.rj.ik(rk, rj, ik, ij, lambdak, lambdaj)
+      val <- E.tau.rj.ik(rk, rj, ik, ij, lambdak, lambdaj, med)
     }
   }
   # case 3
   if(is.na(ik)){
     if(is.na(rj)){
       itr <- itr + 1
-      val <- E.tau.rk.ij(rk, rj, ik, ij, lambdak, lambdaj)
+      val <- E.tau.rk.ij(rk, rj, ik, ij, lambdak, lambdaj, med)
     }
   }
   # case 4
   if(is.na(rk)){
     if(is.na(rj)){
       itr <- itr + 1
-      val <- E.tau.ik.ij(rk, rj, ik, ij, lambdak, lambdaj)
+      val <- E.tau.ik.ij(rk, rj, ik, ij, lambdak, lambdaj, med)
     }
   }
   # case 5
   if(is.na(rk)&itr==0){
     itr <- itr + 1
-    val <- E.tau.rj.ik.ij(rk, rj, ik, ij, lambdak, lambdaj)
+    val <- E.tau.rj.ik.ij(rk, rj, ik, ij, lambdak, lambdaj, med)
   }
   # case 6
   if(is.na(rj)&itr==0){
     itr <- itr + 1
-    val <- E.tau.rk.ik.ij(rk, rj, ik, ij, lambdak, lambdaj)
+    val <- E.tau.rk.ik.ij(rk, rj, ik, ij, lambdak, lambdaj, med)
   }
   # case 7
   if(is.na(ik)&itr==0){
     itr <- itr + 1
-    val <- E.tau.rk.rj.ij(rk, rj, ik, ij, lambdak, lambdaj)
+    val <- E.tau.rk.rj.ij(rk, rj, ik, ij, lambdak, lambdaj, med)
   }
   # case 8
   if(is.na(ij)&itr==0){
     itr <- itr + 1
-    val <- E.tau.rk.rj.ik(rk, rj, ik, ij, lambdak, lambdaj)
+    val <- E.tau.rk.rj.ik(rk, rj, ik, ij, lambdak, lambdaj, med)
   }
   
   # case 9
   if(!is.na(rk+rj+ik+ij)){
     itr <- itr + 1
-    val <- E.tau.rk.rj.ik.ij(rk, rj, ik, ij, lambdak, lambdaj)
+    val <- E.tau.rk.rj.ik.ij(rk, rj, ik, ij, lambdak, lambdaj, med)
   }
   
   result <- tryCatch({

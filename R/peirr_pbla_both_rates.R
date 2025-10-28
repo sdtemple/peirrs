@@ -4,18 +4,29 @@
 #' 
 #' @param r numeric vector: removal times
 #' @param N integer: population size
+#' @param m positive integer shape
+#' @param A integer patient zeros
+#' @param lag numeric fixed lag
 #' 
 #' @return numeric list (infection.rate, removal.rate, R0, tau.sum)
 #'  
 #' @export 
-peirr_pbla_both_rates <- function(r, N){
+peirr_pbla_both_rates <- function(r, 
+                                  N, 
+                                  m=1, 
+                                  A=1, 
+                                  lag=0){
   
   # jointly optimize the likelihood
-  pbla.estimates <- nlm(pbla_gsem,
+  pbla.estimates <- nlm(pblas::pbla_gsem,
                         c(1,1),
                         pbla=pblas::pbla_std_gsem,
                         r=r,
-                        N=N)
+                        N=N,
+                        m=m,
+                        A=A,
+                        lag=lag
+                        )
   
   # estimate of removal rate
   gamma.estim <- pbla.estimates$estimate[2]

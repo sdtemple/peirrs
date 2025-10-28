@@ -3,18 +3,25 @@
 #' Draw infectious periods for general stochastic epidemic.
 #'
 #' @param betas numeric vector: infection rates
-#' @param gamma numeric: removal rate
-#' @param Ns integer: subpopulation sizes
+#' @param gammas numeric: removal rates
+#' @param beta.sizes integers: subpopulation sizes for infection rates
+#' @param gamma.sizes integers: subpopulation sizes for removal rates
 #' @param m integer: positive shape
 #' @param e numeric: fixed exposure period
 #'
-#' @return numeric list: matrix of (infection times, removal times, classes), matrix of (St, It, Et, Rt, Time)
+#' @return numeric list: matrix of (infection times, removal times, classes and rates), matrix of (St, It, Et, Rt, Time)
 #'
 #' @export
-simulate_sem_multitype <- function(betas, gamma, Ns, m = 1, e = 0){
+simulate_sem_multitype <- function(betas, 
+                                   gammas, 
+                                   beta.sizes,
+                                   gamma.sizes,
+                                   m = 1, 
+                                   e = 0){
   
   # initialize vectors
   t = 0
+  Ns = beta.sizes
   betaNs = betas / sum(Ns)
   N <- sum(Ns)
   i = rep(Inf, N)
@@ -27,6 +34,22 @@ simulate_sem_multitype <- function(betas, gamma, Ns, m = 1, e = 0){
   classes[1] = zeroclass
   Ns[zeroclass] = Ns[zeroclass] - 1
   itr = 1
+
+  Ms = gamma.sizes
+  ratesB = rep(NA, N)
+  ratesG = rep(NA, N)
+  classesG = rep(NA, N)
+  if(sum(gamma.sizes) != sum(beta.sizes)){
+    stop("Infection and removal rate classes do not add up")
+  }
+  currentsG = rep(0, length(Ms))
+  weightsG = Ms / N
+  zeroclassG = sample(1:length(Ms), size=1, prob=weightsG)
+  classesG[1] = zeroclassG
+  Ms[zeroclassG] = Ms[zeroclassG] - 1
+  ratesB[1] = betas[zeroclass]
+  ratesG[1] = gammas[zeroclassG]
+  currentsG[zeroclassG] = currentsG[zeroclassG] + 1
   
   # simulate epidemic
   St = sum(is.infinite(i))
@@ -57,7 +80,7 @@ simulate_sem_multitype <- function(betas, gamma, Ns, m = 1, e = 0){
     } else{
       # simulate time
       irate = It * sum(Ns * betaNs)
-      rrate = gamma * It
+      rrate = sum(currentsG * gammas)
       t = t + rexp(1, rate = irate + rrate)
       
       if(t > min.time){
@@ -76,10 +99,26 @@ simulate_sem_multitype <- function(betas, gamma, Ns, m = 1, e = 0){
           itr = itr + 1
           classes[itr] = sampled.class
           i[itr] = t + e # fixed exposure period
+          ratesB[itr] = betas[sampled.class]
+          
+          # give the infected a removal rate
+          weightsG = Ms / sum(Ms)
+          sampled.classG = sample(1:length(Ms), size=1, prob=weightsG)
+          Ms[sampled.classG] = Ms[sampled.classG] - 1
+          classesG[itr] = sampled.classG
+          ratesG[itr] = gammas[sampled.classG]
+          currentsG[sampled.classG] = currentsG[sampled.classG] + 1
+          
         } else{
           # remove an infected
           if(It > 1){
-            argx = sample(which(is.infinite(r) & is.finite(i) & (i <= t), arr.ind = T), 1)
+            
+            # sample based on removal rates
+            removal.bool = which(is.infinite(r) & is.finite(i) & (i <= t), arr.ind=T)
+            removal.weights = ratesG[removal.bool]
+            removal.weights = removal.weights / sum(removal.weights)
+            argx = sample(removal.bool, size=1, prob=removal.weights)
+
             # & (i <= t) means can't be removed before infectious when exposed
           } else{
             # when epidemic is winding down
@@ -90,11 +129,11 @@ simulate_sem_multitype <- function(betas, gamma, Ns, m = 1, e = 0){
           M[argx] = M[argx] + 1
           if(M[argx] == m){ # after m renewals
             r[argx] = t
+            argx.class = classesG[argx]
+            currentsG[argx.class] = currentsG[argx.class] - 1
           }
         }         
-        
       }
-      
     }
     
     # update (S,I) counts
@@ -117,11 +156,16 @@ simulate_sem_multitype <- function(betas, gamma, Ns, m = 1, e = 0){
   }
   
   # formatting
-  output = matrix(c(i,r,classes),
+  output = matrix(c(i,r,classes,ratesB,classesG,ratesG),
                   nrow = N,
-                  ncol = 3,
+                  ncol = 6,
                   byrow = F)
-  colnames(output) = c('i','r','group')
+  colnames(output) = c('i',
+                       'r',
+                       'infection.group',
+                       'infection.rate',
+                       'removal.group',
+                       'removal.rate')
   
   recording = matrix(c(Srecording, Irecording, Erecording, Rrecording, Trecording),
                      nrow = ctr,

@@ -4,7 +4,7 @@
 \alias{simulator}
 \title{Simulate general stochastic epidemic model with formatting}
 \usage{
-simulator(beta, gamma, N, m = 1, e = 0, p = 0, q = 1)
+simulator(beta, gamma, N, m = 1, e = 0, p = 0, q = 1, min.sample.size = 10)
 }
 \arguments{
 \item{beta}{numeric: infection rate}
@@ -20,6 +20,8 @@ simulator(beta, gamma, N, m = 1, e = 0, p = 0, q = 1)
 \item{p}{expected proportion of complete pairs observed}
 
 \item{q}{probability infection time missing}
+
+\item{min.sample.size}{integer}
 }
 \value{
 numeric list: matrix of (infection times, removal times), matrix of (St, It, Et, Rt, Time)
