@@ -11,7 +11,7 @@
 #' @return numeric list (infection.rate, removal.rate, R0)
 #'
 #' @export
-peirr_tau <- function(r, i, N, med=T){
+peirr_tau <- function(r, i, N, med=TRUE){
 
   # make sure one of the other is finite
   or.finite <- is.finite(r)|is.finite(i)

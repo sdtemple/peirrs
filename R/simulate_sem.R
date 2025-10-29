@@ -12,7 +12,7 @@
 #'
 #' @export
 simulate_sem <- function(beta, gamma, N, m = 1, e = 0){
-  
+
   # initialize vectors
   t = 0
   betaN = beta / N
@@ -21,13 +21,13 @@ simulate_sem <- function(beta, gamma, N, m = 1, e = 0){
   M = rep(0, N)
   alpha = sample(N, 1)
   i[alpha] = t
-  
+
   # simulate epidemic
   St = sum(is.infinite(i))
   It = sum(is.finite(i)) - sum(is.finite(r))
   Et = 0
   Rt = 0
-  
+
   # recording the evolution
   Srecording = c(St)
   Irecording = c(It)
@@ -35,15 +35,15 @@ simulate_sem <- function(beta, gamma, N, m = 1, e = 0){
   Rrecording = c(Rt)
   Trecording = c(0)
   ctr = 1
-  
+
   while((It > 0) | (Et > 0)){
-    
+
     # closest infectious time after exposure
     min.time = min(
       i[is.infinite(r) & is.finite(i) & (i > t)],
       Inf
     )
-    
+
     if(It == 0){
       # no infecteds but there are exposeds
       # the closest exposure wait
@@ -81,12 +81,12 @@ simulate_sem <- function(beta, gamma, N, m = 1, e = 0){
           if(M[argx] == m){ # after m renewals
             r[argx] = t
           }
-        }         
-        
+        }
+
       }
 
     }
-    
+
     # update (S,I) counts
     St = sum(is.infinite(i))
     It = sum(is.finite(i) & (i <= t)) - sum(is.finite(r))
@@ -96,30 +96,30 @@ simulate_sem <- function(beta, gamma, N, m = 1, e = 0){
       stop("S(t) + I(t) + E(t) + R(t) do not equal N")
     }
     # & (i <= t) delays the infectious period after exposure
-    
+
     Srecording = c(Srecording, St)
     Irecording = c(Irecording, It)
     Erecording = c(Erecording, Et)
     Rrecording = c(Rrecording, Rt)
     Trecording = c(Trecording, t)
-    ctr = ctr + 1    
-    
+    ctr = ctr + 1
+
   }
-  
+
   # formatting
   output = matrix(c(i,r),
                   nrow = N,
                   ncol = 2,
-                  byrow = F)
+                  byrow = FALSE)
   colnames(output) = c('i','r')
-  
+
   recording = matrix(c(Srecording, Irecording, Erecording, Rrecording, Trecording),
                      nrow = ctr,
                      ncol = 5,
-                     byrow = F
+                     byrow = FALSE
                      )
   colnames(recording) = c('St','It','Et', 'Rt', 'Time')
-  
+
   return(list(matrix.time = output,
               matrix.record = recording
               )

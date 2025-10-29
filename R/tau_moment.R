@@ -13,7 +13,7 @@
 #' @return numeric: expectation of some pair-wise tau
 #'
 #' @export
-tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
+tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=TRUE){
 
   # Hypoexponential CDF with two different rates
   hypo2.cdf <- function(x, lambdak, lambdaj){
@@ -31,7 +31,7 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
   }
 
   # Expected tau: rk, rj, ik, ij observed
-  E.tau.rk.rj.ik.ij <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
+  E.tau.rk.rj.ik.ij <- function(rk,rj,ik,ij,lambdak,lambdaj, med=TRUE){
     # med does nothing
     val <- 0
     if(ij<ik){
@@ -45,7 +45,7 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
   }
 
   # Expected tau: rk, ik, ij observed
-  E.tau.rk.ik.ij <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
+  E.tau.rk.ik.ij <- function(rk,rj,ik,ij,lambdak,lambdaj, med=TRUE){
     # med does nothing
     val <- 0
     if(ij<ik){
@@ -59,7 +59,7 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
   }
 
   # Expected tau: rj, ik, ij observed
-  E.tau.rj.ik.ij <- function(rk,rj,ik,ij,lambdak,lambdaj,med=T){
+  E.tau.rj.ik.ij <- function(rk,rj,ik,ij,lambdak,lambdaj,med=TRUE){
     # med does nothing
     val <- 0
     if(ij<ik){
@@ -73,7 +73,7 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
   }
 
   # Expected tau: rk, rj, ik observed
-  E.tau.rk.rj.ik <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
+  E.tau.rk.rj.ik <- function(rk,rj,ik,ij,lambdak,lambdaj, med=TRUE){
     # med does nothing
     val <- 0
     if(rj < ik){
@@ -90,7 +90,7 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
   }
 
   # Expected tau: rk, rj, ij observed
-  E.tau.rk.rj.ij <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
+  E.tau.rk.rj.ij <- function(rk,rj,ik,ij,lambdak,lambdaj, med=TRUE){
     median.scalar = 1
     if(med){median.scalar=log(2)}
     val <- 0
@@ -103,7 +103,7 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
   }
 
   # Expected tau: rk, rj observed
-  E.tau.rk.rj <- function(rk,rj,ik,ij,lambdak,lambdaj,med=T){
+  E.tau.rk.rj <- function(rk,rj,ik,ij,lambdak,lambdaj,med=TRUE){
     median.scalar=1
     if(med){median.scalar=log(2)}
     val <- 0
@@ -120,13 +120,13 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
 
   # Expected tau: rk, ij observed
   # rj is not useful if ij is known
-  E.tau.rk.ij <- function(rk,rj,ik,ij,lambdak,lambdaj,med=T){
+  E.tau.rk.ij <- function(rk,rj,ik,ij,lambdak,lambdaj,med=TRUE){
     return(E.tau.rk.rj.ij(rk,rj,ik,ij,lambdak,lambdaj,med))
   }
 
   # Expected tau: ik, ij observed
   # rj is not useful if ij is known
-  E.tau.ik.ij <- function(rk,rj,ik,ij,lambdak,lambdaj,med=T){
+  E.tau.ik.ij <- function(rk,rj,ik,ij,lambdak,lambdaj,med=TRUE){
     return(E.tau.rj.ik.ij(rk,rj,ik,ij,lambdak,lambdaj,med))
   }
 
@@ -138,7 +138,7 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
 
   # Expected tau: rj, ik observed
   # This integral problem is extremely hard
-  E.tau.rj.ik <- function(rk,rj,ik,ij,lambdak,lambdaj,med=T){
+  E.tau.rj.ik <- function(rk,rj,ik,ij,lambdak,lambdaj,med=TRUE){
     # med does nothing
     val <- 0
     func1 <- function(x,rate1,rate2,rate3){

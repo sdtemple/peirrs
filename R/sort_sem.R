@@ -1,11 +1,11 @@
 #' Sort epidemic data
-#' 
+#'
 #' Sort matrix by increasing removal times.
-#' 
+#'
 #' @param epi matrix: infection times, removal times, (optional: infection classes)
-#' 
+#'
 #' @return matrix: infection times, removal times, (optional: infection classes)
-#' 
+#'
 #' @export
 sort_sem <- function(epi){
   r <- epi[,2]
@@ -24,7 +24,7 @@ sort_sem <- function(epi){
     output = matrix(c(i,r,classes,ratesB,classesG,ratesG),
                     nrow = N,
                     ncol = 6,
-                    byrow = F)
+                    byrow = FALSE)
     colnames(output) = c('i',
                          'r',
                          'infection.group',

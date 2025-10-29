@@ -12,13 +12,13 @@
 #' @return numeric list: matrix of (infection times, removal times, classes and rates), matrix of (St, It, Et, Rt, Time)
 #'
 #' @export
-simulate_sem_multitype <- function(betas, 
-                                   gammas, 
+simulate_sem_multitype <- function(betas,
+                                   gammas,
                                    beta.sizes,
                                    gamma.sizes,
-                                   m = 1, 
+                                   m = 1,
                                    e = 0){
-  
+
   # initialize vectors
   t = 0
   Ns = beta.sizes
@@ -50,13 +50,13 @@ simulate_sem_multitype <- function(betas,
   ratesB[1] = betas[zeroclass]
   ratesG[1] = gammas[zeroclassG]
   currentsG[zeroclassG] = currentsG[zeroclassG] + 1
-  
+
   # simulate epidemic
   St = sum(is.infinite(i))
   It = sum(is.finite(i)) - sum(is.finite(r))
   Et = 0
   Rt = 0
-  
+
   # recording the evolution
   Srecording = c(St)
   Irecording = c(It)
@@ -64,15 +64,15 @@ simulate_sem_multitype <- function(betas,
   Rrecording = c(Rt)
   Trecording = c(0)
   ctr = 1
-  
+
   while((It > 0) | (Et > 0)){
-    
+
     # closest infectious time after exposure
     min.time = min(
       i[is.infinite(r) & is.finite(i) & (i > t)],
       Inf
     )
-    
+
     if(It == 0){
       # no infecteds but there are exposeds
       # the closest exposure wait
@@ -82,7 +82,7 @@ simulate_sem_multitype <- function(betas,
       irate = It * sum(Ns * betaNs)
       rrate = sum(currentsG * gammas)
       t = t + rexp(1, rate = irate + rrate)
-      
+
       if(t > min.time){
         # update time to make an exposed infectious
         t = min.time + .Machine$double.eps
@@ -100,7 +100,7 @@ simulate_sem_multitype <- function(betas,
           classes[itr] = sampled.class
           i[itr] = t + e # fixed exposure period
           ratesB[itr] = betas[sampled.class]
-          
+
           # give the infected a removal rate
           weightsG = Ms / sum(Ms)
           sampled.classG = sample(1:length(Ms), size=1, prob=weightsG)
@@ -108,11 +108,11 @@ simulate_sem_multitype <- function(betas,
           classesG[itr] = sampled.classG
           ratesG[itr] = gammas[sampled.classG]
           currentsG[sampled.classG] = currentsG[sampled.classG] + 1
-          
+
         } else{
           # remove an infected
           if(It > 1){
-            
+
             # sample based on removal rates
             removal.bool = which(is.infinite(r) & is.finite(i) & (i <= t), arr.ind=T)
             removal.weights = ratesG[removal.bool]
@@ -132,10 +132,10 @@ simulate_sem_multitype <- function(betas,
             argx.class = classesG[argx]
             currentsG[argx.class] = currentsG[argx.class] - 1
           }
-        }         
+        }
       }
     }
-    
+
     # update (S,I) counts
     St = sum(is.infinite(i))
     It = sum(is.finite(i) & (i <= t)) - sum(is.finite(r))
@@ -145,16 +145,16 @@ simulate_sem_multitype <- function(betas,
       stop("S(t) + I(t) + E(t) + R(t) do not equal N")
     }
     # & (i <= t) delays the infectious period after exposure
-    
+
     Srecording = c(Srecording, St)
     Irecording = c(Irecording, It)
     Erecording = c(Erecording, Et)
     Rrecording = c(Rrecording, Rt)
     Trecording = c(Trecording, t)
-    ctr = ctr + 1    
-    
+    ctr = ctr + 1
+
   }
-  
+
   # assign the remaining non-infecteds to classes
   # infection classes
   next.class = Rt
@@ -162,7 +162,7 @@ simulate_sem_multitype <- function(betas,
     if(Ns[l] > 0){
       classes[(next.class+1):(next.class+Ns[l])] = l
       ratesB[(next.class+1):(next.class+Ns[l])] = betas[l]
-      next.class = next.class + Ns[l]      
+      next.class = next.class + Ns[l]
     }
   }
   # removal classes
@@ -171,29 +171,29 @@ simulate_sem_multitype <- function(betas,
     if(Ms[l]>0){
       classesG[(next.class+1):(next.class+Ms[l])] = l
       ratesG[(next.class+1):(next.class+Ms[l])] = gammas[l]
-      next.class = next.class + Ms[l] 
+      next.class = next.class + Ms[l]
     }
   }
-  
+
   # formatting
   output = matrix(c(i,r,classes,ratesB,classesG,ratesG),
                   nrow = N,
                   ncol = 6,
-                  byrow = F)
+                  byrow = FALSE)
   colnames(output) = c('i',
                        'r',
                        'infection.group',
                        'infection.rate',
                        'removal.group',
                        'removal.rate')
-  
+
   recording = matrix(c(Srecording, Irecording, Erecording, Rrecording, Trecording),
                      nrow = ctr,
                      ncol = 5,
-                     byrow = F
+                     byrow = FALSE
   )
   colnames(recording) = c('St','It','Et', 'Rt', 'Time')
-  
+
   return(list(matrix.time = output,
               matrix.record = recording
   )

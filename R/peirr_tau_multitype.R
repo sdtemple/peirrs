@@ -13,7 +13,7 @@
 #' @return numeric list (infection.rates, removal.rates, removal.full.sizes)
 #'
 #' @export
-peirr_tau_multitype <- function(r, i, cr, ci, Ns, med=T){
+peirr_tau_multitype <- function(r, i, cr, ci, Ns, med=TRUE){
 
   # make sure one or the other is finite
   or.finite <- is.finite(r)|is.finite(i)
@@ -44,8 +44,8 @@ peirr_tau_multitype <- function(r, i, cr, ci, Ns, med=T){
   }
 
   # initialize class specific rates
-  removal.classes <- sort(unique(cr, na.rm=T))
-  infection.classes <- sort(unique(ci, na.rm=T))
+  removal.classes <- sort(unique(cr, na.rm=TRUE))
+  infection.classes <- sort(unique(ci, na.rm=TRUE))
   removal.rates <- c()
   infection.rates <- c()
   removal.sizes <- c()

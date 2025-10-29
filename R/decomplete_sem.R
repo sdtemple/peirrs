@@ -33,7 +33,7 @@ decomplete_sem <- function(epi, p = 0, q = 1){
     output = matrix(c(i,r,classes,ratesB,classesG,ratesG),
                     nrow = N,
                     ncol = 6,
-                    byrow = F)
+                    byrow = FALSE)
     colnames(output) = c('i',
                          'r',
                          'infection.group',

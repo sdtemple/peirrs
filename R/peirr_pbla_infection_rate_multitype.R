@@ -1,7 +1,7 @@
 #' PEIRR likelihood estimator of infection rates and MLE removal rates
-#' 
-#' Estimate multiple removal rates with duration date and multiple infection rates with PBLA 
-#' 
+#'
+#' Estimate multiple removal rates with duration date and multiple infection rates with PBLA
+#'
 #' @param r numeric vector: removal times
 #' @param i numeric vector: infection times
 #' @param N integer: population size
@@ -11,19 +11,19 @@
 #' @param A integer patient zeros
 #' @param lag numeric fixed lag
 #' @param known.gammas numeric: removal rates
-#' 
+#'
 #' @return numeric list (infection.rates, removal.rates)
-#'  
-#' @export 
-peirr_pbla_infection_rate_multitype <- function(r, 
-                                      i, 
+#'
+#' @export
+peirr_pbla_infection_rate_multitype <- function(r,
+                                      i,
                                       cr,
                                       ci,
                                       m=1,
                                       A=1,
                                       lag=0,
                                       known.gammas = NULL){
-  
+
   # PBLA function with fixed removal rate
   pb <- function(beta.estims,pbla,gamma.estims,betamap,gammamap,r,m,A,lag){
     # define the betamap
@@ -33,11 +33,11 @@ peirr_pbla_infection_rate_multitype <- function(r,
     gammas <- gamma.estims[gammamap]
     return(pbla(r,betas,gammas,m,A,lag))
   }
-  
+
   # determine unique categories
-  unique.gammas = sort(unique(cr, na.rm=T))
-  unique.betas = sort(unique(ci, na.rm=T))
-  
+  unique.gammas = sort(unique(cr, na.rm=TRUE))
+  unique.betas = sort(unique(ci, na.rm=TRUE))
+
   # estimate of removal rate
   if(is.null(known.gammas)){
     removal.classes <- unique.gammas
@@ -67,7 +67,7 @@ peirr_pbla_infection_rate_multitype <- function(r,
       stop("At least one removal rate is not positive")
     }
   }
-  
+
   # recode the categories if not 1,2,3,...
   for(g in 1:length(unique.gammas)){
     cr[cr == unique.gammas[g]] = g
@@ -75,7 +75,7 @@ peirr_pbla_infection_rate_multitype <- function(r,
   for(b in 1:length(unique.betas)){
     ci[ci == unique.betas[b]] = b
   }
-  
+
   n <- sum(is.finite(r))
   N <- length(r)
   betamap <- matrix(0, nrow=n, ncol=N)
@@ -84,8 +84,8 @@ peirr_pbla_infection_rate_multitype <- function(r,
   }
   gammamap = cr[is.finite(r)]
   r = r[is.finite(r)]
-  
-  
+
+
   # maximizes give conditional expectations
   beta.estims <-   nlm(pb,
                       rep(1,length(unique.betas)),
@@ -96,8 +96,8 @@ peirr_pbla_infection_rate_multitype <- function(r,
                       r=r,
                       m=m,
                       A=A,
-                      lag=lag)$estimate  
-  
-  return(list(infection.rates=beta.estims, 
+                      lag=lag)$estimate
+
+  return(list(infection.rates=beta.estims,
               removal.rates=gamma.estims))
 }
