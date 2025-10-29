@@ -13,7 +13,8 @@ simulator_multitype(
   e = 0,
   p = 0,
   q = 1,
-  min.sample.size = 10
+  min.sample.size = 10,
+  max.sample.size = Inf
 )
 }
 \arguments{

@@ -1,26 +1,39 @@
 #' Pair-based tau estimator of multiple infection and removal rates
-#' 
+#'
 #' Estimate infection and removal rates with tau-based expectation-maximization.
-#' The output value \code{tau.sum} is useful for debugging. 
-#' 
+#' The output value \code{tau.sum} is useful for debugging.
+#'
 #' @param r numeric vector: removal times
 #' @param i numeric vector: infection times
 #' @param cr numeric vector: removal time classes
 #' @param ci numeric vector: infection time classes
 #' @param Ns integer vector: population sizes for infection classes (sorted)
-#' @param med bool: use median imputation if true 
-#' 
+#' @param med bool: use median imputation if true
+#'
 #' @return numeric list (infection.rates, removal.rates, removal.full.sizes)
-#'  
-#' @export 
+#'
+#' @export
 peirr_tau_multitype <- function(r, i, cr, ci, Ns, med=T){
-  
+
+  # make sure one or the other is finite
+  or.finite <- is.finite(r)|is.finite(i)
+  cr <- cr[or.finite]
+  ci <- ci[or.finite]
+  i <- i[or.finite]
+  r <- r[or.finite]
+
   median.scalar <- 1
   if(med){median.scalar <- log(2)}
-  
+
   # number of infected
   n <- sum(!is.na(r) | !is.na(i))
-  
+  if(sum(is.na(r))>=n){
+    stop("There are no complete case periods to estimate removal rates")
+  }
+  if(sum(is.na(i))>=n){
+    stop("There are no complete case periods to estimate removal rates")
+  }
+
   ### first infected ###
   ralpha <- which.min(r)
   ialpha <- which.min(i)
@@ -29,7 +42,7 @@ peirr_tau_multitype <- function(r, i, cr, ci, Ns, med=T){
   } else{
     alpha <- ralpha
   }
-  
+
   # initialize class specific rates
   removal.classes <- sort(unique(cr, na.rm=T))
   infection.classes <- sort(unique(ci, na.rm=T))
@@ -39,7 +52,7 @@ peirr_tau_multitype <- function(r, i, cr, ci, Ns, med=T){
   infection.sizes <- c()
   removal.full.sizes <- c()
   removal.partial.sums <- c()
-  
+
   # compute class-specific removal rates
   for(cl in removal.classes){
     # find those in same class
@@ -60,10 +73,10 @@ peirr_tau_multitype <- function(r, i, cr, ci, Ns, med=T){
     removal.partial.sum <- sum(rg2 - ig2) + num.not.complete / rate.estim * median.scalar
     removal.partial.sums <- c(removal.partial.sums, removal.partial.sum)
   }
-  
+
   # these sum with some expected values for observed infections
   ri.sum <- sum(removal.partial.sums)
-  
+
   # sum up tau terms
   taus <- c()
   for(l in 1:length(infection.classes)){
@@ -87,7 +100,9 @@ peirr_tau_multitype <- function(r, i, cr, ci, Ns, med=T){
           ik <- i[k]
           # should be a scalar
           vk <- removal.rates[which(removal.classes == ck)]
-          tau <- tau + tau_moment(rk, rj, ik, ij, vk, vj, med)
+          tm <- tau_moment(rk, rj, ik, ij, vk, vj, med)
+          if(is.na(tm)){print(c(rk,rj,ik,ij,vk,vj))}
+          tau <- tau + tm
         }
       }
     }
@@ -95,9 +110,9 @@ peirr_tau_multitype <- function(r, i, cr, ci, Ns, med=T){
     rate.estim <- numer / (tau + not.denom * ri.sum)
     infection.rates <- c(infection.rates, rate.estim)
   }
-  
-  return(list(infection.rates=infection.rates*sum(Ns), 
-              removal.rates=removal.rates, 
+
+  return(list(infection.rates=infection.rates*sum(Ns),
+              removal.rates=removal.rates,
               removal.full.sizes=removal.full.sizes,
               tau.sums=taus,
               full.ri.sum=ri.sum,

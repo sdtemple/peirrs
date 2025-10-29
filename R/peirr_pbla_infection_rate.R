@@ -1,4 +1,4 @@
-#' PEIRR likelihood estimator of common infection rate and estimated removal rate
+#' PEIRR likelihood estimator of infection rate with MLE removal rate
 #' 
 #' Estimate removal rate with duration date and infection rate with PBLA 
 #' 
@@ -23,12 +23,12 @@ peirr_pbla_infection_rate <- function(r,
   
   # PBLA function with fixed removal rate
   pb <- function(beta.estim,pbla,gamma.estim,r,N,m,A,lag){
-    pbla(r,beta.estim,gamma.estim,N,m,A,lag)
+    return(pbla(r,beta.estim,gamma.estim,N,m,A,lag))
   }
   
   # estimate of removal rate
   if(is.null(known.gamma)){
-    gamma.estim <- mle.removal.rate(r,i)
+    gamma.estim <- mle_removal_rate(r,i)
   } else{
     gamma.estim <- known.gamma
     if(length(known.gamma)>1){

@@ -21,10 +21,11 @@ simulator <- function(beta,
                       e = 0,
                      p = 0,
                      q = 1,
-                     min.sample.size = 10
+                     min.sample.size = 10,
+                     max.sample.size = Inf
                      ){
   sample.size <- 0
-  while(sample.size < min.sample.size){
+  while((sample.size <= min.sample.size) | (sample.size >= max.sample.size)){
     epi = simulate_sem(beta, gamma, N, m, e)
     epi$matrix.time = filter_sem(epi$matrix.time)
     epi$matrix.time = decomplete_sem(epi$matrix.time, p=p, q=q)

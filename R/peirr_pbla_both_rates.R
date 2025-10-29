@@ -1,4 +1,4 @@
-#' PBLA estimator of common infection rate and estimated removal rate
+#' PBLA estimator of infection rate and removal rate
 #' 
 #' Estimate infection and removal rates with PBLA 
 #' 
@@ -15,17 +15,22 @@ peirr_pbla_both_rates <- function(r,
                                   N, 
                                   m=1, 
                                   A=1, 
-                                  lag=0){
+                                  lag=0,
+                                  i=NA
+                                  ){
+  
+  if(any(!is.na(i))){
+    stop("i is not all NAs. This (hidden) named parameter only exists for bootstrapping.")
+  }
   
   # jointly optimize the likelihood
+  etc = list(m=m, A=A, lag=lag)
   pbla.estimates <- nlm(pblas::pbla_gsem,
                         c(1,1),
                         pbla=pblas::pbla_std_gsem,
                         r=r,
                         N=N,
-                        m=m,
-                        A=A,
-                        lag=lag
+                        etc
                         )
   
   # estimate of removal rate

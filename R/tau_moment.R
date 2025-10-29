@@ -14,7 +14,7 @@
 #'
 #' @export
 tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
-  
+
   # Hypoexponential CDF with two different rates
   hypo2.cdf <- function(x, lambdak, lambdaj){
     if(lambdak==lambdaj){
@@ -24,18 +24,18 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
     second <- lambdak / (lambdak-lambdaj) * exp(-lambdaj*x)
     return(1 - first - second)
   }
-  
+
   # Hypoexponential survival with two different rates
   hypo2.sf <- function(x, lambdak, lambdaj){
     return(1-hypo2.cdf(x,lambdak,lambdaj))
   }
-  
+
   # Expected tau: rk, rj, ik, ij observed
   E.tau.rk.rj.ik.ij <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
     # med does nothing
     val <- 0
     if(ij<ik){
-      val <- 0        
+      val <- 0
     } else if(ij > rk){
       val <- rk - ik
     } else{
@@ -43,13 +43,13 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
     }
     return(val)
   }
-  
+
   # Expected tau: rk, ik, ij observed
   E.tau.rk.ik.ij <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
     # med does nothing
     val <- 0
     if(ij<ik){
-      val <- 0        
+      val <- 0
     } else if(ij > rk){
       val <- rk - ik
     } else{
@@ -57,21 +57,21 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
     }
     return(val)
   }
-  
+
   # Expected tau: rj, ik, ij observed
   E.tau.rj.ik.ij <- function(rk,rj,ik,ij,lambdak,lambdaj,med=T){
     # med does nothing
     val <- 0
     if(ij<ik){
-      val <- 0        
+      val <- 0
     } else if(ij > ik){
       H4 <- pexp(ij-ik,rate=lambdak,lower.tail=FALSE)
       H5 <- (exp(-lambdak*(ij-ik))*(lambdak*(ik-ij)-1)+1)/lambdak
       val <- H4 + H5
-    } 
+    }
     return(val)
   }
-  
+
   # Expected tau: rk, rj, ik observed
   E.tau.rk.rj.ik <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
     # med does nothing
@@ -88,7 +88,7 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
     }
     return(val)
   }
-  
+
   # Expected tau: rk, rj, ij observed
   E.tau.rk.rj.ij <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
     median.scalar = 1
@@ -101,7 +101,7 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
     }
     return(val)
   }
-  
+
   # Expected tau: rk, rj observed
   E.tau.rk.rj <- function(rk,rj,ik,ij,lambdak,lambdaj,med=T){
     median.scalar=1
@@ -117,25 +117,25 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
     }
     return(val*median.scalar)
   }
-  
+
   # Expected tau: rk, ij observed
   # rj is not useful if ij is known
   E.tau.rk.ij <- function(rk,rj,ik,ij,lambdak,lambdaj,med=T){
     return(E.tau.rk.rj.ij(rk,rj,ik,ij,lambdak,lambdaj,med))
   }
-  
+
   # Expected tau: ik, ij observed
   # rj is not useful if ij is known
   E.tau.ik.ij <- function(rk,rj,ik,ij,lambdak,lambdaj,med=T){
     return(E.tau.rj.ik.ij(rk,rj,ik,ij,lambdak,lambdaj,med))
   }
-  
-  
+
+
   # integral from a to b
   integral.upp.low <- function(func,low,upp,rate1,rate2,rate3){
     return(func(upp,rate1,rate2,rate3)-func(low,rate1,rate2,rate3))
   }
-  
+
   # Expected tau: rj, ik observed
   # This integral problem is extremely hard
   E.tau.rj.ik <- function(rk,rj,ik,ij,lambdak,lambdaj,med=T){
@@ -166,12 +166,12 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
       H10 <- (H11-H12)/(lambdak^2)
       H9 <- ((exp(lambdaj*rj)-exp(lambdaj*ik))*exp(-lambdak*ik)/lambdaj - H27)*ik/lambdak
       E1 <- (H10-H9)*lambdak*lambdaj*exp(-lambdaj*rj)*exp(lambdak*ik)
-      
+
       # ik < ij < rj < rk case
       H18 <- exp(-lambdak*rj)*integral.upp.low(func1,rj,ik,0,lambdaj,0)/lambdak/(lambdaj^2)
       H19 <- ik/lambdak/lambdaj*exp(-lambdak*rj)*(exp(lambdaj*rj)-exp(lambdaj*ik))
       H16 <- lambdak*lambdaj*exp(-lambdaj*rj)*exp(lambdak*ik)*(H18-H19)
-      
+
       # ik < ij < rk < rj case
       if(lambdaj==lambdak){
         H22 <- (rj^2-ik^2)/2
@@ -179,26 +179,26 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
       } else{
         H24 <- integral.upp.low(func1,ik,rj,lambdak,lambdaj,0)/((lambdaj-lambdak)^2)
         H22 <- H24
-        H25 <- (exp((lambdaj-lambdak)*rk)-exp((lambdaj-lambdak)*rk))/(lambdaj-lambdak)*exp(-lambdak*rj)
+        H25 <- (exp((lambdaj-lambdak)*rj)-exp((lambdaj-lambdak)*ik))/(lambdaj-lambdak)
       }
       H26 <- (exp(lambdaj*rj)-exp(lambdaj*ik))*exp(-lambdak*rj)/lambdaj
       H21 <- ik*(H25-H26)/lambdak
       H23 <- integral.upp.low(func1,rj,ik,0,lambdaj,0)/(lambdaj^2)*exp(-lambdak*rj)
       H20 <- (H22-H23)/lambdak
       H17 <- lambdak*lambdaj*exp(-lambdaj*rj)*exp(lambdak*ik)*(H20-H21)
-      
+
       # combine as ik < ij < rk
       E2 <- H16 + H17
-      
+
       # final result
       val <- E1 + E2
     }
-    
+
     return(val)
   }
-  
+
   itr <- 0
-  
+
   # should not both be NA
   # means individual not infected
   if(is.na(rk)){
@@ -207,7 +207,7 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
       val <- NULL
     }
   }
-  
+
   # should not both be NA
   # means individual not infected
   if(is.na(rj)){
@@ -216,7 +216,7 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
       val <- NULL
     }
   }
-  
+
   # case 1
   if(is.na(ij)){
     if(is.na(ik)){
@@ -265,13 +265,13 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
     itr <- itr + 1
     val <- E.tau.rk.rj.ik(rk, rj, ik, ij, lambdak, lambdaj, med)
   }
-  
+
   # case 9
   if(!is.na(rk+rj+ik+ij)){
     itr <- itr + 1
     val <- E.tau.rk.rj.ik.ij(rk, rj, ik, ij, lambdak, lambdaj, med)
   }
-  
+
   result <- tryCatch({
     if(is.null(val)){
       stop("Non-case data is input")
@@ -279,13 +279,15 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
     return(val)
   }, warning=function(w){
     message("This is a warning that non-case data is input")
+    print(c(rk,rj,ik,ij))
     return(NULL)
   }, error=function(e){
     message("This is an error that non-case data is input")
+    print(c(rk,rj,ik,ij))
     stop("Non-case data is input")
   }, finally={
   })
-  
+
   result <- tryCatch({
     if(val<0){
       stop("tau is negative")
@@ -299,7 +301,7 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
     stop("tau is negative")
   }, finally={
   })
-  
+
   result <- tryCatch({
     if(itr!=1){
       stop("Too many cases triggered")
@@ -313,7 +315,7 @@ tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=T){
     stop("Too many cases triggered")
   }, finally={
   })
-  
+
   return(val)
-  
+
 }

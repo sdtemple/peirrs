@@ -155,6 +155,26 @@ simulate_sem_multitype <- function(betas,
     
   }
   
+  # assign the remaining non-infecteds to classes
+  # infection classes
+  next.class = Rt
+  for(l in 1:length(Ns)){
+    if(Ns[l] > 0){
+      classes[(next.class+1):(next.class+Ns[l])] = l
+      ratesB[(next.class+1):(next.class+Ns[l])] = betas[l]
+      next.class = next.class + Ns[l]      
+    }
+  }
+  # removal classes
+  next.class = Rt
+  for(l in 1:length(Ms)){
+    if(Ms[l]>0){
+      classesG[(next.class+1):(next.class+Ms[l])] = l
+      ratesG[(next.class+1):(next.class+Ms[l])] = gammas[l]
+      next.class = next.class + Ms[l] 
+    }
+  }
+  
   # formatting
   output = matrix(c(i,r,classes,ratesB,classesG,ratesG),
                   nrow = N,

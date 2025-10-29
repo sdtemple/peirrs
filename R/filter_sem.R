@@ -16,7 +16,19 @@ filter_sem <- function(epi){
     ratesB <- epi[,4][is.finite(epi[,2]) | is.finite(epi[,1])]
     classesG <- epi[,5][is.finite(epi[,2]) | is.finite(epi[,1])]
     ratesG <- epi[,6][is.finite(epi[,2]) | is.finite(epi[,1])]
-    return(cbind(i,r,classes,ratesB,classesG,ratesG))
+    N = length(r)
+    # formatting
+    output = matrix(c(i,r,classes,ratesB,classesG,ratesG),
+                    nrow = N,
+                    ncol = 6,
+                    byrow = F)
+    colnames(output) = c('i',
+                         'r',
+                         'infection.group',
+                         'infection.rate',
+                         'removal.group',
+                         'removal.rate')
+    return(output)
   } else{
     return(cbind(i,r))
   }

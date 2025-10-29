@@ -4,7 +4,17 @@
 \alias{simulator}
 \title{Simulate general stochastic epidemic model with formatting}
 \usage{
-simulator(beta, gamma, N, m = 1, e = 0, p = 0, q = 1, min.sample.size = 10)
+simulator(
+  beta,
+  gamma,
+  N,
+  m = 1,
+  e = 0,
+  p = 0,
+  q = 1,
+  min.sample.size = 10,
+  max.sample.size = Inf
+)
 }
 \arguments{
 \item{beta}{numeric: infection rate}

@@ -19,7 +19,19 @@ sort_sem <- function(epi){
     ratesB <- epi[,4][ind]
     classesG <- epi[,5][ind]
     ratesG <- epi[,6][ind]
-    return(cbind(i,r,classes,ratesB,classesG,ratesG))
+    N = length(r)
+    # formatting
+    output = matrix(c(i,r,classes,ratesB,classesG,ratesG),
+                    nrow = N,
+                    ncol = 6,
+                    byrow = F)
+    colnames(output) = c('i',
+                         'r',
+                         'infection.group',
+                         'infection.rate',
+                         'removal.group',
+                         'removal.rate')
+    return(output)
   } else{
     return(cbind(i,r))
   }

@@ -9,12 +9,14 @@ Requires `devtools::install_github("sdtemple/pblas")` from R terminal.
 ### Next steps
 - [] Simulate a lot of data
 - [x] Simulator with different $\beta$ and $\gamma$
+- [] Perform some unit tests of code correctness
+- [] Use AI to improve docstrings
 - [x] Qualitatively check correctness
-- [] Multi type implementation of PBLA
+- [x] Multi type implementation of PBLA
 - [x] Multi type implementation of tau-based estimator
 - [x] Median imputation in tau moments when possible
-- [] Parametric bootstrap
-- [] Spatial tau-based estimator
+- [x] Parametric bootstrap
+- [] Spatial tau-based and PBLA estimators
 - [] Spatial simulator
 - [] Fixed exposure period implementation of tau-based estimator
 - [] Truncated exponential for online inference
