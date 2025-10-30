@@ -7,7 +7,7 @@
 Requires `devtools::install_github("sdtemple/pblas")` from R terminal.
 
 ### Next steps
-- [] Simulate a lot of data
+- [x] Simulate a lot of data
 - [x] Simulator with different $\beta$ and $\gamma$
 - [] Perform some unit tests of code correctness
 - [] Use AI to improve docstrings
