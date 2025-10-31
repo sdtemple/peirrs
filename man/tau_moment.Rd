@@ -4,7 +4,7 @@
 \alias{tau_moment}
 \title{Expected value for tau with different missingness}
 \usage{
-tau_moment(rk, rj, ik, ij, lambdak, lambdaj, med = T)
+tau_moment(rk, rj, ik, ij, lambdak, lambdaj, med = TRUE)
 }
 \arguments{
 \item{rk}{numeric: removal time rk}

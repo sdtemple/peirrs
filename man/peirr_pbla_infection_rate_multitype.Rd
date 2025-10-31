@@ -12,7 +12,8 @@ peirr_pbla_infection_rate_multitype(
   m = 1,
   A = 1,
   lag = 0,
-  known.gammas = NULL
+  known.gammas = NULL,
+  gamma.med = FALSE
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ peirr_pbla_infection_rate_multitype(
 \item{lag}{numeric fixed lag}
 
 \item{known.gammas}{numeric: removal rates}
+
+\item{gamma.med}{bool: TRUE for median, and FALSE for mean in estimating the removal rate}
 
 \item{N}{integer: population size}
 }

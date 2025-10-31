@@ -4,7 +4,16 @@
 \alias{peirr_pbla_infection_rate}
 \title{PEIRR likelihood estimator of infection rate with MLE removal rate}
 \usage{
-peirr_pbla_infection_rate(r, i, N, m = 1, A = 1, lag = 0, known.gamma = NULL)
+peirr_pbla_infection_rate(
+  r,
+  i,
+  N,
+  m = 1,
+  A = 1,
+  lag = 0,
+  known.gamma = NULL,
+  gamma.med = FALSE
+)
 }
 \arguments{
 \item{r}{numeric vector: removal times}
@@ -20,6 +29,8 @@ peirr_pbla_infection_rate(r, i, N, m = 1, A = 1, lag = 0, known.gamma = NULL)
 \item{lag}{numeric fixed lag}
 
 \item{known.gamma}{numeric: removal rate}
+
+\item{gamma.med}{bool: TRUE for median, and FALSE for mean in estimating the removal rate}
 }
 \value{
 numeric list (infection.rate, removal.rate, R0, tau.sum)
