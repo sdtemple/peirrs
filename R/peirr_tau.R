@@ -6,12 +6,15 @@
 #' @param r numeric vector: removal times
 #' @param i numeric vector: infection times
 #' @param N integer: population size
-#' @param med bool: use median imputation if true
+#' @param tau.med bool: use median imputation for tau if TRUE
+#' @param gamma.med bool: TRUE for median, and FALSE for mean in estimating the removal rate
 #'
 #' @return numeric list (infection.rate, removal.rate, R0)
 #'
 #' @export
-peirr_tau <- function(r, i, N, med=TRUE){
+peirr_tau <- function(r, i, N,
+                      tau.med=TRUE,
+                      gamma.med=FALSE){
 
   # make sure one of the other is finite
   or.finite <- is.finite(r)|is.finite(i)
@@ -19,7 +22,7 @@ peirr_tau <- function(r, i, N, med=TRUE){
   r <- r[or.finite]
 
   # estimate of removal rate
-  gamma.estim <- mle_removal_rate(r,i)
+  gamma.estim <- peirr_removal_rate(r,i,gamma.med)
 
   # number of infected
   n <- sum(!is.na(r) | !is.na(i))
@@ -47,7 +50,7 @@ peirr_tau <- function(r, i, N, med=TRUE){
     for(k in (1:n)[-j]){
       rk <- r[k]
       ik <- i[k]
-      tm <- tau_moment(rk, rj, ik, ij, gamma.estim, gamma.estim, med)
+      tm <- tau_moment(rk, rj, ik, ij, gamma.estim, gamma.estim, tau.med)
       if(is.na(tm)){print(c(rk,rj,ik,ij))}
       tau <- tau + tm
     }
@@ -60,7 +63,7 @@ peirr_tau <- function(r, i, N, med=TRUE){
   # only take expectation when we don't have the full peroid
   num.not.full <- length(r) - length(full.r)
   median.scalar <- 1
-  if(med){median.scalar <- log(2)}
+  if(tau.med){median.scalar <- log(2)}
   ri.sum <- num.not.full / gamma.estim * median.scalar + sum(full.r - full.i)
 
   # maximizes give conditional expectations

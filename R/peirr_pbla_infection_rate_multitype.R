@@ -11,6 +11,7 @@
 #' @param A integer patient zeros
 #' @param lag numeric fixed lag
 #' @param known.gammas numeric: removal rates
+#' @param gamma.med bool: TRUE for median, and FALSE for mean in estimating the removal rate
 #'
 #' @return numeric list (infection.rates, removal.rates)
 #'
@@ -22,7 +23,9 @@ peirr_pbla_infection_rate_multitype <- function(r,
                                       m=1,
                                       A=1,
                                       lag=0,
-                                      known.gammas = NULL){
+                                      known.gammas = NULL,
+                                      gamma.med = FALSE
+                                      ){
 
   # PBLA function with fixed removal rate
   pb <- function(beta.estims,pbla,gamma.estims,betamap,gammamap,r,m,A,lag){
@@ -54,7 +57,11 @@ peirr_pbla_infection_rate_multitype <- function(r,
       rg2 <- rg[filters]
       ig2 <- ig[filters]
       # estimate with complete obs
-      rate.estim <- length(rg2) / sum(rg2 - ig2)
+      if(!gamma.med){
+        rate.estim <- length(rg2) / sum(rg2 - ig2)
+      } else{
+        rate.estim <- 1 / median(rg2 - ig2)
+      }
       removal.rates <- c(removal.rates, rate.estim)
     }
     gamma.estims <- removal.rates

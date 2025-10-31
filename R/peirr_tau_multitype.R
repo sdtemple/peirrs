@@ -8,12 +8,18 @@
 #' @param cr numeric vector: removal time classes
 #' @param ci numeric vector: infection time classes
 #' @param Ns integer vector: population sizes for infection classes (sorted)
-#' @param med bool: use median imputation if true
+#' @param tau.med bool: use median imputation for tau if TRUE
+#' @param gamma.med bool: TRUE for median, and FALSE for mean in estimating the removal rate
 #'
 #' @return numeric list (infection.rates, removal.rates, removal.full.sizes)
 #'
 #' @export
-peirr_tau_multitype <- function(r, i, cr, ci, Ns, med=TRUE){
+peirr_tau_multitype <- function(r, i,
+                                cr, ci,
+                                Ns,
+                                tau.med=TRUE,
+                                gamma.med=FALSE
+                                ){
 
   # make sure one or the other is finite
   or.finite <- is.finite(r)|is.finite(i)
@@ -23,7 +29,7 @@ peirr_tau_multitype <- function(r, i, cr, ci, Ns, med=TRUE){
   r <- r[or.finite]
 
   median.scalar <- 1
-  if(med){median.scalar <- log(2)}
+  if(tau.med){median.scalar <- log(2)}
 
   # number of infected
   n <- sum(!is.na(r) | !is.na(i))
@@ -66,7 +72,11 @@ peirr_tau_multitype <- function(r, i, cr, ci, Ns, med=TRUE){
     ig2 <- ig[filters]
     # estimate with complete obs
     removal.full.sizes <- c(removal.full.sizes, length(rg2))
-    rate.estim <- length(rg2) / sum(rg2 - ig2)
+    if(!gamma.med){
+      rate.estim <- length(rg2) / sum(rg2 - ig2)
+    } else{
+      rate.estim <- 1 / median(rg2 - ig2)
+    }
     removal.rates <- c(removal.rates, rate.estim)
     # compute expected value for incomplete obs
     num.not.complete <- length(rg) - length(filters)
@@ -100,7 +110,7 @@ peirr_tau_multitype <- function(r, i, cr, ci, Ns, med=TRUE){
           ik <- i[k]
           # should be a scalar
           vk <- removal.rates[which(removal.classes == ck)]
-          tm <- tau_moment(rk, rj, ik, ij, vk, vj, med)
+          tm <- tau_moment(rk, rj, ik, ij, vk, vj, tau.med)
           if(is.na(tm)){print(c(rk,rj,ik,ij,vk,vj))}
           tau <- tau + tm
         }
