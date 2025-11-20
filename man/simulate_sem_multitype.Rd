@@ -4,7 +4,7 @@
 \alias{simulate_sem_multitype}
 \title{Simulate general stochastic epidemic model with different infection rates}
 \usage{
-simulate_sem_multitype(betas, gammas, beta.sizes, gamma.sizes, m = 1, e = 0)
+simulate_sem_multitype(betas, gammas, beta.sizes, gamma.sizes, m = 1, lag = 0)
 }
 \arguments{
 \item{betas}{numeric vector: infection rates}
@@ -17,7 +17,7 @@ simulate_sem_multitype(betas, gammas, beta.sizes, gamma.sizes, m = 1, e = 0)
 
 \item{m}{integer: positive shape}
 
-\item{e}{numeric: fixed exposure period}
+\item{lag}{numeric: fixed exposure period}
 }
 \value{
 numeric list: matrix of (infection times, removal times, classes and rates), matrix of (St, It, Et, Rt, Time)

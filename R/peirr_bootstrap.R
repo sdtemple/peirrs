@@ -19,7 +19,7 @@
 #' @param peirr Function (default \code{peirr_tau}). A function that estimates infection and removal
 #'   rates given infection and removal time data (e.g., \code{peirr()}).
 #' @param m Integer (default = 1). Positive shape parameter for the infection period.
-#' @param e Numeric (default = 0). Fixed exposure period duration.
+#' @param lag Numeric (default = 0). Fixed exposure period duration.
 #' @param within Numeric (default = 0.1). Fractional range around
 #'   \code{sample.size} used to generate random sample sizes in each
 #'   bootstrap replicate.
@@ -69,35 +69,36 @@ peirr_bootstrap <- function(num.bootstrap,
                             sample.size,
                             p,
                             q,
-                            peirr=peirr_tau,
-                            m=1,
-                            e=0,
-                            within=0.1,
-                            etc=NULL
-                            ){
+                            peirr = peirr_tau,
+                            m = 1,
+                            lag = 0,
+                            within = 0.1,
+                            etc = NULL
+                            ) {
 
   # override
-  if(identical(body(peirr),body(peirr_pbla_infection_rate))){
-    q=1
+  if (identical(body(peirr), body(peirr_pbla_infection_rate))) {
+    q <- 1
   }
-  if(identical(body(peirr),body(peirr_pbla_both_rates))){
-    p=0
-    q=1
+  if (identical(body(peirr), body(peirr_pbla_both_rates))) {
+    p <- 0
+    q <- 1
   }
+  e=lag
 
-  storage <- matrix(0,nrow=num.bootstrap+1,ncol=2)
-  storage[1,1] = beta
-  storage[1,2] = gamma
-  min.sample.size = (1 - within) * sample.size
-  max.sample.size = (1 + within) * sample.size
-  for(l in 2:(num.bootstrap+1)){
-    out = simulator(beta,gamma,N,m,e,p,q,min.sample.size,max.sample.size)
-    X = out$matrix.time
-    r = X[,2]
-    i = X[,1]
-    bth.estimate = do.call(peirr, c(list(r=r,i=i,N=N), etc))
-    storage[l,1] = bth.estimate$infection.rate
-    storage[l,2] = bth.estimate$removal.rate
+  storage <- matrix(0, nrow = num.bootstrap + 1, ncol = 2)
+  storage[1, 1] <- beta
+  storage[1, 2] <- gamma
+  min.sample.size <- (1 - within) * sample.size
+  max.sample.size <- (1 + within) * sample.size
+  for (l in 2:(num.bootstrap + 1)) {
+    out <- simulator(beta, gamma, N, m, e, p, q, min.sample.size, max.sample.size)
+    X <- out$matrix.time
+    r <- X[, 2]
+    i <- X[, 1]
+    bth.estimate <- do.call(peirr, c(list(r = r, i = i, N = N, lag=e), etc))
+    storage[l, 1] <- bth.estimate$infection.rate
+    storage[l, 2] <- bth.estimate$removal.rate
   }
   return(storage)
 }

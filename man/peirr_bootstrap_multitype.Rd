@@ -14,7 +14,7 @@ peirr_bootstrap_multitype(
   p,
   q,
   m = 1,
-  e = 0,
+  lag = 0,
   within = 0.1,
   etc = NULL
 )
@@ -38,7 +38,7 @@ peirr_bootstrap_multitype(
 
 \item{m}{Integer: positive shape parameter for infectious period distribution (default 1).}
 
-\item{e}{Numeric: fixed exposure period (default 0).}
+\item{lag}{Numeric: fixed exposure period (default 0).}
 
 \item{within}{Numeric: acceptable proportional deviation from the target sample size (default 0.1).}
 

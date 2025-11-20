@@ -9,7 +9,7 @@ simulator(
   gamma,
   N,
   m = 1,
-  e = 0,
+  lag = 0,
   p = 0,
   q = 1,
   min.sample.size = 10,
@@ -25,7 +25,7 @@ simulator(
 
 \item{m}{integer: positive shape}
 
-\item{e}{numeric: fixed exposure period}
+\item{lag}{numeric: fixed exposure period}
 
 \item{p}{expected proportion of complete pairs observed}
 

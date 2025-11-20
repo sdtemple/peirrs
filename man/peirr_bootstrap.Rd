@@ -14,7 +14,7 @@ peirr_bootstrap(
   q,
   peirr = peirr_tau,
   m = 1,
-  e = 0,
+  lag = 0,
   within = 0.1,
   etc = NULL
 )
@@ -40,7 +40,7 @@ rates given infection and removal time data (e.g., \code{peirr()}).}
 
 \item{m}{Integer (default = 1). Positive shape parameter for the infection period.}
 
-\item{e}{Numeric (default = 0). Fixed exposure period duration.}
+\item{lag}{Numeric (default = 0). Fixed exposure period duration.}
 
 \item{within}{Numeric (default = 0.1). Fractional range around
 \code{sample.size} used to generate random sample sizes in each

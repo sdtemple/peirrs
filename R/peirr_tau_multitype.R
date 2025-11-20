@@ -8,6 +8,7 @@
 #' @param cr numeric vector: removal time classes
 #' @param ci numeric vector: infection time classes
 #' @param Ns integer vector: population sizes for infection classes (sorted)
+#' @param lag numeric: fixed exposure period
 #' @param tau.med bool: use median imputation for tau if TRUE
 #' @param gamma.med bool: TRUE for median, and FALSE for mean in estimating the removal rate
 #'
@@ -17,6 +18,7 @@
 peirr_tau_multitype <- function(r, i,
                                 cr, ci,
                                 Ns,
+                                lag=0,
                                 tau.med=TRUE,
                                 gamma.med=FALSE
                                 ){
@@ -61,15 +63,17 @@ peirr_tau_multitype <- function(r, i,
 
   # compute class-specific removal rates
   for(cl in removal.classes){
+
     # find those in same class
-    indicators <- which(cr == cl)
+    indicators <- which(cr == cl, arr.ind=TRUE)
     rg <- r[indicators]
     ig <- i[indicators]
     # find those that are complete
     filters <- (!is.na(rg)) & (!is.na(ig))
-    filters <- which(filters == 1)
+    filters <- which(filters == 1, arr.ind=TRUE)
     rg2 <- rg[filters]
     ig2 <- ig[filters]
+
     # estimate with complete obs
     removal.full.sizes <- c(removal.full.sizes, length(rg2))
     if(!gamma.med){
@@ -82,6 +86,7 @@ peirr_tau_multitype <- function(r, i,
     num.not.complete <- length(rg) - length(filters)
     removal.partial.sum <- sum(rg2 - ig2) + num.not.complete / rate.estim * median.scalar
     removal.partial.sums <- c(removal.partial.sums, removal.partial.sum)
+
   }
 
   # these sum with some expected values for observed infections
@@ -110,7 +115,7 @@ peirr_tau_multitype <- function(r, i,
           ik <- i[k]
           # should be a scalar
           vk <- removal.rates[which(removal.classes == ck)]
-          tm <- tau_moment(rk, rj, ik, ij, vk, vj, tau.med)
+          tm <- tau_moment(rk, rj, ik, ij, vk, vj, lag, tau.med)
           if(is.na(tm)){print(c(rk,rj,ik,ij,vk,vj))}
           tau <- tau + tm
         }

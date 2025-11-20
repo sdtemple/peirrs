@@ -6,6 +6,7 @@
 #' @param r numeric vector: removal times
 #' @param i numeric vector: infection times
 #' @param N integer: population size
+#' @param lag numeric: fixed exposure period
 #' @param tau.med bool: use median imputation for tau if TRUE
 #' @param gamma.med bool: TRUE for median, and FALSE for mean in estimating the removal rate
 #'
@@ -13,45 +14,49 @@
 #'
 #' @export
 peirr_tau <- function(r, i, N,
-                      tau.med=TRUE,
-                      gamma.med=FALSE){
+                      lag = 0,
+                      tau.med = TRUE,
+                      gamma.med = FALSE
+                      ) {
 
   # make sure one of the other is finite
-  or.finite <- is.finite(r)|is.finite(i)
+  or.finite <- is.finite(r) | is.finite(i)
   i <- i[or.finite]
   r <- r[or.finite]
 
   # estimate of removal rate
-  gamma.estim <- peirr_removal_rate(r,i,gamma.med)
+  gamma.estim <- peirr_removal_rate(r, i, gamma.med)
 
   # number of infected
   n <- sum(!is.na(r) | !is.na(i))
-  if(sum(is.na(r))>=n){
+  if (sum(is.na(r)) >= n) {
     stop("There are no complete case periods to estimate the removal rate")
   }
-  if(sum(is.na(i))>=n){
+  if (sum(is.na(i)) >= n) {
     stop("There are no complete case periods to estimate the removal rate")
   }
 
   ### first infected ###
   ralpha <- which.min(r)
   ialpha <- which.min(i)
-  if(i[ialpha] < r[ralpha]){
+  if (i[ialpha] < r[ralpha]) {
     alpha <- ialpha
-  } else{
+  } else {
     alpha <- ralpha
   }
 
   # sum up tau terms
   tau <- 0
-  for(j in (1:n)[-alpha]){
+  for (j in (1:n) [-alpha]) {
     rj <- r[j]
     ij <- i[j]
-    for(k in (1:n)[-j]){
+    for (k in (1:n)[-j]) {
       rk <- r[k]
       ik <- i[k]
-      tm <- tau_moment(rk, rj, ik, ij, gamma.estim, gamma.estim, tau.med)
-      if(is.na(tm)){print(c(rk,rj,ik,ij))}
+      tm <- tau_moment(rk, rj, ik, ij, gamma.estim, gamma.estim, lag, tau.med)
+      if (is.na(tm)) {
+        print(c(rk, rj, ik, ij, gamma.estim, gamma.estim))
+        }
       tau <- tau + tm
     }
   }
@@ -63,17 +68,17 @@ peirr_tau <- function(r, i, N,
   # only take expectation when we don't have the full peroid
   num.not.full <- length(r) - length(full.r)
   median.scalar <- 1
-  if(tau.med){median.scalar <- log(2)}
+  if (tau.med) {median.scalar <- log(2)}
   ri.sum <- num.not.full / gamma.estim * median.scalar + sum(full.r - full.i)
 
   # maximizes give conditional expectations
   beta.estim <- (n - 1) / (tau + (N - n) * ri.sum)
 
-  return(list(infection.rate=beta.estim*N,
-              removal.rate=gamma.estim,
-              R0=beta.estim*N/gamma.estim,
-              tau.sum=tau,
-              full.ri.sum=ri.sum,
-              num.not.infected=N-n
+  return(list(infection.rate = beta.estim * N,
+              removal.rate = gamma.estim,
+              R0 = beta.estim * N / gamma.estim,
+              tau.sum = tau,
+              full.ri.sum = ri.sum,
+              num.not.infected = N-n
               ))
 }

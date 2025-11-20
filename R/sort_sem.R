@@ -7,32 +7,32 @@
 #' @return matrix: infection times, removal times, (optional: infection classes)
 #'
 #' @export
-sort_sem <- function(epi){
-  r <- epi[,2]
-  i <- epi[,1]
+sort_sem <- function(epi) {
+  r <- epi[, 2]
+  i <- epi[, 1]
   ind <- order(r)
   r <- r[ind]
   i <- i[ind]
-  if(dim(epi)[2]==6){
+  if (dim(epi)[2] == 6) {
     # multitype model
-    classes <- epi[,3][ind]
-    ratesB <- epi[,4][ind]
-    classesG <- epi[,5][ind]
-    ratesG <- epi[,6][ind]
-    N = length(r)
+    classes <- epi[, 3][ind]
+    ratesB <- epi[, 4][ind]
+    classesG <- epi[, 5][ind]
+    ratesG <- epi[, 6][ind]
+    N <- length(r)
     # formatting
-    output = matrix(c(i,r,classes,ratesB,classesG,ratesG),
-                    nrow = N,
-                    ncol = 6,
-                    byrow = FALSE)
-    colnames(output) = c('i',
-                         'r',
-                         'infection.group',
-                         'infection.rate',
-                         'removal.group',
-                         'removal.rate')
-    return(output)
-  } else{
-    return(cbind(i,r))
+    output <- matrix(c(i, r, classes, ratesB, classesG, ratesG),
+                     nrow = N,
+                     ncol = 6,
+                     byrow = FALSE)
+    colnames(output) <- c("i",
+                          "r",
+                          "infection.group",
+                          "infection.rate",
+                          "removal.group",
+                          "removal.rate")
+    output
+  } else {
+    cbind(i, r)
   }
 }

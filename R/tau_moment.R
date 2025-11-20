@@ -8,12 +8,20 @@
 #' @param ij numeric: infection time ij
 #' @param lambdak numeric: removal rate of k
 #' @param lambdaj numeric: removal rate of j
+#' @param lag numeric: fixed exposure period
 #' @param med bool: use median imputation if true
 #'
 #' @return numeric: expectation of some pair-wise tau
 #'
 #' @export
-tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, med=TRUE){
+tau_moment <- function(rk,rj,ik,ij,lambdak,lambdaj, lag=0, med=TRUE){
+
+  # update these if there is a lag
+  if(is.na(ij)){
+    rj <- rj - lag
+  } else{
+    ij <- ij - lag
+  }
 
   # Hypoexponential CDF with two different rates
   hypo2.cdf <- function(x, lambdak, lambdaj){

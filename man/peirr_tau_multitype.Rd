@@ -4,7 +4,16 @@
 \alias{peirr_tau_multitype}
 \title{Pair-based tau estimator of multiple infection and removal rates}
 \usage{
-peirr_tau_multitype(r, i, cr, ci, Ns, tau.med = TRUE, gamma.med = FALSE)
+peirr_tau_multitype(
+  r,
+  i,
+  cr,
+  ci,
+  Ns,
+  lag = 0,
+  tau.med = TRUE,
+  gamma.med = FALSE
+)
 }
 \arguments{
 \item{r}{numeric vector: removal times}
@@ -16,6 +25,8 @@ peirr_tau_multitype(r, i, cr, ci, Ns, tau.med = TRUE, gamma.med = FALSE)
 \item{ci}{numeric vector: infection time classes}
 
 \item{Ns}{integer vector: population sizes for infection classes (sorted)}
+
+\item{lag}{numeric: fixed exposure period}
 
 \item{tau.med}{bool: use median imputation for tau if TRUE}
 

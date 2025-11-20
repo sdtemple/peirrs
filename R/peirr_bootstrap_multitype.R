@@ -14,7 +14,7 @@
 #' @param p Numeric: expected proportion of complete pairs observed.
 #' @param q Numeric: probability that infection time is missing (conditional on missingness).
 #' @param m Integer: positive shape parameter for infectious period distribution (default 1).
-#' @param e Numeric: fixed exposure period (default 0).
+#' @param lag Numeric: fixed exposure period (default 0).
 #' @param within Numeric: acceptable proportional deviation from the target sample size (default 0.1).
 #' @param etc List or NULL: additional arguments passed to \code{peirr_tau_multitype}.
 #'
@@ -55,7 +55,7 @@ peirr_bootstrap_multitype <- function(num.bootstrap,
                             p,
                             q,
                             m=1,
-                            e=0,
+                            lag=0,
                             within=0.1,
                             etc=NULL
 ){
@@ -64,17 +64,18 @@ peirr_bootstrap_multitype <- function(num.bootstrap,
   num.beta = length(betas)
   num.gamma = length(gammas)
   num.col = num.beta + num.gamma
-  
+
   # initialize matrix
   storage <- matrix(0,nrow=num.bootstrap+1,ncol=num.col)
   storage[1,1:num.beta] = betas
   storage[1,(num.beta+1):num.col] = gammas
-  
+
   # condition on epidemic being of a certain size
   min.sample.size = (1 - within) * sample.size
   max.sample.size = (1 + within) * sample.size
-  
+
   # bootstrapping
+  e=lag
   for(l in 2:(num.bootstrap+1)){
     out = simulator_multitype(betas,
                               gammas,
@@ -91,8 +92,8 @@ peirr_bootstrap_multitype <- function(num.bootstrap,
     cr = X[,5]
     i = X[,1]
     ci = X[,3]
-    bth.estimate = do.call(peirr_tau_multitype, 
-                           c(list(r=r,i=i,cr=cr,ci=ci,Ns=beta.sizes), etc)
+    bth.estimate = do.call(peirr_tau_multitype,
+                           c(list(r=r,i=i,cr=cr,ci=ci,Ns=beta.sizes,lag=e), etc)
                            )
     # print(bth.estimate)
     storage[l,1:num.beta] = bth.estimate$infection.rates
