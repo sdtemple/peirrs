@@ -93,11 +93,10 @@ simulate_sem <- function(beta, gamma, N, m = 1, lag = 0) {
 
     # update (S,I) counts
     St = sum(is.infinite(i))
-    Rt = sum( is.finite(i) & is.finite(r) )
-    It = sum( (i <= t) & is.infinite(r) )
-    Et = sum( (i > t) & is.infinite(r) & is.finite(i) )
-
-    if (St + Rt + Et + It != N) {
+    It = sum(is.finite(i) & (i <= t)) - sum(is.finite(r))
+    Rt = sum(is.finite(i) & is.finite(r))
+    Et = sum(is.finite(i) & (i > t))
+    if(St + Rt + Et + It != N){
       stop("S(t) + I(t) + E(t) + R(t) do not equal N")
     }
     # & (i <= t) delays the infectious period after exposure

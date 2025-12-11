@@ -13,7 +13,7 @@
 #' @param q probability infection time missing
 #' @param min.sample.size integer
 #'
-#' @return numeric list: matrix of (infection times, removal times), matrix of (St, It, Et, Rt, Time)
+#' @return numeric list: matrix of (infection times, removal times), matrix of (St, It, Et, Rt, Time), matrix of n by N distances
 #'
 #' @export
 simulator_spatial <- function(beta,
@@ -32,16 +32,19 @@ simulator_spatial <- function(beta,
   while ((sample.size <= min.sample.size) || (sample.size >= max.sample.size) || is.na(gamma.estim)) {
     # main simulation
     epi <- simulate_sem_spatial(beta, gamma, N, h, D, m, lag)
+    filter_indices <- is.finite(epi$matrix.time[,1]) & is.finite(epi$matrix.time[,2])
     epi$matrix.time <- filter_sem(epi$matrix.time)
-    filter_indices <- which((is.finite(epi$matrix.time[,1])) | is.finite(epi$matrix.time[,2])) # filter distance matrix
-    epi$matrix.distance <- epi$matrix.distance[filter_indices, filter_indices]
+    epi$matrix.distance <- epi$matrix.distance[filter_indices, ]
     epi$matrix.time <- decomplete_sem(epi$matrix.time, p = p, q = q)
     sort_indices <- order(epi$matrix.time[,2]) # sort the distance matrix
     epi$matrix.time <- sort_sem(epi$matrix.time)
-    epi$matrix.distance <- epi$matrix.distance[sort_indices, sort_indices]
-    
     # calculate the sample size
     sample.size <- dim(epi$matrix.time)[1]
+    if (sample.size > 1){
+      # sorting runs into error when sample.size <= 1
+      epi$matrix.distance <- epi$matrix.distance[sort_indices, ]
+    }    
+
     # ensure there are r and i enough to estimate gamma
     X <- epi$matrix.time
     r <- X[,2]

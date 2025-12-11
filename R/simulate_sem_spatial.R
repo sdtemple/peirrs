@@ -10,7 +10,7 @@
 #' @param h function: symmetric function of distance
 #' @param D numeric: two-dimensional distance matrix
 #'
-#' @return numeric list: matrix of (infection times, removal times, spatial coordinates), matrix of (St, It, Et, Rt, Time)
+#' @return numeric list: matrix of (infection times, removal times, spatial coordinates), matrix of (St, It, Et, Rt, Time), matrix of N by N distances
 #'
 #' @export
 simulate_sem_spatial <- function(beta, gamma, N, h, D, m = 1, lag = 0) {
@@ -53,7 +53,7 @@ simulate_sem_spatial <- function(beta, gamma, N, h, D, m = 1, lag = 0) {
       t <- min.time + .Machine$double.eps
     } else {
       # simulate time
-      irate <- betaN * sum(h(D[is.infinite(r) & is.finite(i) & (i > t),]))
+      irate <- betaN * sum(h(D[is.infinite(r) & is.finite(i) & (i <= t), is.infinite(i)]))
       rrate <- gamma * It
       t <- t + rexp(1, rate = irate + rrate)
 
@@ -95,11 +95,10 @@ simulate_sem_spatial <- function(beta, gamma, N, h, D, m = 1, lag = 0) {
 
     # update (S,I) counts
     St = sum(is.infinite(i))
-    Rt = sum( is.finite(i) & is.finite(r) )
-    It = sum( (i <= t) & is.infinite(r) )
-    Et = sum( (i > t) & is.infinite(r) & is.finite(i) )
-
-    if (St + Rt + Et + It != N) {
+    It = sum(is.finite(i) & (i <= t)) - sum(is.finite(r))
+    Rt = sum(is.finite(i) & is.finite(r))
+    Et = sum(is.finite(i) & (i > t))
+    if(St + Rt + Et + It != N){
       stop("S(t) + I(t) + E(t) + R(t) do not equal N")
     }
     # & (i <= t) delays the infectious period after exposure

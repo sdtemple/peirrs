@@ -55,7 +55,6 @@ peirr_tau_spatial <- function(r, i, N, h, D,
     for (k in (1:n)[-j]) {
       rk <- r[k]
       ik <- i[k]
-      dkj <-
       tm <- tau_moment(rk, rj, ik, ij, gamma.estim, gamma.estim, lag, tau.med) * h(D[k,j])
       if (is.na(tm)) {
         print(c(rk, rj, ik, ij, gamma.estim, gamma.estim))
@@ -73,14 +72,19 @@ peirr_tau_spatial <- function(r, i, N, h, D,
   num.not.full <- length(r) - length(full.r)
   median.scalar <- 1
   if (tau.med) {median.scalar <- log(2)}
-  ri.sum <- 0
-  for (j in 1:n){
-    rjij <- r[j] - i[j]
-    if (is.na(rjij)){ rjij <- 1 / gamma.estim * median.scalar }
-    for (k in (n+1):N) {
-      ri.sum <- ri.sum + rjij * h(D[j,k])
+  if (n == N) {
+    ri.sum <- 0
+  } else{
+    ri.sum <- 0
+    for (j in 1:n){
+      rjij <- r[j] - i[j]
+      if (is.na(rjij)){ rjij <- 1 / gamma.estim * median.scalar }
+      for (k in (n+1):N) {
+        ri.sum <- ri.sum + rjij * h(D[j,k])
+      }
     }
   }
+
 
   # maximizes give conditional expectations
   beta.estim <- (n - 1) / (tau + ri.sum)
