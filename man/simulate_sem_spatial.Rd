@@ -22,7 +22,7 @@ simulate_sem_spatial(beta, gamma, N, h, D, m = 1, lag = 0)
 \item{lag}{numeric: fixed exposure period}
 }
 \value{
-numeric list: matrix of (infection times, removal times, spatial coordinates), matrix of (St, It, Et, Rt, Time)
+numeric list: matrix of (infection times, removal times, spatial coordinates), matrix of (St, It, Et, Rt, Time), matrix of N by N distances
 }
 \description{
 Draw infectious periods for stochastic epidemic with spatial effect.

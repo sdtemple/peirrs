@@ -8,7 +8,7 @@ Description: Simulate and estimate parameters in stochastic epidemic models
 License: CC0 v1.0 Universal
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.3
 Imports: 
   pblas,
   matrixStats,

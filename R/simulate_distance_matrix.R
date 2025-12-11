@@ -11,9 +11,9 @@
 #' @param inverse.h Function. Inverse of the transformation function \code{h}.
 #'   Must satisfy \code{inverse.h(h(x)) ≈ x}.
 #' @param mu Numeric. Target mean for the transformed distance values.
-#'   Default is 0.5.
+#'   Default is 0.9.
 #' @param sigma Numeric. Target standard deviation for the transformed distance
-#'   values. Must be positive. Default is 0.1.
+#'   values. Must be positive. Default is 0.01.
 #' @param method Character. Distance metric to use. Passed to \code{dist()}.
 #'   Default is 'euclidean'.
 #' @param runif_max Numeric. Upper bound for random coordinate generation.
@@ -39,7 +39,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' D <- simulate_distance_matrix(N = 10, mu = 1, sigma = 0.2)
+#' D <- simulate_distance_matrix(N = 10, mu = 0.9, sigma = 0.01)
 #' }
 #'
 #' @export

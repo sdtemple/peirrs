@@ -6,10 +6,10 @@
 \usage{
 simulate_distance_matrix(
   N,
-  mu = 1,
-  sigma = 0.2,
-  h = exp,
-  inverse.h = log,
+  h,
+  inverse.h,
+  mu = 0.9,
+  sigma = 0.01,
   method = "euclidean",
   runif_max = 100,
   scalar = -0.05,
@@ -20,17 +20,17 @@ simulate_distance_matrix(
 \item{N}{Positive integer. Number of points (observations) for which to
 generate distance matrix.}
 
-\item{mu}{Numeric. Target mean for the transformed distance values.
-Default is 1.}
-
-\item{sigma}{Numeric. Target standard deviation for the transformed distance
-values. Must be positive. Default is 0.2.}
-
 \item{h}{Function. Transformation function to apply to scaled distances.
-Default is \code{exp}. Must have a corresponding inverse function.}
+Must have a corresponding inverse function.}
 
 \item{inverse.h}{Function. Inverse of the transformation function \code{h}.
-Default is \code{log}. Must satisfy \code{inverse.h(h(x)) ≈ x}.}
+Must satisfy \code{inverse.h(h(x)) ≈ x}.}
+
+\item{mu}{Numeric. Target mean for the transformed distance values.
+Default is 0.9.}
+
+\item{sigma}{Numeric. Target standard deviation for the transformed distance
+values. Must be positive. Default is 0.01.}
 
 \item{method}{Character. Distance metric to use. Passed to \code{dist()}.
 Default is 'euclidean'.}
@@ -66,7 +66,7 @@ The function iteratively:
 }
 \examples{
 \dontrun{
-D <- simulate_distance_matrix(N = 10, mu = 1, sigma = 0.2)
+D <- simulate_distance_matrix(N = 10, mu = 0.9, sigma = 0.01)
 }
 
 }

@@ -23,7 +23,7 @@ simulator_spatial <- function(beta,
                       D,
                       m = 1,
                       lag = 0,
-                      p = 0,
+                      p = 0.5,
                       q = 1,
                       min.sample.size = 10,
                       max.sample.size = Inf) {
@@ -43,7 +43,7 @@ simulator_spatial <- function(beta,
     if (sample.size > 1){
       # sorting runs into error when sample.size <= 1
       epi$matrix.distance <- epi$matrix.distance[sort_indices, ]
-    }    
+    }
 
     # ensure there are r and i enough to estimate gamma
     X <- epi$matrix.time

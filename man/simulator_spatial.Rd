@@ -12,7 +12,7 @@ simulator_spatial(
   D,
   m = 1,
   lag = 0,
-  p = 0,
+  p = 0.5,
   q = 1,
   min.sample.size = 10,
   max.sample.size = Inf
@@ -40,7 +40,7 @@ simulator_spatial(
 \item{min.sample.size}{integer}
 }
 \value{
-numeric list: matrix of (infection times, removal times), matrix of (St, It, Et, Rt, Time)
+numeric list: matrix of (infection times, removal times), matrix of (St, It, Et, Rt, Time), matrix of n by N distances
 }
 \description{
 Draw infectious periods for spatial stochastic epidemic.

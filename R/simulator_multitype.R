@@ -21,7 +21,7 @@ simulator_multitype <- function(betas,
                       gamma.sizes,
                       m = 1,
                       lag = 0,
-                      p = 0,
+                      p = 0.5,
                       q = 1,
                       min.sample.size = 10,
                       max.sample.size = Inf
