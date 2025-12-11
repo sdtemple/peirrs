@@ -19,7 +19,7 @@ peirr_tau_multitype <- function(r, i,
                                 cr, ci,
                                 Ns,
                                 lag=0,
-                                tau.med=TRUE,
+                                tau.med=FALSE,
                                 gamma.med=FALSE
                                 ){
 

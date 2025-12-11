@@ -1,4 +1,4 @@
-#' Pair-based tau estimator of common infection and removal rates
+#' Pair-based tau estimator of common infection and removal rates with spatial effect
 #'
 #' Estimate infection and removal rates with tau-based expectation-maximization.
 #' The output value \code{tau.sum} is useful for debugging.
@@ -9,11 +9,13 @@
 #' @param lag numeric: fixed exposure period
 #' @param tau.med bool: use median imputation for tau if TRUE
 #' @param gamma.med bool: TRUE for median, and FALSE for mean in estimating the removal rate
+#' @param h function: symmetric function of distance
+#' @param D numeric: two-dimensional distance matrix
 #'
-#' @return numeric list (infection.rate, removal.rate, R0)
+#' @return numeric list (infection.rate, removal.rate)
 #'
 #' @export
-peirr_tau <- function(r, i, N,
+peirr_tau_spatial <- function(r, i, N, h, D,
                       lag = 0,
                       tau.med = FALSE,
                       gamma.med = FALSE
@@ -53,7 +55,8 @@ peirr_tau <- function(r, i, N,
     for (k in (1:n)[-j]) {
       rk <- r[k]
       ik <- i[k]
-      tm <- tau_moment(rk, rj, ik, ij, gamma.estim, gamma.estim, lag, tau.med)
+      dkj <-
+      tm <- tau_moment(rk, rj, ik, ij, gamma.estim, gamma.estim, lag, tau.med) * h(D[k,j])
       if (is.na(tm)) {
         print(c(rk, rj, ik, ij, gamma.estim, gamma.estim))
         }
@@ -65,18 +68,25 @@ peirr_tau <- function(r, i, N,
   full.r <- r[(!is.na(r)) & (!is.na(i))]
   full.i <- i[(!is.na(r)) & (!is.na(i))]
 
+  # have to address this component with spatial function
   # only take expectation when we don't have the full period
   num.not.full <- length(r) - length(full.r)
   median.scalar <- 1
   if (tau.med) {median.scalar <- log(2)}
-  ri.sum <- num.not.full / gamma.estim * median.scalar + sum(full.r - full.i)
+  ri.sum <- 0
+  for (j in 1:n){
+    rjij <- r[j] - i[j]
+    if (is.na(rjij)){ rjij <- 1 / gamma.estim * median.scalar }
+    for (k in (n+1):N) {
+      ri.sum <- ri.sum + rjij * h(D[j,k])
+    }
+  }
 
   # maximizes give conditional expectations
-  beta.estim <- (n - 1) / (tau + (N - n) * ri.sum)
+  beta.estim <- (n - 1) / (tau + ri.sum)
 
   return(list(infection.rate = beta.estim * N,
               removal.rate = gamma.estim,
-              R0 = beta.estim * N / gamma.estim,
               tau.sum = tau,
               full.ri.sum = ri.sum,
               num.not.infected = N-n

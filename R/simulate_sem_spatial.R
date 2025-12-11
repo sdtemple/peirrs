@@ -1,0 +1,141 @@
+#' Simulate stochastic epidemic model with spatial effect
+#'
+#' Draw infectious periods for stochastic epidemic with spatial effect.
+#'
+#' @param beta numeric: infection rate
+#' @param gamma numeric: removal rate
+#' @param N integer: population size
+#' @param m integer: positive shape
+#' @param lag numeric: fixed exposure period
+#' @param h function: symmetric function of distance
+#' @param D numeric: two-dimensional distance matrix
+#'
+#' @return numeric list: matrix of (infection times, removal times, spatial coordinates), matrix of (St, It, Et, Rt, Time)
+#'
+#' @export
+simulate_sem_spatial <- function(beta, gamma, N, h, D, m = 1, lag = 0) {
+
+  # initialize vectors
+  t <- 0
+  betaN <- beta / N
+  i <- rep(Inf, N)
+  r <- rep(Inf, N)
+  M <- rep(0, N)
+  alpha <- sample(N, 1)
+  i[alpha] <- t
+  e <- lag
+
+  # simulate epidemic
+  St <- sum(is.infinite(i))
+  It <- sum(is.finite(i)) - sum(is.finite(r))
+  Et <- 0
+  Rt <- 0
+
+  # recording the evolution
+  Srecording <- c(St)
+  Irecording <- c(It)
+  Erecording <- c(Et)
+  Rrecording <- c(Rt)
+  Trecording <- c(0)
+  ctr <- 1
+
+  while ( (It > 0) || (Et > 0) ) {
+
+    # closest infectious time after exposure
+    min.time <- min(
+      i[is.infinite(r) & is.finite(i) & (i > t)],
+      Inf
+    )
+
+    if (It == 0) {
+      # no infecteds but there are exposeds
+      # the closest exposure wait
+      t <- min.time + .Machine$double.eps
+    } else {
+      # simulate time
+      irate <- betaN * sum(h(D[is.infinite(r) & is.finite(i) & (i > t),]))
+      rrate <- gamma * It
+      t <- t + rexp(1, rate = irate + rrate)
+
+      if (t > min.time) {
+        # update time to make an exposed infectious
+        t <- min.time + .Machine$double.eps
+      } else {
+        # there is infection or removal before
+        # simulate transition
+        x <- rbinom(1, size = 1, prob = rrate / (irate + rrate))
+        x <- (x + 1) %% 2
+        if (x) {
+          # infect a susceptible
+          if(St > 1){
+            argx <- sample(which( is.infinite(i) & is.infinite(r), arr.ind = TRUE), 1)
+          } else{
+            argx <- which( is.infinite(i) & is.infinite(r) )
+          }
+          i[argx] <- t + e # fixed exposure period
+        } else {
+
+          # remove an infected
+          if (It > 1) {
+            argx <- sample(which( is.infinite(r) & (i <= t), arr.ind = TRUE), size=1)
+            # & (i <= t) means can't be removed before infectious when exposed
+          } else {
+            # when epidemic is winding down
+            # no more infecteds
+            argx <- which( is.infinite(r) & (i <= t) )
+            # & (i <= t) means can't be removed before infectious when exposed
+          }
+          M[argx] <- M[argx] + 1
+          if (M[argx] == m) { # after m renewals
+            r[argx] <- t
+          }
+        }
+      }
+    }
+
+    # update (S,I) counts
+    St = sum(is.infinite(i))
+    Rt = sum( is.finite(i) & is.finite(r) )
+    It = sum( (i <= t) & is.infinite(r) )
+    Et = sum( (i > t) & is.infinite(r) & is.finite(i) )
+
+    if (St + Rt + Et + It != N) {
+      stop("S(t) + I(t) + E(t) + R(t) do not equal N")
+    }
+    # & (i <= t) delays the infectious period after exposure
+
+    Srecording <- c(Srecording, St)
+    Irecording <- c(Irecording, It)
+    Erecording <- c(Erecording, Et)
+    Rrecording <- c(Rrecording, Rt)
+    Trecording <- c(Trecording, t)
+    ctr <- ctr + 1
+  }
+
+  # there should be no negatives
+  # and ignore the Inf values
+  ri.check <- r - i
+  ri.check <- ri.check[is.finite(ri.check)]
+  if( any( (ri.check) < 0)){
+    stop("At least one r - i value is negative")
+  }
+
+  # formatting
+  output <- matrix(c(i, r),
+                  nrow = N,
+                  ncol = 2,
+                  byrow = FALSE)
+  colnames(output) <- c("i", "r")
+
+  recording <- matrix(c(Srecording, Erecording, Irecording, Rrecording, Trecording),
+                     nrow = ctr,
+                     ncol = 5,
+                     byrow = FALSE
+                     )
+  colnames(recording) <- c("St", "Et", "It", "Rt", "Time")
+
+  return(list(matrix.time = output,
+              matrix.record = recording,
+              matrix.distance = D
+              ))
+}

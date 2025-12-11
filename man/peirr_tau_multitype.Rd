@@ -11,7 +11,7 @@ peirr_tau_multitype(
   ci,
   Ns,
   lag = 0,
-  tau.med = TRUE,
+  tau.med = FALSE,
   gamma.med = FALSE
 )
 }
