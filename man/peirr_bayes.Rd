@@ -15,7 +15,9 @@ peirr_bayes(
   gshape = 1,
   num.time.update = 10,
   num.iter = 500,
-  num.print = 100
+  num.print = 100,
+  num.tries = 20,
+  update.gamma = FALSE
 )
 }
 \arguments{
@@ -45,11 +47,20 @@ for infection and removal times per iteration. Default is 10.}
 
 \item{num.print}{An integer specifying the print frequency for iteration progress.
 Default is 100.}
+
+\item{num.tries}{An integer specifying the total number of draws
+to check if proposal is consistent with an epidemic.
+Default is 20.}
+
+\item{update.gamma}{bool: TRUE to update removal rate estimate from prior
+Default is FALSE.}
 }
 \value{
 A numeric matrix with 2 rows and num.iter columns containing posterior samples.
 Row 1 contains samples for beta (transmission rate).
 Row 2 contains samples for gamma (recovery rate).
+Row 3 contains proportion of infection times augmented/updated.
+Row 4 contains proportion of removal times augmented/updated.
 }
 \description{
 Performs Bayesian inference for the transmission rate (beta) and recovery rate (gamma)

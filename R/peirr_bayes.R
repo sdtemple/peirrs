@@ -22,10 +22,17 @@
 #' @param num.iter An integer specifying the total number of MCMC iterations. Default is 500.
 #' @param num.print An integer specifying the print frequency for iteration progress.
 #'                  Default is 100.
+#' @param num.tries An integer specifying the total number of draws
+#'                  to check if proposal is consistent with an epidemic.
+#'                  Default is 20.
+#' @param update.gamma bool: TRUE to update removal rate estimate from prior
+#'                  Default is FALSE.
 #'
 #' @return A numeric matrix with 2 rows and num.iter columns containing posterior samples.
 #'         Row 1 contains samples for beta (transmission rate).
 #'         Row 2 contains samples for gamma (recovery rate).
+#'         Row 3 contains proportion of infection times augmented/updated.
+#'         Row 4 contains proportion of removal times augmented/updated.
 #'
 #' @details
 #' The function implements a data augmentation MCMC algorithm for epidemic models.
@@ -45,7 +52,9 @@ peirr_bayes <- function(r,
                         gshape=1,
                         num.time.update=10,
                         num.iter=500,
-                        num.print=100
+                        num.print=100,
+                        num.tries=20,
+                        update.gamma=FALSE
 ){
 
   ### set up initialization and prior ###
@@ -54,7 +63,11 @@ peirr_bayes <- function(r,
   brate <- bshape / binit
   grate <- gshape / ginit
   b <- brate / N
-  g <- rgamma(1, shape=gshape, rate=grate)
+  if (update.gamma) {
+    g <- rgamma(1, shape=gshape, rate=grate)
+  } else {
+    g <- ginit
+  }
 
   ### utility function local to ###
 
@@ -121,12 +134,11 @@ peirr_bayes <- function(r,
     # initialize
     n = length(r)
     N = length(i)
-    
+
     # check that rp has the same length as r
     if(length(rp) != length(r)){
       stop("Observed and proposed removal time vectors must have the same length.")
     }
-    
 
     # compute tau matrices
     tau = matrix(0, nrow = n, ncol = N)
@@ -166,7 +178,7 @@ peirr_bayes <- function(r,
 
   # initialize
   n = sum((!is.na(i)) | (!is.na(r)))
-  storage = array(NA, dim = c(2, K))
+  storage = array(NA, dim = c(4, K))
   tau = matrix(0, nrow = n, ncol = N)
 
   if(sum(!is.na(i)) == n && sum(!is.na(r)) == n){
@@ -182,12 +194,16 @@ peirr_bayes <- function(r,
                                num.posterior.samples = num.iter)
     storage[1, ] <- out$infection.rate.samples
     storage[2, ] <- out$removal.rate.samples
+    storage[3, ] <- rep(NA, K)
+    storage[4, ] <- rep(NA, K)
     return(storage)
   }
 
   # first data augmentation
   ni = sum(is.na(i))
   nr = sum(is.na(r))
+  J1 = min(ni, J)
+  J2= min(nr, J)
   ii = i
   ri = r
   ii[is.na(i)] <- r[is.na(i)] - (rgamma(ni, shape = m, rate = 1) / g)
@@ -202,36 +218,80 @@ peirr_bayes <- function(r,
   for(k in 1:K){
 
     # gamma metropolis hastings step
-    g = rgamma(1, gshape + n, grate + sum((ri - ii[1:n])))
+    if (update.gamma) {
+      g = rgamma(1, gshape + n, grate + sum((ri - ii[1:n])))
+    }
     storage[2,k] = g
 
     # infection times metropolis hastings step
-    for(j in 1:J){
-      l = sample((1:n)[is.na(i)], 1)
-      il = r[l] - (rgamma(1, shape = m, rate = 1) / g)
-      ip = ii
-      ip[l] = il
-      if(is_epidemic(ri, ip[1:n])){ # must be epidemic
-        a = min(1, iupdate(ri, ii, ip, gshape, grate))
-        if(runif(1) < a){
-          ii[l] = il
+    successes <- 0
+    if (ni > 0) {
+      for(j in 1:J1){
+        ctr = 1
+        if (sum(is.na(i))==1) {
+          l = (1:n)[is.na(r)]
+        } else {
+          l = sample((1:n)[is.na(i)], 1)
+        }
+        il = r[l] - (rgamma(1, shape = m, rate = 1) / g)
+        ip = ii
+        ip[l] = il
+        while ((!is_epidemic(ri, ip[1:n])) && (ctr <= num.tries)){
+          ctr = ctr + 1
+          if (sum(is.na(i))==1) {
+            l = (1:n)[is.na(r)]
+          } else {
+            l = sample((1:n)[is.na(i)], 1)
+          }
+          il = r[l] - (rgamma(1, shape = m, rate = 1) / g)
+          ip = ii
+          ip[l] = il
+        }
+        if(is_epidemic(ri, ip[1:n])){ # must be epidemic
+          a = min(1, iupdate(ri, ii, ip, gshape, grate))
+          if(runif(1) < a){
+            ii[l] = il
+            successes <- successes + 1
+          }
         }
       }
     }
+    storage[3, k] <- successes / J1
 
     # removal times metropolis hastings step
-    for(j in 1:J){
-      l = sample((1:n)[is.na(r)], 1)
-      rl = i[l] + (rgamma(1, shape = m, rate = 1) / g)
-      rp = ri
-      rp[l] = rl
-      if(is_epidemic(rp, ii[1:n])){ # must be epidemic
-        a = min(1, rupdate(ri, ii, rp, gshape, grate))
-        if(runif(1) < a){
-          ri[l] = rl
+    successes <- 0
+    if (nr > 0) {
+      for(j in 1:J2){
+        ctr = 1
+        if (sum(is.na(r))==1) {
+          l = (1:n)[is.na(r)]
+        } else {
+          l = sample((1:n)[is.na(r)], 1)
+        }
+        rl = i[l] + (rgamma(1, shape = m, rate = 1) / g)
+        rp = ri
+        rp[l] = rl
+        while ((!is_epidemic(rp, ii[1:n])) && (ctr <= num.tries)) {
+          ctr = ctr + 1
+          if (sum(is.na(r))==1) {
+            l = (1:n)[is.na(r)]
+          } else {
+            l = sample((1:n)[is.na(r)], 1)
+          }
+          rl = i[l] + (rgamma(1, shape = m, rate = 1) / g)
+          rp = ri
+          rp[l] = rl
+        }
+        if (is_epidemic(rp, ii[1:n])) { # must be epidemic
+          a = min(1, rupdate(ri, ii, rp, gshape, grate))
+          if (runif(1) < a) {
+            ri[l] = rl
+            successes <- successes + 1
+          }
         }
       }
     }
+    storage[4, k] <- successes / J2
 
     # beta gibbs step
     for(j in 1:n){
