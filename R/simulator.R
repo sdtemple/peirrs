@@ -25,6 +25,9 @@ simulator <- function(beta,
                       max.sample.size = Inf) {
   sample.size <- 0
   gamma.estim <- NA
+  if (p <= 0) {
+    stop("p <= 0 error. Must have some complete infectious periods.")
+  }
   while ((sample.size <= min.sample.size) || (sample.size >= max.sample.size) || is.na(gamma.estim)) {
     # main simulation
     epi <- simulate_sem(beta, gamma, N, m, lag)

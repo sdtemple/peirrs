@@ -12,9 +12,7 @@ peirr_bayes(
   binit = 1,
   ginit = 1,
   bshape = 1,
-  brate = 1e-04,
   gshape = 1,
-  grate = 1e-04,
   num.time.update = 10,
   num.iter = 500,
   num.print = 100
@@ -30,19 +28,15 @@ peirr_bayes(
 \item{m}{A numeric shape parameter for the gamma distribution used in data augmentation.
 Default is 1.}
 
-\item{binit}{A numeric initial value for the beta (transmission rate) parameter.
+\item{binit}{A numeric initial estimate for the beta (transmission rate) parameter.
 Default is 1.}
 
-\item{ginit}{A numeric initial value for the gamma (recovery rate) parameter.
+\item{ginit}{A numeric initial estimate for the gamma (recovery rate) parameter.
 Default is 1.}
 
 \item{bshape}{A numeric shape parameter for the gamma prior on beta. Default is 1.}
 
-\item{brate}{A numeric rate parameter for the gamma prior on beta. Default is 1e-4.}
-
 \item{gshape}{A numeric shape parameter for the gamma prior on gamma. Default is 1.}
-
-\item{grate}{A numeric rate parameter for the gamma prior on gamma. Default is 1e-4.}
 
 \item{num.time.update}{An integer specifying the number of Metropolis-Hastings updates
 for infection and removal times per iteration. Default is 10.}

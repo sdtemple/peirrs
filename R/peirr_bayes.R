@@ -11,14 +11,12 @@
 #' @param N An integer specifying the total population size.
 #' @param m A numeric shape parameter for the gamma distribution used in data augmentation.
 #'          Default is 1.
-#' @param binit A numeric initial value for the beta (transmission rate) parameter.
+#' @param binit A numeric initial estimate for the beta (transmission rate) parameter.
 #'              Default is 1.
-#' @param ginit A numeric initial value for the gamma (recovery rate) parameter.
+#' @param ginit A numeric initial estimate for the gamma (recovery rate) parameter.
 #'              Default is 1.
 #' @param bshape A numeric shape parameter for the gamma prior on beta. Default is 1.
-#' @param brate A numeric rate parameter for the gamma prior on beta. Default is 1e-4.
 #' @param gshape A numeric shape parameter for the gamma prior on gamma. Default is 1.
-#' @param grate A numeric rate parameter for the gamma prior on gamma. Default is 1e-4.
 #' @param num.time.update An integer specifying the number of Metropolis-Hastings updates
 #'                        for infection and removal times per iteration. Default is 10.
 #' @param num.iter An integer specifying the total number of MCMC iterations. Default is 500.
@@ -36,6 +34,7 @@
 #' (3) updating missing removal times via Metropolis-Hastings, and
 #' (4) updating beta via Gibbs sampling. All epidemic configurations are validated
 #' to ensure consistency with epidemic dynamics.
+#' @export
 peirr_bayes <- function(r,
                         i,
                         N,
@@ -43,13 +42,19 @@ peirr_bayes <- function(r,
                         binit=1,
                         ginit=1,
                         bshape=1,
-                        brate=1e-4,
                         gshape=1,
-                        grate=1e-4,
                         num.time.update=10,
                         num.iter=500,
                         num.print=100
 ){
+
+  ### set up initialization and prior ###
+
+  # priors on beta and gamma come from initial estimate
+  brate <- bshape / binit
+  grate <- gshape / ginit
+  b <- brate / N
+  g <- rgamma(1, shape=gshape, rate=grate)
 
   ### utility function local to ###
 
@@ -153,8 +158,6 @@ peirr_bayes <- function(r,
   n = sum((!is.na(i)) | (!is.na(r)))
   storage = array(NA, dim = c(2, K))
   tau = matrix(0, nrow = n, ncol = N)
-  b = binit / N
-  g = ginit
 
   # first data augmentation
   ni = sum(is.na(i))

@@ -3,6 +3,8 @@
 export(bayes_complete_data)
 export(decomplete_sem)
 export(filter_sem)
+export(peirr_bayes)
+export(peirr_bayes_multitype)
 export(peirr_bootstrap)
 export(peirr_bootstrap_multitype)
 export(peirr_pbla_both_rates)
