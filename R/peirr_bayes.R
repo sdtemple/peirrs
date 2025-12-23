@@ -162,6 +162,21 @@ peirr_bayes <- function(r,
   # first data augmentation
   ni = sum(is.na(i))
   nr = sum(is.na(r))
+  if(ni == n && nr == n){
+    # premature exit
+    # because complete data
+    out <- bayes_complete_data(r,
+                               i,
+                               N,
+                               infection.rate.rate.prior = b,
+                               infection.rate.shape.prior = bshape,
+                               removal.rate.rate.prior = grate,
+                               removal.rate.shape.prior = gshape,
+                               num.posterior.samples = num.iter)
+    storage[1, ] <- out$infection.rate.samples
+    storage[2, ] <- out$removal.rate.samples
+    return(storage)
+  }
   ii = i
   ri = r
   ii[is.na(i)] <- r[is.na(i)] - (rgamma(ni, shape = m, rate = 1) / g)
@@ -196,7 +211,7 @@ peirr_bayes <- function(r,
 
     # removal times metropolis hastings step
     for(j in 1:J){
-      l = sample((1:n)[is.na(i)], 1)
+      l = sample((1:n)[is.na(r)], 1)
       rl = i[l] + (rgamma(1, shape = m, rate = 1) / g)
       rp = ri
       rp[l] = rl
