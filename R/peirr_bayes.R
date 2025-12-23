@@ -81,6 +81,10 @@ peirr_bayes <- function(r,
     n = length(r)
     N = length(i)
 
+    if(length(ip) != length(i)){
+      stop("Observed and proposed infection time vectors must have the same length.")
+    }
+
     # compute tau matrices
     tau = matrix(0, nrow = n, ncol = N)
     for(j in 1:n){
@@ -117,6 +121,12 @@ peirr_bayes <- function(r,
     # initialize
     n = length(r)
     N = length(i)
+    
+    # check that rp has the same length as r
+    if(length(rp) != length(r)){
+      stop("Observed and proposed removal time vectors must have the same length.")
+    }
+    
 
     # compute tau matrices
     tau = matrix(0, nrow = n, ncol = N)
@@ -159,10 +169,7 @@ peirr_bayes <- function(r,
   storage = array(NA, dim = c(2, K))
   tau = matrix(0, nrow = n, ncol = N)
 
-  # first data augmentation
-  ni = sum(is.na(i))
-  nr = sum(is.na(r))
-  if(ni == n && nr == n){
+  if(sum(!is.na(i)) == n && sum(!is.na(r)) == n){
     # premature exit
     # because complete data
     out <- bayes_complete_data(r,
@@ -177,6 +184,10 @@ peirr_bayes <- function(r,
     storage[2, ] <- out$removal.rate.samples
     return(storage)
   }
+
+  # first data augmentation
+  ni = sum(is.na(i))
+  nr = sum(is.na(r))
   ii = i
   ri = r
   ii[is.na(i)] <- r[is.na(i)] - (rgamma(ni, shape = m, rate = 1) / g)
@@ -186,13 +197,12 @@ peirr_bayes <- function(r,
     ri[is.na(r)] <- i[is.na(r)] + (rgamma(nr, shape = m, rate = 1) / g)
   }
   ii = c(ii, rep(Inf, N - n))
-  ri = c(ri, rep(Inf, N - n))
 
   # sampling
   for(k in 1:K){
 
     # gamma metropolis hastings step
-    g = rgamma(1, gshape + n, grate + sum((ri - ii)[is.finite(ri)]))
+    g = rgamma(1, gshape + n, grate + sum((ri - ii[1:n])))
     storage[2,k] = g
 
     # infection times metropolis hastings step
@@ -201,7 +211,7 @@ peirr_bayes <- function(r,
       il = r[l] - (rgamma(1, shape = m, rate = 1) / g)
       ip = ii
       ip[l] = il
-      if(is_epidemic(ri, ip)){ # must be epidemic
+      if(is_epidemic(ri, ip[1:n])){ # must be epidemic
         a = min(1, iupdate(ri, ii, ip, gshape, grate))
         if(runif(1) < a){
           ii[l] = il
@@ -215,7 +225,7 @@ peirr_bayes <- function(r,
       rl = i[l] + (rgamma(1, shape = m, rate = 1) / g)
       rp = ri
       rp[l] = rl
-      if(is_epidemic(rp, ii)){ # must be epidemic
+      if(is_epidemic(rp, ii[1:n])){ # must be epidemic
         a = min(1, rupdate(ri, ii, rp, gshape, grate))
         if(runif(1) < a){
           ri[l] = rl
