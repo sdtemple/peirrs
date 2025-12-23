@@ -74,11 +74,11 @@ peirr_bayes <- function(r,
   ### utility function local to ###
 
   # indicates data consistent with epidemic
-  is_epidemic = function(r, i){
+  is_epidemic = function(r, i, lag){
     n = length(r)
     ind = matrix(0, nrow = n, ncol = n)
     for(j in 1:n){
-      ind[j,] = (i[1:n] < i[j]) * (r > i[j])
+      ind[j,] = (i[1:n] < (i[j] - lag)) * (r > (i[j] - lag))
     }
     x = apply(ind, 1, sum)
     x = x[x == 0]
@@ -203,7 +203,9 @@ peirr_bayes <- function(r,
                                infection.rate.shape.prior = bshape,
                                removal.rate.rate.prior = grate,
                                removal.rate.shape.prior = gshape,
-                               num.posterior.samples = num.iter)
+                               num.posterior.samples = num.iter,
+                               lag=lag
+                               )
     storage[1, ] <- out$infection.rate.samples
     storage[2, ] <- out$removal.rate.samples
     storage[3, ] <- rep(NA, K)
@@ -220,7 +222,13 @@ peirr_bayes <- function(r,
   ri = r
   ii[is.na(i)] <- r[is.na(i)] - (rgamma(ni, shape = m, rate = 1) / g)
   ri[is.na(r)] <- i[is.na(r)] + (rgamma(nr, shape = m, rate = 1) / g)
-  while(!is_epidemic(ri, ii)){ # must be epidemic
+  while(!is_epidemic(ri, ii, lag)){ # must be epidemic
+    # can get hung for poorly drawn gamma
+    if (update.gamma) {
+      g <- rgamma(1, shape=gshape, rate=grate)
+    } else {
+      g <- ginit
+    }
     ii[is.na(i)] <- r[is.na(i)] - (rgamma(ni, shape = m, rate = 1) / g)
     ri[is.na(r)] <- i[is.na(r)] + (rgamma(nr, shape = m, rate = 1) / g)
   }
@@ -248,7 +256,7 @@ peirr_bayes <- function(r,
         il = r[l] - (rgamma(1, shape = m, rate = 1) / g)
         ip = ii
         ip[l] = il
-        while ((!is_epidemic(ri, ip[1:n])) && (ctr <= num.tries)){
+        while ((!is_epidemic(ri, ip[1:n], lag)) && (ctr <= num.tries)){
           ctr = ctr + 1
           if (sum(is.na(i))==1) {
             l = (1:n)[is.na(r)]
@@ -259,8 +267,8 @@ peirr_bayes <- function(r,
           ip = ii
           ip[l] = il
         }
-        if(is_epidemic(ri, ip[1:n])){ # must be epidemic
-          a = min(1, iupdate(ri, ii, ip, gshape, grate))
+        if (is_epidemic(ri, ip[1:n], lag)) { # must be epidemic
+          a = min(1, exp(iupdate(ri, ii, ip, gshape, grate, lag=lag)))
           if(runif(1) < a){
             ii[l] = il
             successes <- successes + 1
@@ -283,7 +291,7 @@ peirr_bayes <- function(r,
         rl = i[l] + (rgamma(1, shape = m, rate = 1) / g)
         rp = ri
         rp[l] = rl
-        while ((!is_epidemic(rp, ii[1:n])) && (ctr <= num.tries)) {
+        while ((!is_epidemic(rp, ii[1:n], lag)) && (ctr <= num.tries)) {
           ctr = ctr + 1
           if (sum(is.na(r))==1) {
             l = (1:n)[is.na(r)]
@@ -294,8 +302,8 @@ peirr_bayes <- function(r,
           rp = ri
           rp[l] = rl
         }
-        if (is_epidemic(rp, ii[1:n])) { # must be epidemic
-          a = min(1, rupdate(ri, ii, rp, gshape, grate))
+        if (is_epidemic(rp, ii[1:n], lag)) { # must be epidemic
+          a = min(1, exp(rupdate(ri, ii, rp, gshape, grate, lag=lag)))
           if (runif(1) < a) {
             ri[l] = rl
             successes <- successes + 1

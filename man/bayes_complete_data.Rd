@@ -12,7 +12,8 @@ bayes_complete_data(
   infection.rate.shape.prior = 0.001,
   removal.rate.rate.prior = 0.001,
   removal.rate.shape.prior = 0.001,
-  num.posterior.samples = 10000
+  num.posterior.samples = 10000,
+  lag = 0
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ bayes_complete_data(
 \item{removal.rate.shape.prior}{numeric}
 
 \item{num.posterior.samples}{numeric}
+
+\item{lag}{numeric: fixed exposure period}
 }
 \value{
 numeric list of exact posterior and prior parameters
