@@ -27,6 +27,7 @@
 #'                  Default is 20.
 #' @param update.gamma bool: TRUE to update removal rate estimate from prior
 #'                  Default is FALSE.
+#' @param lag numeric: fixed exposure period
 #'
 #' @return A numeric matrix with 2 rows and num.iter columns containing posterior samples.
 #'         Row 1 contains samples for beta (transmission rate).
@@ -54,7 +55,8 @@ peirr_bayes <- function(r,
                         num.iter=500,
                         num.print=100,
                         num.tries=20,
-                        update.gamma=FALSE
+                        update.gamma=FALSE,
+                        lag=0
 ){
 
   ### set up initialization and prior ###
@@ -88,7 +90,7 @@ peirr_bayes <- function(r,
   }
 
   # utlity for infection time metropolis hastings step
-  iupdate = function(r, i, ip, bshape, brate){
+  iupdate = function(r, i, ip, bshape, brate, lag){
 
     # initialize
     n = length(r)
@@ -101,35 +103,40 @@ peirr_bayes <- function(r,
     # compute tau matrices
     tau = matrix(0, nrow = n, ncol = N)
     for(j in 1:n){
-      tau[j,] = sapply(i, min, r[j]) - sapply(i, min, i[j])
+      tau[j,] = sapply(i - lag, min, r[j]) - sapply(i - lag, min, i[j])
     }
     taup = matrix(0, nrow = n, ncol = N)
     for(j in 1:n){
-      taup[j,] = sapply(ip, min, r[j]) - sapply(ip, min, ip[j])
+      taup[j,] = sapply(ip - lag, min, r[j]) - sapply(ip - lag, min, ip[j])
     }
 
     # compute
     ind = matrix(0, nrow = n, ncol = n)
     for(j in 1:n){
-      ind[j,] = (i[1:n] < i[j]) * (r > i[j])
+      ind[j,] = (i[1:n] < (i[j] - lag)) * (r > (i[j] - lag))
     }
-    Blong = apply(ind, 1, sum)
-    Blong = Blong[Blong > 0]
+    # L1 comes from page 25 of the stockdale 2019 thesis
+    # Integrated out formula is page 32 of my prelim
+    # There are typos in my exam, though
+    # Assuming gamma density function for nice proposal
+    L1.stockdale19.long = apply(ind, 1, sum)
+    L1.stockdale19.long = L1.stockdale19.long[L1.stockdale19.long > 0]
+
     indp = matrix(0, nrow = n, ncol = n)
     for(j in 1:n){
-      indp[j,] = (ip[1:n] < ip[j]) * (r > ip[j])
+      indp[j,] = (ip[1:n] < (ip[j] - lag)) * (r > (ip[j] - lag))
     }
-    Bplong = apply(indp, 1, sum)
-    Bplong = Bplong[Bplong > 0]
+    L1.stockdale19.long.p = apply(indp, 1, sum)
+    L1.stockdale19.long.p = L1.stockdale19.long.p[L1.stockdale19.long.p > 0]
 
-    ellratio = sum(log(Bplong)) - sum(log(Blong))
+    ellratio = sum(log(L1.stockdale19.long.p)) - sum(log(L1.stockdale19.long))
     ellratio = ellratio + (bshape + n - 1) *
       (log(brate + sum(tau)) - log(brate + sum(taup)))
     return(ellratio)
   }
 
   # utlity for infection time metropolis hastings step
-  rupdate = function(r, i, rp, bshape, brate){
+  rupdate = function(r, i, rp, bshape, brate, lag){
 
     # initialize
     n = length(r)
@@ -143,28 +150,33 @@ peirr_bayes <- function(r,
     # compute tau matrices
     tau = matrix(0, nrow = n, ncol = N)
     for(j in 1:n){
-      tau[j,] = sapply(i, min, r[j]) - sapply(i, min, i[j])
+      tau[j,] = sapply(i - lag, min, r[j]) - sapply(i - lag, min, i[j])
     }
     taup = matrix(0, nrow = n, ncol = N)
     for(j in 1:n){
-      taup[j,] = sapply(i, min, rp[j]) - sapply(i, min, i[j])
+      taup[j,] = sapply(i - lag, min, rp[j]) - sapply(i - lag, min, i[j])
     }
 
     # compute
     ind = matrix(0, nrow = n, ncol = n)
     for(j in 1:n){
-      ind[j,] = (i[1:n] < i[j]) * (r > i[j])
+      ind[j,] = (i[1:n] < (i[j] - lag)) * (r > (i[j] - lag))
     }
-    Blong = apply(ind, 1, sum)
-    Blong = Blong[Blong > 0]
+    # L1 comes from page 25 of the stockdale 2019 thesis
+    # Integrated out formula is page 32 of my prelim
+    # There are typos in my exam, though
+    # Assuming gamma density function for nice proposal
+    L1.stockdale19.long = apply(ind, 1, sum)
+    L1.stockdale19.long = L1.stockdale19.long[L1.stockdale19.long > 0]
+
     indp = matrix(0, nrow = n, ncol = n)
     for(j in 1:n){
-      indp[j,] = (i[1:n] < i[j]) * (rp > i[j])
+      indp[j,] = (i[1:n] < (i[j] - lag)) * (rp > (i[j] - lag))
     }
-    Bplong = apply(indp, 1, sum)
-    Bplong = Bplong[Bplong > 0]
+    L1.stockdale19.long.p = apply(indp, 1, sum)
+    L1.stockdale19.long.p = L1.stockdale19.long.p[L1.stockdale19.long.p > 0]
 
-    ellratio = sum(log(Bplong)) - sum(log(Blong))
+    ellratio = sum(log(L1.stockdale19.long.p)) - sum(log(L1.stockdale19.long))
     ellratio = ellratio + (bshape + n - 1) *
       (log(brate + sum(tau)) - log(brate + sum(taup)))
     return(ellratio)
@@ -295,7 +307,7 @@ peirr_bayes <- function(r,
 
     # beta gibbs step
     for(j in 1:n){
-      tau[j,] = sapply(ii, min, ri[j]) - sapply(ii, min, ii[j])
+      tau[j,] = sapply(ii - lag, min, ri[j]) - sapply(ii - lag, min, ii[j])
     }
     b = rgamma(1, shape = bshape + n - 1, rate = brate + sum(tau))
     storage[1,k] = b * N

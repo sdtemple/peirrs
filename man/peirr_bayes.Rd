@@ -17,7 +17,8 @@ peirr_bayes(
   num.iter = 500,
   num.print = 100,
   num.tries = 20,
-  update.gamma = FALSE
+  update.gamma = FALSE,
+  lag = 0
 )
 }
 \arguments{
@@ -54,6 +55,8 @@ Default is 20.}
 
 \item{update.gamma}{bool: TRUE to update removal rate estimate from prior
 Default is FALSE.}
+
+\item{lag}{numeric: fixed exposure period}
 }
 \value{
 A numeric matrix with 2 rows and num.iter columns containing posterior samples.
