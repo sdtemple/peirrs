@@ -1,14 +1,16 @@
 
-#' Bayesian Inference for Epidemic Parameters using MCMC
+#' Bayesian Inference for Spatial Epidemic Parameters using MCMC
 #'
 #' Performs Bayesian inference for the transmission rate (beta) and recovery rate (gamma)
-#' parameters of an epidemic model using Markov Chain Monte Carlo (MCMC) sampling.
+#' parameters of a spatial epidemic model using Markov Chain Monte Carlo (MCMC) sampling.
 #' Implements data augmentation for missing infection and removal times via Metropolis-Hastings
 #' updates, with a Gibbs step for the beta parameter.
 #'
 #' @param r A numeric vector of removal/recovery times. NA values indicate unobserved times.
 #' @param i A numeric vector of infection times. NA values indicate unobserved times.
 #' @param N An integer specifying the total population size.
+#' @param h function: symmetric function of distance
+#' @param D numeric: two-dimensional distance matrix
 #' @param m A numeric shape parameter for the gamma distribution used in data augmentation.
 #'          Default is 1.
 #' @param binit A numeric initial estimate for the beta (transmission rate) parameter.
@@ -43,9 +45,11 @@
 #' (4) updating beta via Gibbs sampling. All epidemic configurations are validated
 #' to ensure consistency with epidemic dynamics.
 #' @export
-peirr_bayes <- function(r,
+peirr_bayes_spatial <- function(r,
                         i,
                         N,
+                        h,
+                        D,
                         m=1,
                         binit=1,
                         ginit=1,
@@ -90,7 +94,7 @@ peirr_bayes <- function(r,
   }
 
   # utlity for infection time metropolis hastings step
-  iupdate = function(r, i, ip, bshape, brate, lag){
+  iupdate = function(r, i, ip, bshape, brate, lag, h, D){
 
     # initialize
     n = length(r)
@@ -103,17 +107,17 @@ peirr_bayes <- function(r,
     # compute tau matrices
     tau = matrix(0, nrow = n, ncol = N)
     for(j in 1:n){
-      tau[j,] = sapply(i - lag, min, r[j]) - sapply(i - lag, min, i[j])
+      tau[j,] = (sapply(i - lag, min, r[j]) - sapply(i - lag, min, i[j])) * h(D[j,])
     }
     taup = matrix(0, nrow = n, ncol = N)
     for(j in 1:n){
-      taup[j,] = sapply(ip - lag, min, r[j]) - sapply(ip - lag, min, ip[j])
+      taup[j,] = (sapply(ip - lag, min, r[j]) - sapply(ip - lag, min, ip[j])) * h(D[j,])
     }
 
     # compute
     ind = matrix(0, nrow = n, ncol = n)
     for(j in 1:n){
-      ind[j,] = (i[1:n] < (i[j] - lag)) * (r > (i[j] - lag))
+      ind[j,] = (i[1:n] < (i[j] - lag)) * (r > (i[j] - lag)) * h(D[j,1:n])
     }
     # L1 comes from page 25 of the stockdale 2019 thesis
     # Integrated out formula is page 32 of my prelim
@@ -124,7 +128,7 @@ peirr_bayes <- function(r,
 
     indp = matrix(0, nrow = n, ncol = n)
     for(j in 1:n){
-      indp[j,] = (ip[1:n] < (ip[j] - lag)) * (r > (ip[j] - lag))
+      indp[j,] = (ip[1:n] < (ip[j] - lag)) * (r > (ip[j] - lag)) * h(D[j,1:n])
     }
     L1.stockdale19.long.p = apply(indp, 1, sum)
     L1.stockdale19.long.p = L1.stockdale19.long.p[L1.stockdale19.long.p > 0]
@@ -136,7 +140,7 @@ peirr_bayes <- function(r,
   }
 
   # utlity for infection time metropolis hastings step
-  rupdate = function(r, i, rp, bshape, brate, lag){
+  rupdate = function(r, i, rp, bshape, brate, lag, h, D){
 
     # initialize
     n = length(r)
@@ -150,17 +154,17 @@ peirr_bayes <- function(r,
     # compute tau matrices
     tau = matrix(0, nrow = n, ncol = N)
     for(j in 1:n){
-      tau[j,] = sapply(i - lag, min, r[j]) - sapply(i - lag, min, i[j])
+      tau[j,] = (sapply(i - lag, min, r[j]) - sapply(i - lag, min, i[j]))  * h(D[j,])
     }
     taup = matrix(0, nrow = n, ncol = N)
     for(j in 1:n){
-      taup[j,] = sapply(i - lag, min, rp[j]) - sapply(i - lag, min, i[j])
+      taup[j,] = (sapply(i - lag, min, rp[j]) - sapply(i - lag, min, i[j])) * h(D[j,])
     }
 
     # compute
     ind = matrix(0, nrow = n, ncol = n)
     for(j in 1:n){
-      ind[j,] = (i[1:n] < (i[j] - lag)) * (r > (i[j] - lag))
+      ind[j,] = (i[1:n] < (i[j] - lag)) * (r > (i[j] - lag)) * h(D[j,1:n])
     }
     # L1 comes from page 25 of the stockdale 2019 thesis
     # Integrated out formula is page 32 of my prelim
@@ -171,7 +175,7 @@ peirr_bayes <- function(r,
 
     indp = matrix(0, nrow = n, ncol = n)
     for(j in 1:n){
-      indp[j,] = (i[1:n] < (i[j] - lag)) * (rp > (i[j] - lag))
+      indp[j,] = (i[1:n] < (i[j] - lag)) * (rp > (i[j] - lag)) * h(D[j,1:n])
     }
     L1.stockdale19.long.p = apply(indp, 1, sum)
     L1.stockdale19.long.p = L1.stockdale19.long.p[L1.stockdale19.long.p > 0]
@@ -194,23 +198,7 @@ peirr_bayes <- function(r,
   tau = matrix(0, nrow = n, ncol = N)
 
   if(sum(!is.na(i)) == n && sum(!is.na(r)) == n){
-    # premature exit
-    # because complete data
-    out <- bayes_complete_data(r,
-                               i,
-                               N,
-                               infection.rate.rate.prior = b,
-                               infection.rate.shape.prior = bshape,
-                               removal.rate.rate.prior = grate,
-                               removal.rate.shape.prior = gshape,
-                               num.posterior.samples = num.iter,
-                               lag=lag
-                               )
-    storage[1, ] <- out$infection.rate.samples
-    storage[2, ] <- out$removal.rate.samples
-    storage[3, ] <- rep(NA, K)
-    storage[4, ] <- rep(NA, K)
-    return(storage)
+    stop("No implementation for complete spatial data")
   }
 
   # first data augmentation
@@ -268,7 +256,7 @@ peirr_bayes <- function(r,
           ip[l] = il
         }
         if (is_epidemic(ri, ip[1:n], lag)) { # must be epidemic
-          a = min(1, exp(iupdate(ri, ii, ip, gshape, grate, lag=lag)))
+          a = min(1, exp(iupdate(ri, ii, ip, gshape, grate, lag=lag, h=h, D=D)))
           if(runif(1) < a){
             ii[l] = il
             successes <- successes + 1
@@ -303,7 +291,7 @@ peirr_bayes <- function(r,
           rp[l] = rl
         }
         if (is_epidemic(rp, ii[1:n], lag)) { # must be epidemic
-          a = min(1, exp(rupdate(ri, ii, rp, gshape, grate, lag=lag)))
+          a = min(1, exp(rupdate(ri, ii, rp, gshape, grate, lag=lag, h=h, D=D)))
           if (runif(1) < a) {
             ri[l] = rl
             successes <- successes + 1
@@ -315,8 +303,9 @@ peirr_bayes <- function(r,
 
     # beta gibbs step
     for(j in 1:n){
-      tau[j,] = sapply(ii - lag, min, ri[j]) - sapply(ii - lag, min, ii[j])
+      tau[j,] = (sapply(ii - lag, min, ri[j]) - sapply(ii - lag, min, ii[j]))  * h(D[j,])
     }
+    # may still have an issue here
     b = rgamma(1, shape = bshape + n - 1, rate = brate + sum(tau))
     storage[1,k] = b * N
 
