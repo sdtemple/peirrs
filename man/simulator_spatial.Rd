@@ -7,15 +7,15 @@
 simulator_spatial(
   beta,
   gamma,
-  N,
-  h,
-  D,
-  m = 1,
+  population_size,
+  kernel,
+  matrix_distance,
+  num_renewals = 1,
   lag = 0,
-  p = 0.5,
-  q = 1,
-  min.sample.size = 10,
-  max.sample.size = Inf
+  prop_complete = 0.5,
+  prop_infection_missing = 1,
+  min_epidemic_size = 10,
+  max_epidemic_size = Inf
 )
 }
 \arguments{
@@ -23,21 +23,23 @@ simulator_spatial(
 
 \item{gamma}{numeric: removal rate}
 
-\item{N}{integer: population size}
+\item{population_size}{integer: population size}
 
-\item{h}{function: symmetric function of distance}
+\item{kernel}{function: symmetric function of distance}
 
-\item{D}{numeric: two-dimensional distance matrix}
+\item{matrix_distance}{numeric: two-dimensional distance matrix}
 
-\item{m}{integer: positive shape}
+\item{num_renewals}{integer: positive shape}
 
 \item{lag}{numeric: fixed exposure period}
 
-\item{p}{expected proportion of complete pairs observed}
+\item{prop_complete}{expected proportion of complete pairs observed}
 
-\item{q}{probability infection time missing}
+\item{prop_infection_missing}{probability infection time missing}
 
-\item{min.sample.size}{integer}
+\item{min_epidemic_size}{integer}
+
+\item{max_epidemic_size}{integer}
 }
 \value{
 numeric list: matrix of (infection times, removal times), matrix of (St, It, Et, Rt, Time), matrix of n by N distances

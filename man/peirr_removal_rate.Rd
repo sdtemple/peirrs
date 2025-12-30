@@ -4,14 +4,14 @@
 \alias{peirr_removal_rate}
 \title{Removal rate estimator}
 \usage{
-peirr_removal_rate(r, i, med = TRUE)
+peirr_removal_rate(removals, infections, median_gamma = TRUE)
 }
 \arguments{
-\item{r}{numeric vector: removal times}
+\item{removals}{numeric vector: removal times}
 
-\item{i}{numeric vector: infection times}
+\item{infections}{numeric vector: infection times}
 
-\item{med}{bool: TRUE for median, FALSE for mean}
+\item{median_gamma}{bool: TRUE for median, FALSE for mean}
 }
 \value{
 float: Removal rate estimate

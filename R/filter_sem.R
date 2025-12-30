@@ -2,35 +2,37 @@
 #'
 #' Keep cases only.
 #'
-#' @param epi matrix: infection times, removal times, (optional: infection classes)
+#' @param epidemic_time matrix: infection times, removal times, (optional: infection classes)
 #'
 #' @return matrix: infection times, removal times, (optional: infection classes)
 #'
 #' @export
-filter_sem <- function(epi) {
-  filtline <- is.finite(epi[, 2]) | is.finite(epi[, 1])
-  r <- epi[, 2][filtline]
-  i <- epi[, 1][filtline]
-  if (dim(epi)[2] == 6) {
+filter_sem <- function(epidemic_time) {
+  filter_by <- is.finite(epidemic_time[, 2]) | is.finite(epidemic_time[, 1])
+  removals <- epidemic_time[, 2][filter_by]
+  infections <- epidemic_time[, 1][filter_by]
+  if (dim(epidemic_time)[2] == 6) {
     # multitype model
-    classes <- epi[, 3][filtline]
-    ratesB <- epi[, 4][filtline]
-    classesG <- epi[, 5][filtline]
-    ratesG <- epi[, 6][filtline]
-    N <- length(r)
+    infection_classes <- epidemic_time[, 3][filter_by]
+    infection_rates <- epidemic_time[, 4][filter_by]
+    removal_classes <- epidemic_time[, 5][filter_by]
+    removal_rates <- epidemic_time[, 6][filter_by]
+    population_size <- length(removals)
     # formatting
-    output <- matrix(c(i, r, classes, ratesB, classesG, ratesG),
-                     nrow = N,
+    output <- matrix(c(infections, removals, infection_classes, infection_rates, removal_classes, removal_rates),
+                     nrow = population_size,
                      ncol = 6,
                      byrow = FALSE)
-    colnames(output) <- c("i",
-                          "r",
-                          "infection.group",
-                          "infection.rate",
-                          "removal.group",
-                          "removal.rate")
+    colnames(output) <- c("infection",
+                          "removal",
+                          "infection_class",
+                          "infection_rate",
+                          "removal_class",
+                          "removal_rate")
     output
   } else {
-    cbind(i, r)
+    output <- cbind(infections, removals)
+    colnames(output) <- c("infection", "removal")
+    output
   }
 }

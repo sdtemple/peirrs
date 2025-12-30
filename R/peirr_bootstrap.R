@@ -8,14 +8,14 @@
 #' \code{peirr}), and stores the resulting infection and removal rate
 #' estimates for each bootstrap iteration.
 #'
-#' @param num.bootstrap Integer. Number of bootstrap replicates to perform.
+#' @param num_bootstrap Integer. Number of bootstrap replicates to perform.
 #' @param beta Numeric. Infection rate parameter used for simulation.
 #' @param gamma Numeric. Removal rate parameter used for simulation.
-#' @param N Integer. Population size.
-#' @param sample.size Integer. Number of individuals sampled in each
+#' @param population_size Integer. Population size.
+#' @param epidemic_size Integer. Number of individuals sampled in each
 #'   bootstrap replicate.
-#' @param p Numeric. Expected proportion of complete pairs observed.
-#' @param q Numeric. Probability that an infection time is missing.
+#' @param prop_complete Numeric. Expected proportion of complete pairs observed.
+#' @param prop_infection_missing Numeric. Probability that an infection time is missing.
 #' @param peirr Function (default \code{peirr_tau}). A function that estimates infection and removal
 #'   rates given infection and removal time data (e.g., \code{peirr()}).
 #' @param m Integer (default = 1). Positive shape parameter for the infection period.
@@ -50,27 +50,27 @@
 #' @examples
 #' \dontrun{
 #' results <- peirr_bootstrap(
-#'   num.bootstrap = 100,
+#'   num_bootstrap = 100,
 #'   beta = 2,
 #'   gamma = 1,
 #'   peirr = peirr_tau,
-#'   N = 500,
-#'   sample.size = 100,
-#'   p = 0.5,
-#'   q = 0.5
+#'   population_size = 500,
+#'   epidemic_size = 100,
+#'   prop_complete = 0.5,
+#'   prop_infection_missing = 0.5
 #' )
 #' }
 #'
 #' @export
-peirr_bootstrap <- function(num.bootstrap,
+peirr_bootstrap <- function(num_bootstrap,
                             beta,
                             gamma,
-                            N,
-                            sample.size,
-                            p,
-                            q,
+                            population_size,
+                            epidemic_size,
+                            prop_complete,
+                            prop_infection_missing,
                             peirr = peirr_tau,
-                            m = 1,
+                            num_renewals = 1,
                             lag = 0,
                             within = 0.1,
                             etc = NULL
@@ -78,27 +78,28 @@ peirr_bootstrap <- function(num.bootstrap,
 
   # override
   if (identical(body(peirr), body(peirr_pbla_infection_rate))) {
-    q <- 1
+    prop_infection_missing <- 1
   }
   if (identical(body(peirr), body(peirr_pbla_both_rates))) {
-    p <- 0
-    q <- 1
+    prop_complete <- 0
+    prop_infection_missing <- 1
   }
-  e=lag
 
-  storage <- matrix(0, nrow = num.bootstrap + 1, ncol = 2)
+  storage <- matrix(0, nrow = num_bootstrap + 1, ncol = 2)
   storage[1, 1] <- beta
   storage[1, 2] <- gamma
-  min.sample.size <- (1 - within) * sample.size
-  max.sample.size <- (1 + within) * sample.size
-  for (l in 2:(num.bootstrap + 1)) {
-    out <- simulator(beta, gamma, N, m, e, p, q, min.sample.size, max.sample.size)
-    X <- out$matrix.time
-    r <- X[, 2]
-    i <- X[, 1]
-    bth.estimate <- do.call(peirr, c(list(r = r, i = i, N = N, lag=e), etc))
-    storage[l, 1] <- bth.estimate$infection.rate
-    storage[l, 2] <- bth.estimate$removal.rate
+  min_epidemic_size <- (1 - within) * epidemic_size
+  max_epidemic_size <- (1 + within) * epidemic_size
+  for (b in 2:(num_bootstrap + 1)) {
+    output <- simulator(beta, gamma, population_size, num_renewals, lag, prop_complete, prop_infection_missing, min_epidemic_size, max_epidemic_size)
+    X <- output$matrix_time
+    removals <- X[, 2]
+    infections <- X[, 1]
+    bth_estimate <- do.call(peirr, c(list(removals=removals, infections=infections, population_size=population_size, lag=lag), etc))
+    storage[b, 1] <- bth_estimate$infection.rate
+    storage[b, 2] <- bth_estimate$removal.rate
   }
-  return(storage)
+  return(list(infection_rates = storage[, 1],
+              removal_rates = storage[, 2]
+              ))
 }

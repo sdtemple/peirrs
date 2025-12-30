@@ -4,10 +4,10 @@
 \alias{sort_sem}
 \title{Sort epidemic data}
 \usage{
-sort_sem(epi)
+sort_sem(epidemic_time)
 }
 \arguments{
-\item{epi}{matrix: infection times, removal times, (optional: infection classes)}
+\item{epidemic_time}{matrix: infection times, removal times, (optional: infection classes)}
 }
 \value{
 matrix: infection times, removal times, (optional: infection classes)

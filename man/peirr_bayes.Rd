@@ -5,55 +5,55 @@
 \title{Bayesian Inference for Epidemic Parameters using MCMC}
 \usage{
 peirr_bayes(
-  r,
-  i,
-  N,
-  m = 1,
-  binit = 1,
-  ginit = 1,
-  bshape = 1,
-  gshape = 1,
-  num.time.update = 10,
-  num.iter = 500,
-  num.print = 100,
-  num.tries = 20,
-  update.gamma = FALSE,
+  removals,
+  infections,
+  population_size,
+  num_renewals = 1,
+  beta_init = 1,
+  gamma_init = 1,
+  beta_shape = 1,
+  gamma_shape = 1,
+  num_iter = 500,
+  num_update = 10,
+  num_tries = 5,
+  num_print = 100,
+  update_gamma = FALSE,
   lag = 0
 )
 }
 \arguments{
-\item{r}{A numeric vector of removal/recovery times. NA values indicate unobserved times.}
+\item{removals}{A numeric vector of removal/recovery times. NA values indicate unobserved times.}
 
-\item{i}{A numeric vector of infection times. NA values indicate unobserved times.}
+\item{infections}{A numeric vector of infection times. NA values indicate unobserved times.}
 
-\item{N}{An integer specifying the total population size.}
+\item{population_size}{An integer specifying the total population size.}
 
-\item{m}{A numeric shape parameter for the gamma distribution used in data augmentation.
+\item{num_renewals}{A numeric shape parameter for the gamma distribution used in data augmentation.
 Default is 1.}
 
-\item{binit}{A numeric initial estimate for the beta (transmission rate) parameter.
+\item{beta_init}{A numeric initial estimate for the beta (transmission rate) parameter.
 Default is 1.}
 
-\item{ginit}{A numeric initial estimate for the gamma (recovery rate) parameter.
+\item{gamma_init}{A numeric initial estimate for the gamma (recovery rate) parameter.
 Default is 1.}
 
-\item{bshape}{A numeric shape parameter for the gamma prior on beta. Default is 1.}
+\item{beta_shape}{A numeric shape parameter for the gamma prior on beta. Default is 1.}
 
-\item{gshape}{A numeric shape parameter for the gamma prior on gamma. Default is 1.}
+\item{gamma_shape}{A numeric shape parameter for the gamma prior on gamma. Default is 1.}
 
-\item{num.time.update}{An integer specifying the number of Metropolis-Hastings updates
+\item{num_iter}{An integer specifying the total number of MCMC iterations. Default is 500.}
+
+\item{num_update}{An integer specifying the number of Metropolis-Hastings updates
 for infection and removal times per iteration. Default is 10.}
 
-\item{num.iter}{An integer specifying the total number of MCMC iterations. Default is 500.}
-
-\item{num.print}{An integer specifying the print frequency for iteration progress.
-Default is 100.}
-
-\item{num.tries}{An integer specifying the total number of draws
+\item{num_tries}{An integer specifying the total number of draws
 to check if proposal is consistent with an epidemic.
 Default is 20.}
 
-\item{update.gamma}{bool: TRUE to update removal rate estimate from initial estimate
+\item{num_print}{An integer specifying the print frequency for iteration progress.
+Default is 100.}
+
+\item{update_gamma}{bool: TRUE to update removal rate estimate from initial estimate
 Default is FALSE.}
 
 \item{lag}{numeric: fixed exposure period}

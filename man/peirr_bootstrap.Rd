@@ -5,40 +5,38 @@
 \title{Bootstrap pair-based estimators for epidemic parameters}
 \usage{
 peirr_bootstrap(
-  num.bootstrap,
+  num_bootstrap,
   beta,
   gamma,
-  N,
-  sample.size,
-  p,
-  q,
+  population_size,
+  epidemic_size,
+  prop_complete,
+  prop_infection_missing,
   peirr = peirr_tau,
-  m = 1,
+  num_renewals = 1,
   lag = 0,
   within = 0.1,
   etc = NULL
 )
 }
 \arguments{
-\item{num.bootstrap}{Integer. Number of bootstrap replicates to perform.}
+\item{num_bootstrap}{Integer. Number of bootstrap replicates to perform.}
 
 \item{beta}{Numeric. Infection rate parameter used for simulation.}
 
 \item{gamma}{Numeric. Removal rate parameter used for simulation.}
 
-\item{N}{Integer. Population size.}
+\item{population_size}{Integer. Population size.}
 
-\item{sample.size}{Integer. Number of individuals sampled in each
+\item{epidemic_size}{Integer. Number of individuals sampled in each
 bootstrap replicate.}
 
-\item{p}{Numeric. Expected proportion of complete pairs observed.}
+\item{prop_complete}{Numeric. Expected proportion of complete pairs observed.}
 
-\item{q}{Numeric. Probability that an infection time is missing.}
+\item{prop_infection_missing}{Numeric. Probability that an infection time is missing.}
 
 \item{peirr}{Function (default \code{peirr_tau}). A function that estimates infection and removal
 rates given infection and removal time data (e.g., \code{peirr()}).}
-
-\item{m}{Integer (default = 1). Positive shape parameter for the infection period.}
 
 \item{lag}{Numeric (default = 0). Fixed exposure period duration.}
 
@@ -48,6 +46,8 @@ bootstrap replicate.}
 
 \item{etc}{List (default = NULL). Additional arguments passed to
 \code{peirr()} via \code{do.call()}.}
+
+\item{m}{Integer (default = 1). Positive shape parameter for the infection period.}
 }
 \value{
 A numeric matrix with \code{num.bootstrap + 1} rows and 2 columns:
@@ -82,14 +82,14 @@ The first row of the returned matrix stores the true values of
 \examples{
 \dontrun{
 results <- peirr_bootstrap(
-  num.bootstrap = 100,
+  num_bootstrap = 100,
   beta = 2,
   gamma = 1,
   peirr = peirr_tau,
-  N = 500,
-  sample.size = 100,
-  p = 0.5,
-  q = 0.5
+  population_size = 500,
+  epidemic_size = 100,
+  prop_complete = 0.5,
+  prop_infection_missing = 0.5
 )
 }
 

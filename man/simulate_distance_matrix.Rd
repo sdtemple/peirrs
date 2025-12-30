@@ -5,26 +5,26 @@
 \title{Simulate a Distance Matrix with Specified Statistical Properties}
 \usage{
 simulate_distance_matrix(
-  N,
-  h,
-  inverse.h,
+  population_size,
+  kernel = exp,
+  inverse_kernel = log,
   mu = 0.9,
   sigma = 0.01,
   method = "euclidean",
   runif_max = 100,
   scalar = -0.05,
-  max.tries = 1000
+  num_tries = 1000
 )
 }
 \arguments{
-\item{N}{Positive integer. Number of points (observations) for which to
+\item{population_size}{Positive integer. Number of points (observations) for which to
 generate distance matrix.}
 
-\item{h}{Function. Transformation function to apply to scaled distances.
+\item{kernel}{Function. Transformation function to apply to scaled distances.
 Must have a corresponding inverse function.}
 
-\item{inverse.h}{Function. Inverse of the transformation function \code{h}.
-Must satisfy \code{inverse.h(h(x)) ≈ x}.}
+\item{inverse_kernel}{Function. Inverse of the transformation function \code{kernel}.
+Must satisfy \code{inverse_kernel(kernel(x)) ≈ x}.}
 
 \item{mu}{Numeric. Target mean for the transformed distance values.
 Default is 0.9.}
@@ -41,7 +41,7 @@ Default is 100.}
 \item{scalar}{Numeric. Scaling factor applied to distances before
 transformation. Default is -0.05.}
 
-\item{max.tries}{Positive integer. Maximum number of iterations to attempt
+\item{num_tries}{Positive integer. Maximum number of iterations to attempt
 finding a valid distance matrix. Default is 1000.}
 }
 \value{
@@ -66,7 +66,7 @@ The function iteratively:
 }
 \examples{
 \dontrun{
-D <- simulate_distance_matrix(N = 10, mu = 0.9, sigma = 0.01)
+D <- simulate_distance_matrix(population_size=10, kernel=exp, inverse_kernel=log, mu=0.9, sigma=0.01)
 }
 
 }

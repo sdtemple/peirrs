@@ -4,16 +4,16 @@
 \alias{simulate_sem}
 \title{Simulate general stochastic epidemic model}
 \usage{
-simulate_sem(beta, gamma, N, m = 1, lag = 0)
+simulate_sem(beta, gamma, population_size, num_renewals = 1, lag = 0)
 }
 \arguments{
 \item{beta}{numeric: infection rate}
 
 \item{gamma}{numeric: removal rate}
 
-\item{N}{integer: population size}
+\item{population_size}{integer: population size}
 
-\item{m}{integer: positive shape}
+\item{num_renewals}{integer: positive shape}
 
 \item{lag}{numeric: fixed exposure period}
 }

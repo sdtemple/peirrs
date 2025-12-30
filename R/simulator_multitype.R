@@ -3,55 +3,56 @@
 #' Draw infectious periods for stochastic epidemic with different classes.
 #'
 #' @param betas numeric vector: infection rates
-#' @param gamma numeric: removal rates
-#' @param beta.sizes integers: subpopulation sizes for infection rates
-#' @param gamma.sizes integers: subpopulation sizes for removal rates
-#' @param m integer: positive shape
+#' @param gammas numeric vector: removal rates
+#' @param infection_class_sizes integers: subpopulation sizes for infection rates
+#' @param removal_class_sizes integers: subpopulation sizes for removal rates
+#' @param num_renewals integer: positive shape
 #' @param lag numeric: fixed exposure period
-#' @param p expected proportion of complete pairs observed
-#' @param q probability infection time missing
-#' @param min.sample.size integer
+#' @param prop_complete expected proportion of complete pairs observed
+#' @param prop_infection_missing probability infection time missing
+#' @param min_epidemic_size integer
+#' @param max_epidemic_size integer
 #'
 #' @return numeric list: matrix of (infection times, removal times), matrix of (St, It, Et, Rt, Time)
 #'
 #' @export
 simulator_multitype <- function(betas,
                       gammas,
-                      beta.sizes,
-                      gamma.sizes,
-                      m = 1,
-                      lag = 0,
-                      p = 0.5,
-                      q = 1,
-                      min.sample.size = 10,
-                      max.sample.size = Inf
+                      infection_class_sizes,
+                      removal_class_sizes,
+                      num_renewals=1,
+                      lag=0,
+                      prop_complete=0.5,
+                      prop_infection_missing=1,
+                      min_epidemic_size=10,
+                      max_epidemic_size=Inf
                       ){
-  sample.size <- 0
-  gamma.estim <- NA
-  if (p <= 0) {
-    stop("p <= 0 error. Must have some complete infectious periods.")
+  sample_size <- 0
+  gamma_estim <- NA
+  if (prop_complete <= 0) {
+    stop("prop_complete <= 0 error. Must have some complete infectious periods.")
   }
-  while((sample.size <= min.sample.size) || (sample.size >= max.sample.size) || is.na(gamma.estim) ){
+  while((sample_size <= min_epidemic_size) || (sample_size >= max_epidemic_size) || is.na(gamma_estim) ){
     # main simulation
-    epi = simulate_sem_multitype(betas, gammas, beta.sizes, gamma.sizes, m, lag)
-    epi$matrix.time = filter_sem(epi$matrix.time)
-    epi$matrix.time = decomplete_sem(epi$matrix.time, p=p, q=q)
-    epi$matrix.time = sort_sem(epi$matrix.time)
+    epidemic = simulate_sem_multitype(betas, gammas, infection_class_sizes, removal_class_sizes, num_renewals, lag)
+    epidemic$matrix_time = filter_sem(epidemic$matrix_time)
+    epidemic$matrix_time = decomplete_sem(epidemic$matrix_time, prop_complete=prop_complete, prop_infection_missing=prop_infection_missing)
+    epidemic$matrix_time = sort_sem(epidemic$matrix_time)
     # calculate the sample size
-    sample.size = dim(epi$matrix.time)[1]
+    sample_size = dim(epidemic$matrix_time)[1]
     # ensure there are r and i enough to estimate all gammas
-    gamma.estim <- 0
-    for(n in 1:length(gamma.sizes)){
-      X <- epi$matrix.time
-      r <- X[, 2]
-      i <- X[, 1]
-      cr <- X[, 5]
-      rg <- r[cr==n]
-      ig <- i[cr==n]
-      rig <- rg - ig
-      rig <- rig[!is.na(rig)]
-      gamma.estim <- gamma.estim + 1 / mean(rig)
+    gamma_estim <- 0
+    for(removal_class in 1:length(removal_class_sizes)){
+      X <- epidemic$matrix_time
+      removals <- X[, 2]
+      infections <- X[, 1]
+      removal_classes <- X[, 5]
+      removals_kept <- removals[removal_classes == removal_class]
+      infections_kept <- infections[removal_classes == removal_class]
+      period_kept <- removals_kept - infections_kept
+      period_kept <- period_kept[!is.na(period_kept)]
+      gamma_estim <- gamma_estim + 1 / mean(period_kept)
     }
   }
-  return(epi)
+  return(epidemic)
 }

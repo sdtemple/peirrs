@@ -4,20 +4,28 @@
 \alias{simulate_sem_spatial}
 \title{Simulate stochastic epidemic model with spatial effect}
 \usage{
-simulate_sem_spatial(beta, gamma, N, h, D, m = 1, lag = 0)
+simulate_sem_spatial(
+  beta,
+  gamma,
+  population_size,
+  kernel,
+  matrix_distance,
+  num_renewals = 1,
+  lag = 0
+)
 }
 \arguments{
 \item{beta}{numeric: infection rate}
 
 \item{gamma}{numeric: removal rate}
 
-\item{N}{integer: population size}
+\item{population_size}{integer: population size}
 
-\item{h}{function: symmetric function of distance}
+\item{kernel}{function: symmetric function of distance}
 
-\item{D}{numeric: two-dimensional distance matrix}
+\item{matrix_distance}{numeric: two-dimensional distance matrix}
 
-\item{m}{integer: positive shape}
+\item{num_renewals}{integer: positive shape}
 
 \item{lag}{numeric: fixed exposure period}
 }

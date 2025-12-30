@@ -4,12 +4,12 @@
 #' computing pairwise distances, applying a transformation function, and
 #' scaling the resulting values to match target mean and standard deviation.
 #'
-#' @param N Positive integer. Number of points (observations) for which to
+#' @param population_size Positive integer. Number of points (observations) for which to
 #'   generate distance matrix.
-#' @param h Function. Transformation function to apply to scaled distances.
+#' @param kernel Function. Transformation function to apply to scaled distances.
 #'   Must have a corresponding inverse function.
-#' @param inverse.h Function. Inverse of the transformation function \code{h}.
-#'   Must satisfy \code{inverse.h(h(x)) ≈ x}.
+#' @param inverse_kernel Function. Inverse of the transformation function \code{kernel}.
+#'   Must satisfy \code{inverse_kernel(kernel(x)) ≈ x}.
 #' @param mu Numeric. Target mean for the transformed distance values.
 #'   Default is 0.9.
 #' @param sigma Numeric. Target standard deviation for the transformed distance
@@ -20,7 +20,7 @@
 #'   Default is 100.
 #' @param scalar Numeric. Scaling factor applied to distances before
 #'   transformation. Default is -0.05.
-#' @param max.tries Positive integer. Maximum number of iterations to attempt
+#' @param num_tries Positive integer. Maximum number of iterations to attempt
 #'   finding a valid distance matrix. Default is 1000.
 #'
 #' @return A numeric matrix of pairwise distances with dimensions N × N,
@@ -39,39 +39,39 @@
 #'
 #' @examples
 #' \dontrun{
-#' D <- simulate_distance_matrix(N = 10, mu = 0.9, sigma = 0.01)
+#' D <- simulate_distance_matrix(population_size=10, kernel=exp, inverse_kernel=log, mu=0.9, sigma=0.01)
 #' }
 #'
 #' @export
-simulate_distance_matrix <- function(N,
-                         h,
-                         inverse.h,
+simulate_distance_matrix <- function(population_size,
+                         kernel=exp,
+                         inverse_kernel=log,
                          mu=0.9,
                          sigma=0.01,
                          method='euclidean',
                          runif_max=100,
                          scalar=-0.05,
-                         max.tries=1000
+                         num_tries=1000
                          ) {
 
   # some double checks, especially for user-defined inverse
-  if (!is.function(h) || !is.function(inverse.h)) {
-    stop("h and inverse.h must be functions")
+  if (!is.function(kernel) || !is.function(inverse_kernel)) {
+    stop("kernel and inverse_kernel must be functions")
   }
-  val <- try(inverse.h(h(1)), silent = TRUE)
+  val <- try(inverse_kernel(kernel(1)), silent = TRUE)
   if (abs(val - 1) > 1e-16) {
-    stop("h and inverse.h must be inverses of each other")
+    stop("kernel and inverse_kernel must be inverses of each other")
   }
-  val <- try(inverse.h(h(2)), silent = TRUE)
+  val <- try(inverse_kernel(kernel(2)), silent = TRUE)
   if (abs(val - 2) > 1e-16) {
-    stop("h and inverse.h must be inverses of each other")
+    stop("kernel and inverse_kernel must be inverses of each other")
   }
-  val <- try(inverse.h(h(3)), silent = TRUE)
+  val <- try(inverse_kernel(kernel(3)), silent = TRUE)
   if (abs(val - 3) > 1e-16) {
-    stop("h and inverse.h must be inverses of each other")
+    stop("kernel and inverse_kernel must be inverses of each other")
   }
-  if (N <= 0 || !is.numeric(N)) {
-    stop("N must be a positive number")
+  if (population_size <= 0 || !is.numeric(population_size)) {
+    stop("population_size must be a positive number")
   }
   if (sigma <= 0) {
     stop("sigma must be positive")
@@ -82,12 +82,11 @@ simulate_distance_matrix <- function(N,
   while (condition) {
     ctr <- ctr + 1
     coords <- data.frame(
-      x = runif(N, min = 0, max = runif_max),
-      y = runif(N, min = 0, max = runif_max)
+      x = runif(population_size, min = 0, max = runif_max),
+      y = runif(population_size, min = 0, max = runif_max)
     )
     D <- as.matrix(dist(coords, method = method))
-    W_h <- h(scalar * D)
-
+    W_h <- kernel(scalar * D)
     # Target means and standard deviations
     target_mean <- mu
     target_sd <- sigma
@@ -105,14 +104,14 @@ simulate_distance_matrix <- function(N,
     if (all(W_scaled >= 0)) {
       condition <- FALSE
     }
-    if (ctr >= max.tries) {
+    if (ctr >= num_tries) {
       stop("Maximum number of tries reached without finding a valid distance matrix.")
     }
 
   }
 
   # undo the transformation
-  D_new <- inverse.h(W_scaled) / scalar
+  D_new <- inverse_kernel(W_scaled) / scalar
   diag(D_new) <- 0
   D_object <- as.dist(D_new) # to ensure it's a valid distance matrix
   return(D_new)

@@ -4,14 +4,14 @@
 \alias{decomplete_sem}
 \title{Missing epidemic data}
 \usage{
-decomplete_sem(epi, p = 0, q = 1)
+decomplete_sem(epidemic_time, prop_complete = 0, prop_infection_missing = 1)
 }
 \arguments{
-\item{epi}{infection and removal times}
+\item{epidemic_time}{matrix: infection and removal times}
 
-\item{p}{expected proportion of complete pairs observed}
+\item{prop_complete}{numeric: expected proportion of complete pairs observed}
 
-\item{q}{probability infection time missing}
+\item{prop_infection_missing}{numeric: probability infection time missing}
 }
 \value{
 matrix: infection times, removal times, (optional: infection classes)

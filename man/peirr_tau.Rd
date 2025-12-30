@@ -4,20 +4,27 @@
 \alias{peirr_tau}
 \title{Pair-based tau estimator of common infection and removal rates}
 \usage{
-peirr_tau(r, i, N, lag = 0, tau.med = FALSE, gamma.med = FALSE)
+peirr_tau(
+  removals,
+  infections,
+  population_size,
+  lag = 0,
+  median_tau = FALSE,
+  median_gamma = FALSE
+)
 }
 \arguments{
-\item{r}{numeric vector: removal times}
+\item{removals}{numeric vector: removal times}
 
-\item{i}{numeric vector: infection times}
+\item{infections}{numeric vector: infection times}
 
-\item{N}{integer: population size}
+\item{population_size}{integer: population size}
 
 \item{lag}{numeric: fixed exposure period}
 
-\item{tau.med}{bool: use median imputation for tau if TRUE}
+\item{median_tau}{bool: use median imputation for tau if TRUE}
 
-\item{gamma.med}{bool: TRUE for median, and FALSE for mean in estimating the removal rate}
+\item{median_gamma}{bool: TRUE for median, and FALSE for mean in estimating the removal rate}
 }
 \value{
 numeric list (infection.rate, removal.rate, R0)
