@@ -5,35 +5,35 @@
 \title{Pair-based tau estimator of multiple infection and removal rates}
 \usage{
 peirr_tau_multitype(
-  r,
-  i,
-  cr,
-  ci,
-  Ns,
+  removals,
+  infections,
+  removal_classes,
+  infection_classes,
+  infection_class_sizes,
   lag = 0,
-  tau.med = FALSE,
-  gamma.med = FALSE
+  median_tau = FALSE,
+  median_gamma = FALSE
 )
 }
 \arguments{
-\item{r}{numeric vector: removal times}
+\item{removals}{numeric: removal times}
 
-\item{i}{numeric vector: infection times}
+\item{infections}{numeric: infection times}
 
-\item{cr}{numeric vector: removal time classes}
+\item{removal_classes}{numeric: removal time classes}
 
-\item{ci}{numeric vector: infection time classes}
+\item{infection_classes}{numeric: infection time classes}
 
-\item{Ns}{integer vector: population sizes for infection classes (sorted)}
+\item{infection_class_sizes}{integer: population sizes for infection classes (sorted)}
 
 \item{lag}{numeric: fixed exposure period}
 
-\item{tau.med}{bool: use median imputation for tau if TRUE}
+\item{median_tau}{bool: use median imputation for tau if TRUE}
 
-\item{gamma.med}{bool: TRUE for median, and FALSE for mean in estimating the removal rate}
+\item{median_gamma}{bool: TRUE for median, and FALSE for mean in estimating the removal rate}
 }
 \value{
-numeric list (infection.rates, removal.rates, removal.full.sizes)
+numeric list (infection_rates, removal_rates, etc)
 }
 \description{
 Estimate infection and removal rates with tau-based expectation-maximization.

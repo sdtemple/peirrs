@@ -8,7 +8,7 @@ simulator_spatial(
   beta,
   gamma,
   population_size,
-  kernel,
+  kernel_spatial,
   matrix_distance,
   num_renewals = 1,
   lag = 0,
@@ -25,7 +25,7 @@ simulator_spatial(
 
 \item{population_size}{integer: population size}
 
-\item{kernel}{function: symmetric function of distance}
+\item{kernel_spatial}{function: symmetric function of distance}
 
 \item{matrix_distance}{numeric: two-dimensional distance matrix}
 

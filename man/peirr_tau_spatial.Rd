@@ -4,24 +4,33 @@
 \alias{peirr_tau_spatial}
 \title{Pair-based tau estimator of common infection and removal rates with spatial effect}
 \usage{
-peirr_tau_spatial(r, i, N, h, D, lag = 0, tau.med = FALSE, gamma.med = FALSE)
+peirr_tau_spatial(
+  removals,
+  infections,
+  population_size,
+  kernel_spatial,
+  matrix_distance,
+  lag = 0,
+  median_tau = FALSE,
+  median_gamma = FALSE
+)
 }
 \arguments{
-\item{r}{numeric vector: removal times}
+\item{removals}{numeric: removal times}
 
-\item{i}{numeric vector: infection times}
+\item{infections}{numeric: infection times}
 
-\item{N}{integer: population size}
+\item{population_size}{integer: population size}
 
-\item{h}{function: symmetric function of distance}
+\item{kernel_spatial}{function: symmetric function of distance}
 
-\item{D}{numeric: two-dimensional distance matrix}
+\item{matrix_distance}{numeric: two-dimensional distance matrix}
 
 \item{lag}{numeric: fixed exposure period}
 
-\item{tau.med}{bool: use median imputation for tau if TRUE}
+\item{median_tau}{bool: use median imputation for tau if TRUE}
 
-\item{gamma.med}{bool: TRUE for median, and FALSE for mean in estimating the removal rate}
+\item{median_gamma}{bool: TRUE for median, and FALSE for mean in estimating the removal rate}
 }
 \value{
 numeric list (infection.rate, removal.rate)

@@ -32,7 +32,7 @@ peirr_pbla_both_rates_multitype <- function(removals,
   gamma_map = removal_classes[is.finite(removals)]
   removals = removals[is.finite(removals)]
 
-  etc = list(m=m,A=A,lag=lag)
+  etc = list(m=num_renewals, A=num_patient_zeros, lag=lag)
   pbla.estimates <- nlm(pblas::pbla_multi,
                         rep(1, num_rates),
                         R=num_beta_rates,

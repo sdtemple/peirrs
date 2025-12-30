@@ -4,7 +4,7 @@
 \alias{tau_moment}
 \title{Expected value for tau with different missingness}
 \usage{
-tau_moment(rk, rj, ik, ij, lambdak, lambdaj, lag = 0, med = TRUE)
+tau_moment(rk, rj, ik, ij, lambdak, lambdaj, lag = 0, impute_median = TRUE)
 }
 \arguments{
 \item{rk}{numeric: removal time rk}
@@ -21,7 +21,7 @@ tau_moment(rk, rj, ik, ij, lambdak, lambdaj, lag = 0, med = TRUE)
 
 \item{lag}{numeric: fixed exposure period}
 
-\item{med}{bool: use median imputation if true}
+\item{impute_median}{bool: use median imputation if true}
 }
 \value{
 numeric: expectation of some pair-wise tau

@@ -4,18 +4,25 @@
 \alias{simulate_sem_multitype}
 \title{Simulate general stochastic epidemic model with different infection rates}
 \usage{
-simulate_sem_multitype(betas, gammas, beta.sizes, gamma.sizes, m = 1, lag = 0)
+simulate_sem_multitype(
+  beta,
+  gamma,
+  infection_class_sizes,
+  removal_class_sizes,
+  num_renewals = 1,
+  lag = 0
+)
 }
 \arguments{
-\item{betas}{numeric vector: infection rates}
+\item{beta}{numeric vector: infection rates}
 
-\item{gammas}{numeric: removal rates}
+\item{gamma}{numeric: removal rates}
 
-\item{beta.sizes}{integers: subpopulation sizes for infection rates}
+\item{infection_class_sizes}{integer: subpopulation sizes for infection rates}
 
-\item{gamma.sizes}{integers: subpopulation sizes for removal rates}
+\item{removal_class_sizes}{integer: subpopulation sizes for removal rates}
 
-\item{m}{integer: positive shape}
+\item{num_renewals}{integer: positive erlang shape}
 
 \item{lag}{numeric: fixed exposure period}
 }

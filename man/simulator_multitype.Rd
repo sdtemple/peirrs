@@ -5,8 +5,8 @@
 \title{Simulate multi-type stochastic epidemic model with formatting}
 \usage{
 simulator_multitype(
-  betas,
-  gammas,
+  beta,
+  gamma,
   infection_class_sizes,
   removal_class_sizes,
   num_renewals = 1,
@@ -18,9 +18,9 @@ simulator_multitype(
 )
 }
 \arguments{
-\item{betas}{numeric vector: infection rates}
+\item{beta}{numeric vector: infection rates}
 
-\item{gammas}{numeric vector: removal rates}
+\item{gamma}{numeric vector: removal rates}
 
 \item{infection_class_sizes}{integers: subpopulation sizes for infection rates}
 

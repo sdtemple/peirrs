@@ -5,7 +5,7 @@
 #' @param beta numeric: infection rate
 #' @param gamma numeric: removal rate
 #' @param population_size integer: population size
-#' @param kernel function: symmetric function of distance
+#' @param kernel_spatial function: symmetric function of distance
 #' @param matrix_distance numeric: two-dimensional distance matrix
 #' @param num_renewals integer: positive shape
 #' @param lag numeric: fixed exposure period
@@ -20,7 +20,7 @@
 simulator_spatial <- function(beta,
                       gamma,
                       population_size,
-                      kernel,
+                      kernel_spatial,
                       matrix_distance,
                       num_renewals=1,
                       lag=0,
@@ -35,7 +35,7 @@ simulator_spatial <- function(beta,
   }
   while ((sample_size <= min_epidemic_size) || (sample_size >= max_epidemic_size) || is.na(gamma_estim)) {
     # main simulation
-    epidemic <- simulate_sem_spatial(beta, gamma, population_size, kernel, matrix_distance, num_renewals, lag)
+    epidemic <- simulate_sem_spatial(beta, gamma, population_size, kernel_spatial, matrix_distance, num_renewals, lag)
     filter_indices <- is.finite(epidemic$matrix_time[,1]) & is.finite(epidemic$matrix_time[,2])
     epidemic$matrix_time <- filter_sem(epidemic$matrix_time)
     epidemic$matrix_distance <- epidemic$matrix_distance[filter_indices, ]

@@ -91,8 +91,8 @@ peirr_bootstrap <- function(num_bootstrap,
   min_epidemic_size <- (1 - within) * epidemic_size
   max_epidemic_size <- (1 + within) * epidemic_size
   for (b in 2:(num_bootstrap + 1)) {
-    output <- simulator(beta, gamma, population_size, num_renewals, lag, prop_complete, prop_infection_missing, min_epidemic_size, max_epidemic_size)
-    X <- output$matrix_time
+    epidemic <- simulator(beta, gamma, population_size, num_renewals, lag, prop_complete, prop_infection_missing, min_epidemic_size, max_epidemic_size)
+    X <- epidemic$matrix_time
     removals <- X[, 2]
     infections <- X[, 1]
     bth_estimate <- do.call(peirr, c(list(removals=removals, infections=infections, population_size=population_size, lag=lag), etc))

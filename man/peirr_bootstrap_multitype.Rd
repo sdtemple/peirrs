@@ -5,38 +5,38 @@
 \title{Bootstrap pair-based estimators for multitype epidemic model}
 \usage{
 peirr_bootstrap_multitype(
-  num.bootstrap,
-  betas,
-  gammas,
-  beta.sizes,
-  gamma.sizes,
-  sample.size,
-  p,
-  q,
-  m = 1,
+  num_bootstrap,
+  beta,
+  gamma,
+  infection_class_sizes,
+  removal_class_sizes,
+  epidemic_size,
+  prop_complete,
+  prop_infection_missing,
+  num_renewals = 1,
   lag = 0,
   within = 0.1,
   etc = NULL
 )
 }
 \arguments{
-\item{num.bootstrap}{Integer: number of bootstrap replicates.}
+\item{num_bootstrap}{Integer: number of bootstrap replicates.}
 
-\item{betas}{Numeric vector: infection rates for each infection type.}
+\item{beta}{Numeric vector: infection rates for each infection type.}
 
-\item{gammas}{Numeric vector: removal rates for each removal type.}
+\item{gamma}{Numeric vector: removal rates for each removal type.}
 
-\item{beta.sizes}{Integer vector: population sizes or group sizes corresponding to \code{betas}.}
+\item{infection_class_sizes}{Integer vector: population sizes or group sizes corresponding to \code{betas}.}
 
-\item{gamma.sizes}{Integer vector: population sizes or group sizes corresponding to \code{gammas}.}
+\item{removal_class_sizes}{Integer vector: population sizes or group sizes corresponding to \code{gammas}.}
 
-\item{sample.size}{Numeric: target epidemic size to condition on.}
+\item{epidemic_size}{Numeric: target epidemic size to condition on.}
 
-\item{p}{Numeric: expected proportion of complete pairs observed.}
+\item{prop_complete}{Numeric: expected proportion of complete pairs observed.}
 
-\item{q}{Numeric: probability that infection time is missing (conditional on missingness).}
+\item{prop_infection_missing}{Numeric: probability that infection time is missing (conditional on missingness).}
 
-\item{m}{Integer: positive shape parameter for infectious period distribution (default 1).}
+\item{num_renewals}{Integer: positive shape parameter for infectious period distribution (default 1).}
 
 \item{lag}{Numeric: fixed exposure period (default 0).}
 
@@ -67,14 +67,14 @@ The resulting matrix can be used to assess estimation uncertainty.
 \examples{
 \dontrun{
 results <- peirr_bootstrap_multitype(
-  num.bootstrap = 100,
-  betas = c(2,2),
-  gammas = c(1,2),
-  beta.sizes = c(110,90)
-  gamma.sizes = c(90,110),
-  sample.size = 100,
-  p = 0.5,
-  q = 0.5
+  num_bootstrap = 100,
+  beta = c(2,2),
+  gamma = c(1,2),
+  infection_class_sizes = c(110,90)
+  removal_class_sizes = c(90,110),
+  epidemic_size = 100,
+  prop_complete = 0.5,
+  prop_infection_missing = 0.5
 )
 }
 

@@ -2,8 +2,8 @@
 #'
 #' Draw infectious periods for stochastic epidemic with different classes.
 #'
-#' @param betas numeric vector: infection rates
-#' @param gammas numeric vector: removal rates
+#' @param beta numeric vector: infection rates
+#' @param gamma numeric vector: removal rates
 #' @param infection_class_sizes integers: subpopulation sizes for infection rates
 #' @param removal_class_sizes integers: subpopulation sizes for removal rates
 #' @param num_renewals integer: positive shape
@@ -16,8 +16,8 @@
 #' @return numeric list: matrix of (infection times, removal times), matrix of (St, It, Et, Rt, Time)
 #'
 #' @export
-simulator_multitype <- function(betas,
-                      gammas,
+simulator_multitype <- function(beta,
+                      gamma,
                       infection_class_sizes,
                       removal_class_sizes,
                       num_renewals=1,
@@ -34,7 +34,7 @@ simulator_multitype <- function(betas,
   }
   while((sample_size <= min_epidemic_size) || (sample_size >= max_epidemic_size) || is.na(gamma_estim) ){
     # main simulation
-    epidemic = simulate_sem_multitype(betas, gammas, infection_class_sizes, removal_class_sizes, num_renewals, lag)
+    epidemic = simulate_sem_multitype(beta, gamma, infection_class_sizes, removal_class_sizes, num_renewals, lag)
     epidemic$matrix_time = filter_sem(epidemic$matrix_time)
     epidemic$matrix_time = decomplete_sem(epidemic$matrix_time, prop_complete=prop_complete, prop_infection_missing=prop_infection_missing)
     epidemic$matrix_time = sort_sem(epidemic$matrix_time)

@@ -47,15 +47,15 @@ peirr_tau <- function(removals, infections, population_size,
 
   # sum up tau terms
   tau_sum <- 0
-  for (j in (1:n) [-alpha]) {
-    r_j <- removals[j]
-    i_j <- infections[j]
-    for (k in (1:n)[-j]) {
-      r_k <- removals[k]
-      i_k <- infections[k]
-      tau_kj <- tau_moment(r_k, r_j, i_k, i_j, gamma_estim, gamma_estim, lag, median_tau)
+  for (j in (1:epidemic_size) [-alpha]) {
+    removals_j <- removals[j]
+    infections_j <- infections[j]
+    for (k in (1:epidemic_size)[-j]) {
+      removals_k <- removals[k]
+      infections_k <- infections[k]
+      tau_kj <- tau_moment(removals_k, removals_j, infections_k, infections_j, gamma_estim, gamma_estim, lag, median_tau)
       if (is.na(tau_kj)) {
-        print(c(r_k, r_j, i_k, i_j, gamma_estim, gamma_estim))
+        print(c(removals_k, removals_j, infections_k, infections_j, gamma_estim, gamma_estim))
         }
       tau_sum <- tau_sum + tau_kj
     }
@@ -78,7 +78,8 @@ peirr_tau <- function(removals, infections, population_size,
               removal_rate = gamma_estim,
               effective_number = beta_estim * population_size / gamma_estim,
               tau_sum = tau_sum,
-              complete_period_sum = complete_period_sum,
-              num_not_infected = population_size - epidemic_size
+              not_infected_sum = complete_period_sum,
+              num_not_infected = population_size - epidemic_size,
+              num_complete = length(removals_complete)
               ))
 }

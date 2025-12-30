@@ -3,96 +3,94 @@
 #' Estimate infection and removal rates with tau-based expectation-maximization.
 #' The output value \code{tau.sum} is useful for debugging.
 #'
-#' @param r numeric vector: removal times
-#' @param i numeric vector: infection times
-#' @param N integer: population size
+#' @param removals numeric: removal times
+#' @param infections numeric: infection times
+#' @param population_size integer: population size
+#' @param kernel_spatial function: symmetric function of distance
+#' @param matrix_distance numeric: two-dimensional distance matrix
 #' @param lag numeric: fixed exposure period
-#' @param tau.med bool: use median imputation for tau if TRUE
-#' @param gamma.med bool: TRUE for median, and FALSE for mean in estimating the removal rate
-#' @param h function: symmetric function of distance
-#' @param D numeric: two-dimensional distance matrix
+#' @param median_tau bool: use median imputation for tau if TRUE
+#' @param median_gamma bool: TRUE for median, and FALSE for mean in estimating the removal rate
 #'
 #' @return numeric list (infection.rate, removal.rate)
 #'
 #' @export
-peirr_tau_spatial <- function(r, i, N, h, D,
+peirr_tau_spatial <- function(removals, infections, population_size, kernel_spatial, matrix_distance,
                       lag = 0,
-                      tau.med = FALSE,
-                      gamma.med = FALSE
+                      median_tau = FALSE,
+                      median_gamma = FALSE
                       ) {
 
   # make sure one of the other is finite
-  or.finite <- is.finite(r) | is.finite(i)
-  i <- i[or.finite]
-  r <- r[or.finite]
+  or.finite <- is.finite(removals) | is.finite(infections)
+  infections <- infections[or.finite]
+  removals <- removals[or.finite]
 
   # estimate of removal rate
-  gamma.estim <- peirr_removal_rate(r, i, gamma.med)
+  gamma_estim <- peirr_removal_rate(removals, infections, median_gamma=median_gamma)
 
   # number of infected
-  n <- sum(!is.na(r) | !is.na(i))
-  if (sum(is.na(r)) >= n) {
+  epidemic_size <- sum(!is.na(removals) | !is.na(infections))
+  if (sum(is.na(removals)) >= epidemic_size) {
     stop("There are no complete case periods to estimate the removal rate")
   }
-  if (sum(is.na(i)) >= n) {
+  if (sum(is.na(infections)) >= epidemic_size) {
     stop("There are no complete case periods to estimate the removal rate")
   }
 
   ### first infected ###
-  ralpha <- which.min(r)
-  ialpha <- which.min(i)
-  if (i[ialpha] < r[ralpha]) {
-    alpha <- ialpha
+  alpha_r <- which.min(removals)
+  alpha_i <- which.min(infections)
+  if (infections[alpha_i] < removals[alpha_r]) {
+    alpha <- alpha_i
   } else {
-    alpha <- ralpha
+    alpha <- alpha_r
   }
 
   # sum up tau terms
-  tau <- 0
-  for (j in (1:n) [-alpha]) {
-    rj <- r[j]
-    ij <- i[j]
-    for (k in (1:n)[-j]) {
-      rk <- r[k]
-      ik <- i[k]
-      tm <- tau_moment(rk, rj, ik, ij, gamma.estim, gamma.estim, lag, tau.med) * h(D[k,j])
-      if (is.na(tm)) {
-        print(c(rk, rj, ik, ij, gamma.estim, gamma.estim))
-        }
-      tau <- tau + tm
+  tau_sum <- 0
+  for (j in (1:epidemic_size)[-alpha]) {
+    removal_j <- removals[j]
+    infection_j <- infections[j]
+    for (k in (1:epidemic_size)[-j]) {
+      removal_k <- removals[k]
+      infection_k <- infections[k]
+      tau_kj <- tau_moment(removal_k, removal_j, infection_k, infection_j, gamma_estim, gamma_estim, lag, median_tau) * kernel_spatial(matrix_distance[k,j])
+      if (is.na(tau_kj)) {
+        print(c(removal_k, removal_j, infection_k, infection_j, gamma_estim, gamma_estim))
+      }
+      tau_sum <- tau_sum + tau_kj
     }
   }
 
-  # these are where we have full infectious period
-  full.r <- r[(!is.na(r)) & (!is.na(i))]
-  full.i <- i[(!is.na(r)) & (!is.na(i))]
-
   # have to address this component with spatial function
   # only take expectation when we don't have the full period
-  num.not.full <- length(r) - length(full.r)
-  median.scalar <- 1
-  if (tau.med) {median.scalar <- log(2)}
-  if (n == N) {
-    ri.sum <- 0
-  } else{
-    ri.sum <- 0
-    for (j in 1:n){
-      rjij <- r[j] - i[j]
-      if (is.na(rjij)){ rjij <- 1 / gamma.estim * median.scalar }
-      for (k in (n+1):N) {
-        ri.sum <- ri.sum + rjij * h(D[j,k])
+  median_scalar <- 1
+  if (median_tau) {median_scalar <- log(2)}
+  if (epidemic_size == population_size) {
+    not_infected_sum <- 0
+  } else {
+    not_infected_sum <- 0
+    for (j in 1:epidemic_size) {
+      period <- removals[j] - infections[j]
+      if (is.na(period)) { period <- 1 / gamma_estim * median_scalar }
+      for (k in (epidemic_size+1):population_size) {
+        not_infected_sum <- not_infected_sum + period * kernel_spatial(matrix_distance[j,k])
       }
     }
   }
 
 
   # maximizes give conditional expectations
-  beta.estim <- (n - 1) / (tau + ri.sum)
+  beta_estim <- (epidemic_size - 1) / (tau_sum + not_infected_sum)
 
-  return(list(infection.rate = beta.estim * N,
-              removal.rate = gamma.estim,
-              tau.sum = tau,
-              full.ri.sum = ri.sum,
-              num.not.infected = N-n
+  num_complete = length(removals[(!is.na(removals)) & (!is.na(infections))])
+
+  return(list(infection.rate = beta_estim * population_size,
+              removal.rate = gamma_estim,
+              tau_sum = tau_sum,
+              not_infected_sum = not_infected_sum,
+              num_not_infected = population_size - epidemic_size,
+              num_complete = num_complete
               ))
 }
