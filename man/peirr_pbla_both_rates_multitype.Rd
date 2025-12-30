@@ -4,25 +4,30 @@
 \alias{peirr_pbla_both_rates_multitype}
 \title{PBLA estimators of infection rates and removal rates}
 \usage{
-peirr_pbla_both_rates_multitype(r, cr, ci, m = 1, A = 1, lag = 0)
+peirr_pbla_both_rates_multitype(
+  removals,
+  removal_classes,
+  infection_classes,
+  num_renewals = 1,
+  num_patient_zeros = 1,
+  lag = 0
+)
 }
 \arguments{
-\item{r}{numeric vector: removal times}
+\item{removals}{numeric: removal times}
 
-\item{cr}{numeric vector: removal time classes}
+\item{removal_classes}{numeric: removal time classes}
 
-\item{ci}{numeric vector: infection time classes}
+\item{infection_classes}{numeric: infection time classes}
 
-\item{m}{positive integer shape}
+\item{num_renewals}{integer: erlang shape}
 
-\item{A}{integer patient zeros}
+\item{num_patient_zeros}{integer: patient zeros}
 
-\item{lag}{numeric fixed lag}
-
-\item{N}{integer: population size}
+\item{lag}{numeric: fixed lag}
 }
 \value{
-numeric list (infection.rates, removal.rates)
+numeric list (infection_rate, removal_rate_)
 }
 \description{
 Estimate multiple infection and removal rates with PBLA

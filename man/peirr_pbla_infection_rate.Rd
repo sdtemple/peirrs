@@ -5,35 +5,35 @@
 \title{PEIRR likelihood estimator of infection rate with MLE removal rate}
 \usage{
 peirr_pbla_infection_rate(
-  r,
-  i,
-  N,
-  m = 1,
-  A = 1,
+  removals,
+  infections,
+  population_size,
+  num_renewals = 1,
+  num_patient_zeros = 1,
   lag = 0,
-  known.gamma = NULL,
-  gamma.med = FALSE
+  known_gamma = NULL,
+  median_gamma = FALSE
 )
 }
 \arguments{
-\item{r}{numeric vector: removal times}
+\item{removals}{numeric vector: removal times}
 
-\item{i}{numeric vector: infection times}
+\item{infections}{numeric vector: infection times}
 
-\item{N}{integer: population size}
+\item{population_size}{integer: population size}
 
-\item{m}{positive integer shape}
+\item{num_renewals}{positive integer shape}
 
-\item{A}{integer patient zeros}
+\item{num_patient_zeros}{integer patient zeros}
 
 \item{lag}{numeric fixed lag}
 
-\item{known.gamma}{numeric: removal rate}
+\item{known_gamma}{numeric: removal rate}
 
-\item{gamma.med}{bool: TRUE for median, and FALSE for mean in estimating the removal rate}
+\item{median_gamma}{bool: TRUE for median, and FALSE for mean in estimating the removal rate}
 }
 \value{
-numeric list (infection.rate, removal.rate, R0, tau.sum)
+numeric list (infection_rate, removal_rate, effective_number)
 }
 \description{
 Estimate removal rate with duration date and infection rate with PBLA

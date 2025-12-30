@@ -4,21 +4,28 @@
 \alias{peirr_pbla_both_rates}
 \title{PBLA estimator of infection rate and removal rate}
 \usage{
-peirr_pbla_both_rates(r, N, m = 1, A = 1, lag = 0, i = NA)
+peirr_pbla_both_rates(
+  removals,
+  population_size,
+  num_renewals = 1,
+  num_patient_zeros = 1,
+  lag = 0,
+  infections = NA
+)
 }
 \arguments{
-\item{r}{numeric vector: removal times}
+\item{removals}{numeric: removal times}
 
-\item{N}{integer: population size}
+\item{population_size}{integer: population size}
 
-\item{m}{positive integer shape}
+\item{num_renewals}{integer: erlang shape}
 
-\item{A}{integer patient zeros}
+\item{num_patient_zeros}{integer: patient zeros}
 
-\item{lag}{numeric fixed lag}
+\item{lag}{numeric: fixed lag}
 }
 \value{
-numeric list (infection.rate, removal.rate, R0, tau.sum)
+numeric list (infection_rate, removal_rate, effective_number)
 }
 \description{
 Estimate infection and removal rates with PBLA

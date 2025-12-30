@@ -2,58 +2,58 @@
 #'
 #' Estimate removal rate with duration date and infection rate with PBLA
 #'
-#' @param r numeric vector: removal times
-#' @param i numeric vector: infection times
-#' @param N integer: population size
-#' @param m positive integer shape
-#' @param A integer patient zeros
+#' @param removals numeric vector: removal times
+#' @param infections numeric vector: infection times
+#' @param population_size integer: population size
+#' @param num_renewals positive integer shape
+#' @param num_patient_zeros integer patient zeros
 #' @param lag numeric fixed lag
-#' @param known.gamma numeric: removal rate
-#' @param gamma.med bool: TRUE for median, and FALSE for mean in estimating the removal rate
+#' @param known_gamma numeric: removal rate
+#' @param median_gamma bool: TRUE for median, and FALSE for mean in estimating the removal rate
 #'
-#' @return numeric list (infection.rate, removal.rate, R0, tau.sum)
+#' @return numeric list (infection_rate, removal_rate, effective_number)
 #'
 #' @export
-peirr_pbla_infection_rate <- function(r,
-                                      i,
-                                      N,
-                                      m = 1,
-                                      A = 1,
+peirr_pbla_infection_rate <- function(removals,
+                                      infections,
+                                      population_size,
+                                      num_renewals = 1,
+                                      num_patient_zeros = 1,
                                       lag = 0,
-                                      known.gamma = NULL,
-                                      gamma.med = FALSE
+                                      known_gamma = NULL,
+                                      median_gamma = FALSE
                                       ) {
 
   # PBLA function with fixed removal rate
-  pb <- function(beta.estim, pbla, gamma.estim, r, N, m, A, lag) {
-    pbla(r, beta.estim, gamma.estim, N, m, A, lag)
+  pb <- function(beta_estim, pbla, gamma_estim, removals, population_size, num_renewals, num_patient_zeros, lag) {
+    pbla(removals, beta_estim, gamma_estim, population_size, num_renewals, num_patient_zeros, lag)
   }
 
   # estimate of removal rate
-  if (is.null(known.gamma)) {
-    gamma.estim <- peirr_removal_rate(r, i, gamma.med)
+  if (is.null(known_gamma)) {
+    gamma_estim <- peirr_removal_rate(removals, infections, median_gamma=median_gamma)
   } else {
-    gamma.estim <- known.gamma
-    if (length(known.gamma) > 1) {
+    gamma_estim <- known_gamma
+    if (length(known_gamma) > 1) {
       stop("More than 1 removal rate")
     }
-    if (known.gamma <= 0) {
+    if (known_gamma <= 0) {
       stop("Removal rate is not positive")
     }
   }
 
   # maximizes give conditional expectations
-  beta.estim <-   nlm(pb,
+  beta_estim <-   nlm(pb,
                       1,
                       pbla=pblas::pbla_std_gsem,
-                      gamma.estim = gamma.estim,
-                      r = r,
-                      N = N,
-                      m = m,
-                      A = A,
+                      gamma_estim = gamma_estim,
+                      removals = removals,
+                      population_size = population_size,
+                      num_renewals = num_renewals,
+                      num_patient_zeros = num_patient_zeros,
                       lag = lag)$estimate
 
-  return(list(infection.rate = beta.estim,
-              removal.rate = gamma.estim,
-              R0 = beta.estim / gamma.estim))
+  return(list(infection_rate = beta_estim,
+              removal_rate = gamma_estim,
+              effective_number = beta_estim / gamma_estim))
 }

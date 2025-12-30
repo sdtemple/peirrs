@@ -2,54 +2,53 @@
 #'
 #' Estimate multiple infection and removal rates with PBLA
 #'
-#' @param r numeric vector: removal times
-#' @param N integer: population size
-#' @param cr numeric vector: removal time classes
-#' @param ci numeric vector: infection time classes
-#' @param m positive integer shape
-#' @param A integer patient zeros
-#' @param lag numeric fixed lag
+#' @param removals numeric: removal times
+#' @param removal_classes numeric: removal time classes
+#' @param infection_classes numeric: infection time classes
+#' @param num_renewals integer: erlang shape
+#' @param num_patient_zeros integer: patient zeros
+#' @param lag numeric: fixed lag
 #'
-#' @return numeric list (infection.rates, removal.rates)
+#' @return numeric list (infection_rate, removal_rate_)
 #'
 #' @export
-peirr_pbla_both_rates_multitype <- function(r,
-                                  cr,
-                                  ci,
-                                  m=1,
-                                  A=1,
+peirr_pbla_both_rates_multitype <- function(removals,
+                                  removal_classes,
+                                  infection_classes,
+                                  num_renewals=1,
+                                  num_patient_zeros=1,
                                   lag=0){
 
   # jointly optimize the likelihood
-  num.rates <- length(unique(cr,na.rm=TRUE)) + length(unique(ci,na.rm=TRUE))
-  num.beta.rates <- length(unique(ci,na.rm=TRUE))
+  num_rates <- length(unique(removal_classes,na.rm=TRUE)) + length(unique(infection_classes,na.rm=TRUE))
+  num_beta_rates <- length(unique(infection_classes,na.rm=TRUE))
 
-  n <- sum(is.finite(r))
-  N <- length(r)
-  betamap <- matrix(0, nrow=n, ncol=N)
-  for(b in 1:N){
-    betamap[,b] = ci[b]
+  epidemic_size <- sum(is.finite(removals))
+  population_size <- length(removals)
+  beta_map <- matrix(0, nrow=epidemic_size, ncol=population_size)
+  for(b in 1:population_size){
+    beta_map[,b] = infection_classes[b]
   }
-  gammamap = cr[is.finite(r)]
-  r = r[is.finite(r)]
+  gamma_map = removal_classes[is.finite(removals)]
+  removals = removals[is.finite(removals)]
 
   etc = list(m=m,A=A,lag=lag)
   pbla.estimates <- nlm(pblas::pbla_multi,
-                        rep(1, num.rates),
-                        R=num.beta.rates,
+                        rep(1, num_rates),
+                        R=num_beta_rates,
                         pbla=pblas::pbla_std,
-                        betamap=betamap,
-                        gammamap=gammamap,
-                        r=r,
+                        betamap=beta_map,
+                        gammamap=gamma_map,
+                        r=removals,
                         etc=etc
                         )
 
   # estimate of removal rate
-  gamma.estims <- pbla.estimates$estimate[(num.beta.rates+1):num.rates]
+  gamma_estims <- pbla.estimates$estimate[(num_beta_rates+1):num_rates]
 
   # estimate of infection rate
-  beta.estims <- pbla.estimates$estimate[1:num.beta.rates]
+  beta_estims <- pbla.estimates$estimate[1:num_beta_rates]
 
-  return(list(infection.rates=beta.estims,
-              removal.rates=gamma.estims))
+  return(list(infection.rate=beta_estims,
+              removal.rate=gamma_estims))
 }

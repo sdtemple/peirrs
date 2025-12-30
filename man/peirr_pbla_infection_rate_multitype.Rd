@@ -5,40 +5,40 @@
 \title{PEIRR likelihood estimator of infection rates and MLE removal rates}
 \usage{
 peirr_pbla_infection_rate_multitype(
-  r,
-  i,
-  cr,
-  ci,
-  m = 1,
-  A = 1,
+  removals,
+  infections,
+  removal_classes,
+  infection_classes,
+  num_renewals = 1,
+  num_patient_zeros = 1,
   lag = 0,
-  known.gammas = NULL,
-  gamma.med = FALSE
+  known_gamma = NULL,
+  median_gamma = FALSE
 )
 }
 \arguments{
-\item{r}{numeric vector: removal times}
+\item{removals}{numeric: removal times}
 
-\item{i}{numeric vector: infection times}
+\item{infections}{numeric: infection times}
 
-\item{cr}{numeric vector: removal time classes}
+\item{removal_classes}{numeric: removal time classes}
 
-\item{ci}{numeric vector: infection time classes}
+\item{infection_classes}{numeric: infection time classes}
 
-\item{m}{positive integer shape}
+\item{num_renewals}{integer: erlang shape}
 
-\item{A}{integer patient zeros}
+\item{num_patient_zeros}{integer: patient zeros}
 
-\item{lag}{numeric fixed lag}
+\item{lag}{numeric: fixed lag}
 
-\item{known.gammas}{numeric: removal rates}
+\item{known_gamma}{numeric: removal rates}
 
-\item{gamma.med}{bool: TRUE for median, and FALSE for mean in estimating the removal rate}
+\item{median_gamma}{bool: TRUE for median, and FALSE for mean in estimating the removal rate}
 
-\item{N}{integer: population size}
+\item{population_size}{integer: population size}
 }
 \value{
-numeric list (infection.rates, removal.rates)
+numeric list (infection_rate, removal_rate)
 }
 \description{
 Estimate multiple removal rates with duration date and multiple infection rates with PBLA

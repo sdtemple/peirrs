@@ -4,10 +4,10 @@
 \alias{filter_sem}
 \title{Filter epidemic data}
 \usage{
-filter_sem(epidemic_time)
+filter_sem(matrix_time)
 }
 \arguments{
-\item{epidemic_time}{matrix: infection times, removal times, (optional: infection classes)}
+\item{matrix_time}{matrix: infection times, removal times, (optional: infection classes)}
 }
 \value{
 matrix: infection times, removal times, (optional: infection classes)

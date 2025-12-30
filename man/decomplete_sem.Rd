@@ -4,10 +4,10 @@
 \alias{decomplete_sem}
 \title{Missing epidemic data}
 \usage{
-decomplete_sem(epidemic_time, prop_complete = 0, prop_infection_missing = 1)
+decomplete_sem(matrix_time, prop_complete = 0, prop_infection_missing = 1)
 }
 \arguments{
-\item{epidemic_time}{matrix: infection and removal times}
+\item{matrix_time}{matrix: infection and removal times}
 
 \item{prop_complete}{numeric: expected proportion of complete pairs observed}
 

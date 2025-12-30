@@ -2,39 +2,39 @@
 #' 
 #' Estimate infection and removal rates with PBLA 
 #' 
-#' @param r numeric vector: removal times
-#' @param N integer: population size
-#' @param m positive integer shape
-#' @param A integer patient zeros
-#' @param lag numeric fixed lag
+#' @param removals numeric: removal times
+#' @param population_size integer: population size
+#' @param num_renewals integer: erlang shape
+#' @param num_patient_zeros integer: patient zeros
+#' @param lag numeric: fixed lag
 #' 
-#' @return numeric list (infection.rate, removal.rate, R0, tau.sum)
+#' @return numeric list (infection_rate, removal_rate, effective_number)
 #'  
 #' @export 
-peirr_pbla_both_rates <- function(r,
-                                  N,
-                                  m = 1,
-                                  A = 1,
+peirr_pbla_both_rates <- function(removals,
+                                  population_size,
+                                  num_renewals = 1,
+                                  num_patient_zeros = 1,
                                   lag = 0,
-                                  i = NA
+                                  infections = NA
                                   ) {
-  if (any(!is.na(i))) {
-    stop("i is not all NAs. This (hidden) named parameter only exists for bootstrapping.")
+  if (any(!is.na(infections))) {
+    stop("infections is not all NAs. This (hidden) named parameter only exists for bootstrapping.")
   }
   # jointly optimize the likelihood
-  etc <- list(m = m, A = A, lag = lag)
-  pbla.estimates <- nlm(pblas::pbla_gsem,
+  etc <- list(m = num_renewals, A = num_patient_zeros, lag = lag)
+  pbla_estimates <- nlm(pblas::pbla_gsem,
                         c(1, 1),
                         pbla = pblas::pbla_std_gsem,
-                        r = r,
-                        N = N,
+                        r = removals,
+                        N = population_size,
                         etc
                         )
   # estimate of removal rate
-  gamma.estim <- pbla.estimates$estimate[2]
+  gamma_estim <- pbla_estimates$estimate[2]
   # estimate of infection rate
-  beta.estim <- pbla.estimates$estimate[1]
-  return(list(infection.rate = beta.estim,
-              removal.rate = gamma.estim, 
-              R0 = beta.estim / gamma.estim))
+  beta_estim <- pbla_estimates$estimate[1]
+  return(list(infection_rate = beta_estim,
+              removal_rate = gamma_estim, 
+              effective_number = beta_estim / gamma_estim))
 }
