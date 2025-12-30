@@ -2,7 +2,7 @@
 % Please edit documentation in R/peirr_bayes_multitype.R
 \name{peirr_bayes_multitype}
 \alias{peirr_bayes_multitype}
-\title{Bayesian Inference for Epidemic Parameters using MCMC}
+\title{Bayesian Inference for Multitype Epidemic Parameters using MCMC}
 \usage{
 peirr_bayes_multitype(
   r,
@@ -10,14 +10,17 @@ peirr_bayes_multitype(
   cr,
   ci,
   Ns,
+  binit,
+  ginit,
+  bshape,
+  gshape,
   m = 1,
-  binit = 1,
-  ginit = 1,
-  bshape = 1,
-  gshape = 1,
-  num.time.update = 10,
+  num.time.update = 5,
   num.iter = 500,
-  num.print = 100
+  num.print = 100,
+  num.tries = 20,
+  update.gamma = FALSE,
+  lag = 0
 )
 }
 \arguments{
@@ -31,18 +34,18 @@ peirr_bayes_multitype(
 
 \item{Ns}{integer vector: population sizes for infection classes (sorted)}
 
+\item{binit}{Numeric initial estimates for the beta (transmission rates) parameters.
+Default is 1.}
+
+\item{ginit}{Numeric initial estimates for the gamma (recovery rates) parameters.
+Default is 1.}
+
+\item{bshape}{Numeric shape parameters for the gamma prior on beta.}
+
+\item{gshape}{Numeric shape parameters for the gamma prior on gamma.}
+
 \item{m}{A numeric shape parameter for the gamma distribution used in data augmentation.
 Default is 1.}
-
-\item{binit}{A numeric initial value for the beta (transmission rate) parameter.
-Default is 1.}
-
-\item{ginit}{A numeric initial value for the gamma (recovery rate) parameter.
-Default is 1.}
-
-\item{bshape}{A numeric shape parameter for the gamma prior on beta. Default is 1.}
-
-\item{gshape}{A numeric shape parameter for the gamma prior on gamma. Default is 1.}
 
 \item{num.time.update}{An integer specifying the number of Metropolis-Hastings updates
 for infection and removal times per iteration. Default is 10.}
@@ -52,14 +55,21 @@ for infection and removal times per iteration. Default is 10.}
 \item{num.print}{An integer specifying the print frequency for iteration progress.
 Default is 100.}
 
-\item{brate}{A numeric rate parameter for the gamma prior on beta. Default is 1e-4.}
+\item{num.tries}{An integer specifying the total number of draws
+to check if proposal is consistent with an epidemic.
+Default is 20.}
 
-\item{grate}{A numeric rate parameter for the gamma prior on gamma. Default is 1e-4.}
+\item{update.gamma}{bool: TRUE to update removal rate estimates from initial estimate
+Default is FALSE.}
+
+\item{lag}{numeric: fixed exposure period}
 }
 \value{
 A numeric matrix with 2 rows and num.iter columns containing posterior samples.
 Row 1 contains samples for beta (transmission rate).
 Row 2 contains samples for gamma (recovery rate).
+Row 3 contains proportion of infection times augmented/updated.
+Row 4 contains proportion of removal times augmented/updated.
 }
 \description{
 Performs Bayesian inference for the transmission rate (beta) and recovery rate (gamma)

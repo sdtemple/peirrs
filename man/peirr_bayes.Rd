@@ -53,7 +53,7 @@ Default is 100.}
 to check if proposal is consistent with an epidemic.
 Default is 20.}
 
-\item{update.gamma}{bool: TRUE to update removal rate estimate from prior
+\item{update.gamma}{bool: TRUE to update removal rate estimate from initial estimate
 Default is FALSE.}
 
 \item{lag}{numeric: fixed exposure period}

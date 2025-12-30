@@ -25,7 +25,7 @@
 #' @param num.tries An integer specifying the total number of draws
 #'                  to check if proposal is consistent with an epidemic.
 #'                  Default is 20.
-#' @param update.gamma bool: TRUE to update removal rate estimate from prior
+#' @param update.gamma bool: TRUE to update removal rate estimate from initial estimate
 #'                  Default is FALSE.
 #' @param lag numeric: fixed exposure period
 #'
@@ -249,7 +249,7 @@ peirr_bayes <- function(r,
       for(j in 1:J1){
         ctr = 1
         if (sum(is.na(i))==1) {
-          l = (1:n)[is.na(r)]
+          l = (1:n)[is.na(i)]
         } else {
           l = sample((1:n)[is.na(i)], 1)
         }
@@ -259,7 +259,7 @@ peirr_bayes <- function(r,
         while ((!is_epidemic(ri, ip[1:n], lag)) && (ctr <= num.tries)){
           ctr = ctr + 1
           if (sum(is.na(i))==1) {
-            l = (1:n)[is.na(r)]
+            l = (1:n)[is.na(i)]
           } else {
             l = sample((1:n)[is.na(i)], 1)
           }
@@ -268,7 +268,7 @@ peirr_bayes <- function(r,
           ip[l] = il
         }
         if (is_epidemic(ri, ip[1:n], lag)) { # must be epidemic
-          a = min(1, exp(iupdate(ri, ii, ip, gshape, grate, lag=lag)))
+          a = min(1, exp(iupdate(ri, ii, ip, bshape, brate, lag=lag)))
           if(runif(1) < a){
             ii[l] = il
             successes <- successes + 1
@@ -303,7 +303,7 @@ peirr_bayes <- function(r,
           rp[l] = rl
         }
         if (is_epidemic(rp, ii[1:n], lag)) { # must be epidemic
-          a = min(1, exp(rupdate(ri, ii, rp, gshape, grate, lag=lag)))
+          a = min(1, exp(rupdate(ri, ii, rp, bshape, brate, lag=lag)))
           if (runif(1) < a) {
             ri[l] = rl
             successes <- successes + 1
@@ -314,6 +314,7 @@ peirr_bayes <- function(r,
     storage[4, k] <- successes / J2
 
     # beta gibbs step
+    tau = matrix(0, nrow = n, ncol = N)
     for(j in 1:n){
       tau[j,] = sapply(ii - lag, min, ri[j]) - sapply(ii - lag, min, ii[j])
     }
