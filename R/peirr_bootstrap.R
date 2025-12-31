@@ -96,10 +96,10 @@ peirr_bootstrap <- function(num_bootstrap,
     removals <- X[, 2]
     infections <- X[, 1]
     bth_estimate <- do.call(peirr, c(list(removals=removals, infections=infections, population_size=population_size, lag=lag), etc))
-    storage[b, 1] <- bth_estimate$infection.rate
-    storage[b, 2] <- bth_estimate$removal.rate
+    storage[b, 1] <- bth_estimate$infection_rate
+    storage[b, 2] <- bth_estimate$removal_rate
   }
-  return(list(infection_rates = storage[, 1],
-              removal_rates = storage[, 2]
+  return(list(infection_rate = storage[, 1],
+              removal_rate = storage[, 2]
               ))
 }

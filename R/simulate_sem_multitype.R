@@ -19,16 +19,20 @@ simulate_sem_multitype <- function(beta,
                                    num_renewals = 1,
                                    lag = 0) {
 
+  if (sum(removal_class_sizes) != sum(infection_class_sizes)) {
+    stop("Infection and removal rate classes do not add up")
+  }
+
   # initialize vectors
   t <- 0
-  betaN <- betas / sum(infection_class_sizes)
   population_size <- sum(infection_class_sizes)
+  betaN <- beta / population_size
   infections <- rep(Inf, population_size)
   removals <- rep(Inf, population_size)
   infection_classes <- rep(NA, population_size)
   renewals <- rep(0, population_size)
   infection_weights <- infection_class_sizes / population_size
-  zero_class_infection <- sample(1:length(infection_class_sizes), size=1, prob=weights)
+  zero_class_infection <- sample(1:length(infection_class_sizes), size=1, prob=infection_weights)
   infections[1] <- t
   infection_classes[1] <- zero_class_infection
   infection_class_sizes[zero_class_infection] <- infection_class_sizes[zero_class_infection] - 1
@@ -37,9 +41,6 @@ simulate_sem_multitype <- function(beta,
   infection_rates <- rep(NA, population_size)
   removal_rates <- rep(NA, population_size)
   removal_classes <- rep(NA, population_size)
-  if (sum(removal_class_sizes) != sum(infection_class_sizes)) {
-    stop("Infection and removal rate classes do not add up")
-  }
   removals_current <- rep(0, length(removal_class_sizes))
   removal_weights <- removal_class_sizes / population_size
   zero_class_removal <- sample(1:length(removal_class_sizes), size=1, prob=removal_weights)
@@ -102,7 +103,7 @@ simulate_sem_multitype <- function(beta,
         if (x) {
           # infect a susceptible
           infection_weights <- infection_class_sizes * betaN / (sum(infection_class_sizes * betaN))
-          sampled_class_infection <- sample(1:length(infection_class_sizes), size=1, prob=weights)
+          sampled_class_infection <- sample(1:length(infection_class_sizes), size=1, prob=infection_weights)
           infection_class_sizes[sampled_class_infection] <- infection_class_sizes[sampled_class_infection] - 1
           itr <- itr + 1
           infection_classes[itr] <- sampled_class_infection
@@ -160,7 +161,7 @@ simulate_sem_multitype <- function(beta,
 
     susceptible_recording = c(susceptible_recording, St)
     infection_recording = c(infection_recording, It)
-    exposure_recording = c(exposure_recording, Et)
+    exposed_recording = c(exposed_recording, Et)
     removal_recording = c(removal_recording, Rt)
     time_recording = c(time_recording, t)
     ctr = ctr + 1
@@ -169,22 +170,31 @@ simulate_sem_multitype <- function(beta,
 
   # assign the remaining non-infecteds to classes
   # infection classes
-  next_class = Rt
-  for (l in 1:length(infection_class_sizes)) {
-    if (infection_class_sizes[l] > 0) {
-      infection_classes[(next_class+1):(next_class+infection_class_sizes[l])] = l
-      infection_rates[(next_class+1):(next_class+infection_class_sizes[l])] = betaN[l]
-      next_class = next_class + infection_class_sizes[l]
+  if (itr < population_size) {
+    remain_infection_classes <- c()
+    remain_infection_rates <- c()
+    for (l in 1:length(infection_class_sizes)) {
+      if (infection_class_sizes[l] > 0) {
+        remain_infection_classes <- c(remain_infection_classes, rep(l, infection_class_sizes[l]))
+        remain_infection_rates <- c(remain_infection_rates, rep(betaN[l] * population_size, infection_class_sizes[l]))
+      }
     }
-  }
-  # removal classes
-  next_class = Rt
-  for (l in 1:length(removal_class_sizes)) {
-    if (removal_class_sizes[l] > 0) {
-      removal_classes[(next_class+1):(next_class+removal_class_sizes[l])] = l
-      removal_rates[(next_class+1):(next_class+removal_class_sizes[l])] = gammas[l]
-      next_class = next_class + removal_class_sizes[l]
+    shuffled_indices <- sample(seq_along(remain_infection_classes))
+    infection_classes[(itr+1):population_size] <- remain_infection_classes[shuffled_indices]
+    infection_rates[(itr+1):population_size] <- remain_infection_rates[shuffled_indices]
+
+    # removal classes
+    remain_removal_classes <- c()
+    remain_removal_rates <- c()
+    for (l in 1:length(removal_class_sizes)) {
+      if (removal_class_sizes[l] > 0) {
+        remain_removal_classes <- c(remain_removal_classes, rep(l, removal_class_sizes[l]))
+        remain_removal_rates <- c(remain_removal_rates, rep(gamma[l], removal_class_sizes[l]))
+      }
     }
+    shuffled_indices <- sample(seq_along(remain_removal_classes))
+    removal_classes[(itr+1):population_size] <- remain_removal_classes[shuffled_indices]
+    removal_rates[(itr+1):population_size] <- remain_removal_rates[shuffled_indices]
   }
 
   # there should be no negatives
@@ -207,7 +217,7 @@ simulate_sem_multitype <- function(beta,
                        'removal_class',
                        'removal_rate')
 
-  recording = matrix(c(susceptible_recording, exposure_recording, infection_recording, removal_recording, time_recording),
+  recording = matrix(c(susceptible_recording, exposed_recording, infection_recording, removal_recording, time_recording),
                      nrow = ctr,
                      ncol = 5,
                      byrow = FALSE

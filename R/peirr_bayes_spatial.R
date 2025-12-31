@@ -6,32 +6,32 @@
 #' Implements data augmentation for missing infection and removal times via Metropolis-Hastings
 #' updates, with a Gibbs step for the beta parameter.
 #'
-#' @param r A numeric vector of removal/recovery times. NA values indicate unobserved times.
-#' @param i A numeric vector of infection times. NA values indicate unobserved times.
-#' @param N An integer specifying the total population size.
-#' @param h function: symmetric function of distance
-#' @param D numeric: two-dimensional distance matrix
-#' @param m A numeric shape parameter for the gamma distribution used in data augmentation.
+#' @param removals A numeric vector of removal/recovery times. NA values indicate unobserved times.
+#' @param infections A numeric vector of infection times. NA values indicate unobserved times.
+#' @param population_size An integer specifying the total population size.
+#' @param kernel_spatial function: symmetric function of distance
+#' @param matrix_distance numeric: two-dimensional distance matrix
+#' @param num_renewals A numeric shape parameter for the gamma distribution used in data augmentation.
 #'          Default is 1.
-#' @param binit A numeric initial estimate for the beta (transmission rate) parameter.
+#' @param beta_init A numeric initial estimate for the beta (transmission rate) parameter.
 #'              Default is 1.
-#' @param ginit A numeric initial estimate for the gamma (recovery rate) parameter.
+#' @param gamma_init A numeric initial estimate for the gamma (recovery rate) parameter.
 #'              Default is 1.
-#' @param bshape A numeric shape parameter for the gamma prior on beta. Default is 1.
-#' @param gshape A numeric shape parameter for the gamma prior on gamma. Default is 1.
-#' @param num.time.update An integer specifying the number of Metropolis-Hastings updates
+#' @param beta_shape A numeric shape parameter for the gamma prior on beta. Default is 1.
+#' @param gamma_shape A numeric shape parameter for the gamma prior on gamma. Default is 1.
+#' @param num_update An integer specifying the number of Metropolis-Hastings updates
 #'                        for infection and removal times per iteration. Default is 10.
-#' @param num.iter An integer specifying the total number of MCMC iterations. Default is 500.
-#' @param num.print An integer specifying the print frequency for iteration progress.
+#' @param num_iter An integer specifying the total number of MCMC iterations. Default is 500.
+#' @param num_print An integer specifying the print frequency for iteration progress.
 #'                  Default is 100.
-#' @param num.tries An integer specifying the total number of draws
+#' @param num_tries An integer specifying the total number of draws
 #'                  to check if proposal is consistent with an epidemic.
-#'                  Default is 20.
-#' @param update.gamma bool: TRUE to update removal rate estimate from initial estimate
+#'                  Default is 5.
+#' @param update_gamma bool: TRUE to update removal rate estimate from initial estimate
 #'                  Default is FALSE.
 #' @param lag numeric: fixed exposure period
 #'
-#' @return A numeric matrix with 2 rows and num.iter columns containing posterior samples.
+#' @return A numeric matrix with 2 rows and num_iter columns containing posterior samples.
 #'         Row 1 contains samples for beta (transmission rate).
 #'         Row 2 contains samples for gamma (recovery rate).
 #'         Row 3 contains proportion of infection times augmented/updated.
@@ -45,48 +45,36 @@
 #' (4) updating beta via Gibbs sampling. All epidemic configurations are validated
 #' to ensure consistency with epidemic dynamics.
 #' @export
-peirr_bayes_spatial <- function(r,
-                        i,
-                        N,
-                        h,
-                        D,
-                        m=1,
-                        binit=1,
-                        ginit=1,
-                        bshape=1,
-                        gshape=1,
-                        num.time.update=10,
-                        num.iter=500,
-                        num.print=100,
-                        num.tries=20,
-                        update.gamma=FALSE,
+peirr_bayes_spatial <- function(removals,
+                        infections,
+                        population_size,
+                        kernel_spatial,
+                        matrix_distance,
+                        num_renewals=1,
+                        beta_init=1,
+                        gamma_init=1,
+                        beta_shape=1,
+                        gamma_shape=1,
+                        num_update=10,
+                        num_iter=500,
+                        num_print=100,
+                        num_tries=5,
+                        update_gamma=FALSE,
                         lag=0
 ){
-
-  ### set up initialization and prior ###
-
-  # priors on beta and gamma come from initial estimate
-  brate <- bshape / binit
-  grate <- gshape / ginit
-  b <- brate / N
-  if (update.gamma) {
-    g <- rgamma(1, shape=gshape, rate=grate)
-  } else {
-    g <- ginit
-  }
 
   ### utility function local to ###
 
   # indicates data consistent with epidemic
-  is_epidemic = function(r, i, lag){
-    n = length(r)
-    ind = matrix(0, nrow = n, ncol = n)
-    for(j in 1:n){
-      ind[j,] = (i[1:n] < (i[j] - lag)) * (r > (i[j] - lag))
+  check_if_epidemic = function(removals, infections, lag) {
+    epidemic_size = length(removals)
+    ind_matrix = matrix(0, nrow = epidemic_size, ncol = epidemic_size)
+    for(j in 1:epidemic_size){
+      ind_matrix[j,] = (infections[1:epidemic_size] < (infections[j] - lag)) * (removals > (infections[j] - lag))
     }
-    x = apply(ind, 1, sum)
-    x = x[x == 0]
-    if(length(x) > 1){
+    chi_matrix = apply(ind_matrix, 1, sum)
+    chi_matrix = chi_matrix[chi_matrix == 0]
+    if(length(chi_matrix) > 1){
       return(FALSE)
     } else{
       return(TRUE)
@@ -94,245 +82,255 @@ peirr_bayes_spatial <- function(r,
   }
 
   # utlity for infection time metropolis hastings step
-  iupdate = function(r, i, ip, bshape, brate, lag, h, D){
+  update_infected_prob = function(removals, infections, infections_proposed, beta_shape, beta_rate, lag, kernel_spatial, matrix_distance){
 
     # initialize
-    n = length(r)
-    N = length(i)
-
-    if(length(ip) != length(i)){
+    epidemic_size = length(removals)
+    population_size = length(infections)
+    if (length(infections_proposed) != length(infections)) {
       stop("Observed and proposed infection time vectors must have the same length.")
     }
 
     # compute tau matrices
-    tau = matrix(0, nrow = n, ncol = N)
-    for(j in 1:n){
-      tau[j,] = (sapply(i - lag, min, r[j]) - sapply(i - lag, min, i[j])) * h(D[j,])
+    tau_matrix = matrix(0, nrow = epidemic_size, ncol = population_size)
+    for (j in 1:epidemic_size) {
+      tau_matrix[j,] = (sapply(infections - lag, min, removals[j]) - sapply(infections - lag, min, infections[j])) * kernel_spatial(matrix_distance[j,])
     }
-    taup = matrix(0, nrow = n, ncol = N)
-    for(j in 1:n){
-      taup[j,] = (sapply(ip - lag, min, r[j]) - sapply(ip - lag, min, ip[j])) * h(D[j,])
+    tau_matrix_proposed = matrix(0, nrow = epidemic_size, ncol = population_size)
+    for (j in 1:epidemic_size) {
+      tau_matrix_proposed[j,] = (sapply(infections_proposed - lag, min, removals[j]) - sapply(infections_proposed - lag, min, infections_proposed[j])) * kernel_spatial(matrix_distance[j,])
     }
 
     # compute
-    ind = matrix(0, nrow = n, ncol = n)
-    for(j in 1:n){
-      ind[j,] = (i[1:n] < (i[j] - lag)) * (r > (i[j] - lag)) * h(D[j,1:n])
+    ind_matrix = matrix(0, nrow = epidemic_size, ncol = epidemic_size)
+    for (j in 1:epidemic_size) {
+      ind_matrix[j,] = (infections[1:epidemic_size] < (infections[j] - lag)) * (removals > (infections[j] - lag)) * kernel_spatial(matrix_distance[j,1:epidemic_size])
     }
     # L1 comes from page 25 of the stockdale 2019 thesis
     # Integrated out formula is page 32 of my prelim
     # There are typos in my exam, though
     # Assuming gamma density function for nice proposal
-    L1.stockdale19.long = apply(ind, 1, sum)
-    L1.stockdale19.long = L1.stockdale19.long[L1.stockdale19.long > 0]
+    chi_prob = apply(ind_matrix, 1, sum)
+    chi_prob = chi_prob[chi_prob > 0]
 
-    indp = matrix(0, nrow = n, ncol = n)
-    for(j in 1:n){
-      indp[j,] = (ip[1:n] < (ip[j] - lag)) * (r > (ip[j] - lag)) * h(D[j,1:n])
+    ind_matrix_proposed = matrix(0, nrow = epidemic_size, ncol = epidemic_size)
+    for (j in 1:epidemic_size) {
+      ind_matrix_proposed[j,] = (infections_proposed[1:epidemic_size] < (infections_proposed[j] - lag)) * (removals > (infections_proposed[j] - lag)) * kernel_spatial(matrix_distance[j,1:epidemic_size])
     }
-    L1.stockdale19.long.p = apply(indp, 1, sum)
-    L1.stockdale19.long.p = L1.stockdale19.long.p[L1.stockdale19.long.p > 0]
+    chi_prob_proposed = apply(ind_matrix_proposed, 1, sum)
+    chi_prob_proposed = chi_prob_proposed[chi_prob_proposed > 0]
 
-    ellratio = sum(log(L1.stockdale19.long.p)) - sum(log(L1.stockdale19.long))
-    ellratio = ellratio + (bshape + n - 1) *
-      (log(brate + sum(tau)) - log(brate + sum(taup)))
-    return(ellratio)
+    ell_ratio = sum(log(chi_prob_proposed)) - sum(log(chi_prob))
+    ell_ratio = ell_ratio + (beta_shape + epidemic_size - 1) *
+      (log(beta_rate + sum(tau_matrix)) - log(beta_rate + sum(tau_matrix_proposed)))
+    return(ell_ratio)
   }
 
   # utlity for infection time metropolis hastings step
-  rupdate = function(r, i, rp, bshape, brate, lag, h, D){
+  update_removal_prob = function(removals, infections, removals_proposed, beta_shape, beta_rate, lag, kernel_spatial, matrix_distance){
 
     # initialize
-    n = length(r)
-    N = length(i)
+    epidemic_size = length(removals)
+    population_size = length(infections)
 
     # check that rp has the same length as r
-    if(length(rp) != length(r)){
+    if(length(removals_proposed) != length(removals)){
       stop("Observed and proposed removal time vectors must have the same length.")
     }
 
     # compute tau matrices
-    tau = matrix(0, nrow = n, ncol = N)
-    for(j in 1:n){
-      tau[j,] = (sapply(i - lag, min, r[j]) - sapply(i - lag, min, i[j]))  * h(D[j,])
+    tau_matrix = matrix(0, nrow = epidemic_size, ncol = population_size)
+    for(j in 1:epidemic_size){
+      tau_matrix[j,] = (sapply(infections - lag, min, removals[j]) - sapply(infections - lag, min, infections[j]))  * kernel_spatial(matrix_distance[j,])
     }
-    taup = matrix(0, nrow = n, ncol = N)
-    for(j in 1:n){
-      taup[j,] = (sapply(i - lag, min, rp[j]) - sapply(i - lag, min, i[j])) * h(D[j,])
+    tau_matrix_proposed = matrix(0, nrow = epidemic_size, ncol = population_size)
+    for(j in 1:epidemic_size){
+      tau_matrix_proposed[j,] = (sapply(infections - lag, min, removals_proposed[j]) - sapply(infections - lag, min, infections[j])) * kernel_spatial(matrix_distance[j,])
     }
 
     # compute
-    ind = matrix(0, nrow = n, ncol = n)
-    for(j in 1:n){
-      ind[j,] = (i[1:n] < (i[j] - lag)) * (r > (i[j] - lag)) * h(D[j,1:n])
+    ind_matrix = matrix(0, nrow = epidemic_size, ncol = epidemic_size)
+    for(j in 1:epidemic_size){
+      ind_matrix[j,] = (infections[1:epidemic_size] < (infections[j] - lag)) * (removals > (infections[j] - lag)) * kernel_spatial(matrix_distance[j,1:epidemic_size])
     }
     # L1 comes from page 25 of the stockdale 2019 thesis
     # Integrated out formula is page 32 of my prelim
     # There are typos in my exam, though
     # Assuming gamma density function for nice proposal
-    L1.stockdale19.long = apply(ind, 1, sum)
-    L1.stockdale19.long = L1.stockdale19.long[L1.stockdale19.long > 0]
+    chi_prob = apply(ind_matrix, 1, sum)
+    chi_prob = chi_prob[chi_prob > 0]
 
-    indp = matrix(0, nrow = n, ncol = n)
-    for(j in 1:n){
-      indp[j,] = (i[1:n] < (i[j] - lag)) * (rp > (i[j] - lag)) * h(D[j,1:n])
+    ind_matrix_proposed = matrix(0, nrow = epidemic_size, ncol = epidemic_size)
+    for(j in 1:epidemic_size){
+      ind_matrix_proposed[j,] = (infections[1:epidemic_size] < (infections[j] - lag)) * (removals_proposed > (infections[j] - lag)) * kernel_spatial(matrix_distance[j,1:epidemic_size])
     }
-    L1.stockdale19.long.p = apply(indp, 1, sum)
-    L1.stockdale19.long.p = L1.stockdale19.long.p[L1.stockdale19.long.p > 0]
+    chi_prob_proposed = apply(ind_matrix_proposed, 1, sum)
+    chi_prob_proposed = chi_prob_proposed[chi_prob_proposed > 0]
 
-    ellratio = sum(log(L1.stockdale19.long.p)) - sum(log(L1.stockdale19.long))
-    ellratio = ellratio + (bshape + n - 1) *
-      (log(brate + sum(tau)) - log(brate + sum(taup)))
-    return(ellratio)
+    ell_ratio = sum(log(chi_prob_proposed)) - sum(log(chi_prob))
+    ell_ratio = ell_ratio + (beta_shape + epidemic_size - 1) *
+      (log(beta_rate + sum(tau_matrix)) - log(beta_rate + sum(tau_matrix_proposed)))
+    return(ell_ratio)
+  }
+
+  ### set up initialization and prior ###
+
+  # priors on beta and gamma come from initial estimate
+  beta_rate <- beta_shape / beta_init
+  gamma_rate <- gamma_shape / gamma_init
+  beta_curr <- beta_rate / population_size
+  if (update_gamma) {
+    gamma_curr <- rgamma(1, shape=gamma_shape, rate=gamma_rate)
+  } else {
+    gamma_curr <- gamma_init
   }
 
   # start the sampler
 
-  K = num.iter
-  J = num.time.update
-  U = num.print
-
   # initialize
-  n = sum((!is.na(i)) | (!is.na(r)))
-  storage = array(NA, dim = c(4, K))
-  tau = matrix(0, nrow = n, ncol = N)
+  epidemic_size = sum((!is.na(i)) | (!is.na(r)))
+  storage = array(NA, dim = c(4, num_iter))
+  tau_matrix = matrix(0, nrow = epidemic_size, ncol = population_size)
 
-  if(sum(!is.na(i)) == n && sum(!is.na(r)) == n){
+  if (sum(!is.na(infections)) == epidemic_size && sum(!is.na(removals)) == epidemic_size) {
     stop("No implementation for complete spatial data")
   }
 
   # first data augmentation
-  ni = sum(is.na(i))
-  nr = sum(is.na(r))
-  J1 = min(ni, J)
-  J2 = min(nr, J)
-  ii = i
-  ri = r
-  ii[is.na(i)] <- r[is.na(i)] - (rgamma(ni, shape = m, rate = 1) / g)
-  ri[is.na(r)] <- i[is.na(r)] + (rgamma(nr, shape = m, rate = 1) / g)
-  while(!is_epidemic(ri, ii, lag)){ # must be epidemic
+  num_nan_infections <- sum(is.na(infections))
+  num_nan_removals <- sum(is.na(removals))
+  num_update_infections <- min(num_nan_infections, num_update)
+  num_update_removals <- min(num_nan_removals, num_update)
+  infections_augmented <- infections
+  removals_augmented <- removals
+  infections_augmented[is.na(infections)] <- removals[is.na(infections)] - (rgamma(num_nan_infections, shape = num_renewals, rate = 1) / gamma_curr)
+  removals_augmented[is.na(removals)] <- infections[is.na(removals)] + (rgamma(num_nan_removals, shape = num_renewals, rate = 1) / gamma_curr)
+  while (!check_if_epidemic(removals_augmented, infections_augmented, lag)) { # must be epidemic
     # can get hung for poorly drawn gamma
-    if (update.gamma) {
-      g <- rgamma(1, shape=gshape, rate=grate)
+    if (update_gamma) {
+      gamma_curr <- rgamma(1, shape=gamma_shape, rate=gamma_rate)
     } else {
-      g <- ginit
+      gamma_curr <- gamma_init
     }
-    ii[is.na(i)] <- r[is.na(i)] - (rgamma(ni, shape = m, rate = 1) / g)
-    ri[is.na(r)] <- i[is.na(r)] + (rgamma(nr, shape = m, rate = 1) / g)
+    infections_augmented[is.na(infections)] <- removals[is.na(infections)] - (rgamma(num_nan_infections, shape = num_renewals, rate = 1) / gamma_curr)
+    removals_augmented[is.na(removals)] <- infections[is.na(removals)] + (rgamma(num_nan_removals, shape = num_renewals, rate = 1) / gamma_curr)
   }
-  ii = c(ii, rep(Inf, N - n))
+  infections_augmented <- c(infections_augmented, rep(Inf, population_size - epidemic_size))
 
   # sampling
-  for(k in 1:K){
+  for (k in 1:num_iter) {
 
-    # gamma metropolis hastings step
-    if (update.gamma) {
-      g = rgamma(1, gshape + n, grate + sum((ri - ii[1:n])))
+    # beta gibbs step
+    tau_matrix = matrix(0, nrow = epidemic_size, ncol = population_size)
+    for(j in 1:epidemic_size){
+      tau_matrix[j,] = (sapply(infections_augmented - lag, min, removals_augmented[j]) - sapply(infections_augmented - lag, min, infections_augmented[j]))  * kernel_spatial(matrix_distance[j,])
     }
-    storage[2,k] = g
+    # may still have an issue here
+    beta_curr = rgamma(1, shape = beta_shape + epidemic_size - 1, rate = beta_rate + sum(tau_matrix))
+    storage[1, k] = beta_curr * population_size
 
     # infection times metropolis hastings step
     successes <- 0
-    if (ni > 0) {
+    if (num_nan_infections > 0) {
 
-      for(j in 1:J1){
+      for(j in 1:num_update_infections){
         ctr = 1
 
-        if (sum(is.na(i))==1) {
-          l = (1:n)[is.na(i)]
+        if (sum(is.na(infections)) == 1) {
+          l = (1:epidemic_size)[is.na(infections)]
         } else {
-          l = sample((1:n)[is.na(i)], 1)
+          l = sample((1:epidemic_size)[is.na(infections)], 1)
         }
 
-        il = r[l] - (rgamma(1, shape = m, rate = 1) / g)
-        ip = ii
-        ip[l] = il
+        new_infection = removals_augmented[l] - (rgamma(1, shape = num_renewals, rate = 1) / gamma_curr)
+        infections_proposed = infections_augmented
+        infections_proposed[l] = new_infection
 
-        while ((!is_epidemic(ri, ip[1:n], lag)) && (ctr <= num.tries)){
+        while ((!check_if_epidemic(removals_augmented, infections_proposed[1:population_size], lag)) && (ctr <= num_tries)) {
           ctr = ctr + 1
 
-          if (sum(is.na(i))==1) {
-            l = (1:n)[is.na(i)]
+          if (sum(is.na(infections)) == 1) {
+            l = (1:epidemic_size)[is.na(infections)]
           } else {
-            l = sample((1:n)[is.na(i)], 1)
+            l = sample((1:epidemic_size)[is.na(infections)], 1)
           }
 
-          il = r[l] - (rgamma(1, shape = m, rate = 1) / g)
-          ip = ii
-          ip[l] = il
+          new_infection = removals_augmented[l] - (rgamma(1, shape = num_renewals, rate = 1) / gamma_curr)
+          infections_proposed = infections_augmented
+          infections_proposed[l] = new_infection
         }
 
-        if (is_epidemic(ri, ip[1:n], lag)) { # must be epidemic
-          a = min(1, exp(iupdate(ri, ii, ip, bshape, brate, lag=lag, h=h, D=D)))
-
-          if(runif(1) < a){
-            ii[l] = il
+        if (check_if_epidemic(removals_augmented, infections_proposed[1:population_size], lag)) { # must be epidemic
+          proposal_log_prob <- update_infected_prob(removals_augmented, infections_augmented, infections_proposed, beta_shape, beta_rate, lag=lag, kernel_spatial=kernel_spatial, matrix_distance=matrix_distance)
+          accept_prob = min(1, exp(proposal_log_prob))
+          if (runif(1) < accept_prob) {
+            infections_augmented[l] = new_infection
             successes <- successes + 1
           }
         }
       }
     }
-    storage[3, k] <- successes / J1
+    storage[3, k] <- successes / num_update_infections
 
     # removal times metropolis hastings step
     successes <- 0
-    if (nr > 0) {
+    if (num_nan_removals > 0) {
 
-      for(j in 1:J2){
+      for(j in 1:num_update_removals){
         ctr = 1
 
-        if (sum(is.na(r))==1) {
-          l = (1:n)[is.na(r)]
+        if (sum(is.na(removals)) == 1) {
+          l = (1:epidemic_size)[is.na(removals)]
         } else {
-          l = sample((1:n)[is.na(r)], 1)
+          l = sample((1:epidemic_size)[is.na(removals)], 1)
         }
 
-        rl = i[l] + (rgamma(1, shape = m, rate = 1) / g)
-        rp = ri
-        rp[l] = rl
+        new_removal = infections_augmented[l] + (rgamma(1, shape = num_renewals, rate = 1) / gamma_curr)
+        removals_proposed = removals_augmented
+        removals_proposed[l] = new_removal
 
-        while ((!is_epidemic(rp, ii[1:n], lag)) && (ctr <= num.tries)) {
+        while ((!check_if_epidemic(removals_proposed, infections_augmented[1:population_size], lag)) && (ctr <= num_tries)) {
           ctr = ctr + 1
 
-          if (sum(is.na(r))==1) {
-            l = (1:n)[is.na(r)]
+          if (sum(is.na(removals)) == 1) {
+            l = (1:epidemic_size)[is.na(removals)]
           } else {
-            l = sample((1:n)[is.na(r)], 1)
+            l = sample((1:epidemic_size)[is.na(removals)], 1)
           }
 
-          rl = i[l] + (rgamma(1, shape = m, rate = 1) / g)
-          rp = ri
-          rp[l] = rl
+          new_removal = infections_augmented[l] + (rgamma(1, shape = num_renewals, rate = 1) / gamma_curr)
+          removals_proposed = removals_augmented
+          removals_proposed[l] = new_removal
         }
 
-        if (is_epidemic(rp, ii[1:n], lag)) { # must be epidemic
-          a = min(1, exp(rupdate(ri, ii, rp, bshape, brate, lag=lag, h=h, D=D)))
-          if (runif(1) < a) {
-            ri[l] = rl
+        if (check_if_epidemic(removals_proposed, infections_augmented[1:population_size], lag)) { # must be epidemic
+          proposal_log_prob <- update_removal_prob(removals_augmented, infections_augmented, removals_proposed, beta_shape, beta_rate, lag=lag, kernel_spatial=kernel_spatial, matrix_distance=matrix_distance)
+          accept_prob = min(1, exp(proposal_log_prob))
+          if (runif(1) < accept_prob) {
+            removals_augmented[l] = new_removal
             successes <- successes + 1
           }
         }
       }
     }
-    storage[4, k] <- successes / J2
+    storage[4, k] <- successes / num_update_removals
 
-    # beta gibbs step
-    tau = matrix(0, nrow = n, ncol = N)
-    for(j in 1:n){
-      tau[j,] = (sapply(ii - lag, min, ri[j]) - sapply(ii - lag, min, ii[j]))  * h(D[j,])
+    # gamma gibbs step
+    if (update_gamma) {
+      gamma_curr = rgamma(1, gamma_shape + epidemic_size, gamma_rate + sum((removals_augmented - infections_augmented[1:epidemic_size])))
     }
-    # may still have an issue here
-    b = rgamma(1, shape = bshape + n - 1, rate = brate + sum(tau))
-    storage[1,k] = b * N
+    storage[2, k] = gamma_curr
 
     # iteration update
-    if(!(k %% U)){
+    if(!(k %% num_print)){
       print(k)
     }
   }
 
-  return(storage)
+  return(list(infection_rate = storage[1, ],
+              removal_rate = storage[2, ],
+              prop_infection_updated = storage[3, ],
+              prop_removal_updated = storage[4, ]
+              ))
 
 }
-
-

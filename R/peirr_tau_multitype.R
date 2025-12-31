@@ -79,7 +79,7 @@ peirr_tau_multitype <- function(removals, infections,
     if (!median_gamma) {
       rate_estim <- length(removals_kept_v2) / sum(removals_kept_v2 - infections_kept_v2)
     } else {
-      rate_estim <- 1 / median(removals_kept_v2 - infections_kept_v2)
+      rate_estim <- 1 / median(removals_kept_v2 - infections_kept_v2) * log(2)
     }
     removal_rates <- c(removal_rates, rate_estim)
     # compute expected value for incomplete obs
@@ -133,7 +133,7 @@ peirr_tau_multitype <- function(removals, infections,
     infection_rates <- c(infection_rates, rate_estim)
   }
 
-  return(list(infection_rate = infection_rates * sum(infection_rate_sizes),
+  return(list(infection_rate = infection_rates * sum(infection_class_sizes),
               removal_rate = removal_rates,
               tau_sum = tau_sums,
               not_infected_sum = removal_partial_sums,

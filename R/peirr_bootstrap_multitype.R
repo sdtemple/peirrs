@@ -63,12 +63,12 @@ peirr_bootstrap_multitype <- function(num_bootstrap,
   # for matrix setup and filling
   num_beta = length(beta)
   num_gamma = length(gamma)
-  num_col = num_beta + num_gamma
+  num_param = num_beta + num_gamma
 
   # initialize matrix
-  storage <- matrix(0, nrow=num_bootstrap + 1, ncol=num_col)
-  storage[1, 1:num_beta] = beta
-  storage[1, (num_beta+1):num_col] = gamma
+  storage <- matrix(0, ncol=num_bootstrap + 1, nrow=num_param)
+  storage[1:num_beta, 1] = beta
+  storage[(num_beta+1):num_param, 1] = gamma
 
   # condition on epidemic being of a certain size
   min_epidemic_size = (1 - within) * epidemic_size
@@ -80,23 +80,23 @@ peirr_bootstrap_multitype <- function(num_bootstrap,
                               gamma,
                               infection_class_sizes,
                               removal_class_sizes,
-                              epidemic_size,
-                              lag,
-                              prop_complete,
-                              prop_infection_missing,
-                              min_epidemic_size,
-                              max_epidemic_size)
+                              num_renewals=num_renewals,
+                              lag=lag,
+                              prop_complete=prop_complete,
+                              prop_infection_missing=prop_infection_missing,
+                              min_epidemic_size=min_epidemic_size,
+                              max_epidemic_size=max_epidemic_size)
     X = epidemic$matrix_time
     removals = X[,2]
     removal_classes = X[,5]
     infections = X[,1]
     infection_classes = X[,3]
     bth_estimate = do.call(peirr_tau_multitype,
-                           c(list(removals=removals,infections=infections,removal_classes=removal_classes,infection_classes=infection_classes,infection_class_sizes=infection_class_sizes,lag=lag), etc)
+                           c(list(removals=removals, infections=infections, removal_classes=removal_classes, infection_classes=infection_classes, infection_class_sizes=infection_class_sizes, lag=lag), etc)
                            )
     # print(bth.estimate)
-    storage[l,1:num_beta] = bth_estimate$infection.rate
-    storage[l,(num_beta+1):num_col] = bth_estimate$removal.rate
+    storage[1:num_beta, l] = bth_estimate$infection_rate
+    storage[(num_beta+1):num_param, l] = bth_estimate$removal_rate
   }
-  return(list(infection_rate=storage[, 1:num_beta], removal_rate=storage[, (num_beta+1):num_col]))
+  return(list(infection_rate=storage[1:num_beta, ], removal_rate=storage[(num_beta+1):num_param, ]))
 }

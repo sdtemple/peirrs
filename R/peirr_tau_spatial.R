@@ -86,8 +86,8 @@ peirr_tau_spatial <- function(removals, infections, population_size, kernel_spat
 
   num_complete = length(removals[(!is.na(removals)) & (!is.na(infections))])
 
-  return(list(infection.rate = beta_estim * population_size,
-              removal.rate = gamma_estim,
+  return(list(infection_rate = beta_estim * population_size,
+              removal_rate = gamma_estim,
               tau_sum = tau_sum,
               not_infected_sum = not_infected_sum,
               num_not_infected = population_size - epidemic_size,

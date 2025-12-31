@@ -59,7 +59,7 @@ Default is FALSE.}
 \item{lag}{numeric: fixed exposure period}
 }
 \value{
-A numeric matrix with 2 rows and num.iter columns containing posterior samples.
+A numeric matrix with 2 rows and num_iter columns containing posterior samples.
 Row 1 contains samples for beta (transmission rate).
 Row 2 contains samples for gamma (recovery rate).
 Row 3 contains proportion of infection times augmented/updated.

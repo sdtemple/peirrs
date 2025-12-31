@@ -64,9 +64,9 @@ simulate_sem <- function(beta, gamma, population_size, num_renewals = 1, lag = 0
         x <- (x + 1) %% 2
         if (x) {
           # infect a susceptible
-          if(St > 1){
-            argx <- sample(which( is.infinite(i) & is.infinite(r), arr.ind = TRUE), 1)
-          } else{
+          if (St > 1) {
+            argx <- sample(which( is.infinite(infections) & is.infinite(removals), arr.ind = TRUE), 1)
+          } else {
             argx <- which( is.infinite(infections) & is.infinite(removals) )
           }
           infections[argx] <- t + lag # fixed exposure period

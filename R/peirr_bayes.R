@@ -29,7 +29,7 @@
 #'                  Default is FALSE.
 #' @param lag numeric: fixed exposure period
 #'
-#' @return A numeric matrix with 2 rows and num.iter columns containing posterior samples.
+#' @return A numeric matrix with 2 rows and num_iter columns containing posterior samples.
 #'         Row 1 contains samples for beta (transmission rate).
 #'         Row 2 contains samples for gamma (recovery rate).
 #'         Row 3 contains proportion of infection times augmented/updated.
@@ -59,60 +59,48 @@ peirr_bayes <- function(removals,
                         lag=0
 ){
 
-  ### set up initialization and prior ###
-
-  # priors on beta and gamma come from initial estimate
-  beta_rate <- beta_shape / beta_init
-  gamma_rate <- gamma_shape / gamma_init
-  beta_curr <- beta_rate / population_size
-  if (update_gamma) {
-    gamma_curr <- rgamma(1, shape=gamma_shape, rate=gamma_rate)
-  } else {
-    gamma_curr <- gamma_init
-  }
-
   ### utility function local to ###
 
   # indicates data consistent with epidemic
-  check_if_epidemic = function(removals, infections, lag){
+  check_if_epidemic = function(removals, infections, lag) {
     epidemic_size = length(removals)
     ind_matrix = matrix(0, nrow = epidemic_size, ncol = epidemic_size)
-    for(j in 1:epidemic_size){
+    for (j in 1:epidemic_size) {
       ind_matrix[j, ] = (infections[1:epidemic_size] < (infections[j] - lag)) * (removals > (infections[j] - lag))
     }
     chi_matrix = apply(ind_matrix, 1, sum)
     chi_matrix = chi_matrix[chi_matrix == 0]
-    if(length(chi_matrix) > 1){
+    if (length(chi_matrix) > 1) {
       return(FALSE)
-    } else{
+    } else {
       return(TRUE)
     }
   }
 
   # utlity for infection time metropolis hastings step
-  update_infect_prob = function(removals, infections, infections_proposed, beta_shape, beta_rate, lag){
+  update_infected_prob = function(removals, infections, infections_proposed, beta_shape, beta_rate, lag) {
 
     # initialize
     epidemic_size = length(removals)
     population_size = length(infections)
 
-    if(length(infections_proposed) != length(infections)){
+    if (length(infections_proposed) != length(infections)) {
       stop("Observed and proposed infection time vectors must have the same length.")
     }
 
     # compute tau matrices
     tau_matrix <- matrix(0, nrow = epidemic_size, ncol = population_size)
-    for(j in 1:epidemic_size){
+    for (j in 1:epidemic_size) {
       tau_matrix[j, ] <- sapply(infections - lag, min, removals[j]) - sapply(infections - lag, min, infections[j])
     }
     tau_matrix_proposed <- matrix(0, nrow = epidemic_size, ncol = population_size)
-    for(j in 1:epidemic_size){
+    for (j in 1:epidemic_size) {
       tau_matrix_proposed[j, ] <- sapply(infections_proposed - lag, min, removals[j]) - sapply(infections_proposed - lag, min, infections_proposed[j])
     }
 
     # compute
     ind_matrix <- matrix(0, nrow = epidemic_size, ncol = epidemic_size)
-    for(j in 1:epidemic_size){
+    for (j in 1:epidemic_size) {
       ind_matrix[j, ] <- (infections[1:epidemic_size] < (infections[j] - lag)) * (removals > (infections[j] - lag))
     }
     # L1 comes from page 25 of the stockdale 2019 thesis
@@ -123,7 +111,7 @@ peirr_bayes <- function(removals,
     chi_prob <- chi_prob[chi_prob > 0]
 
     ind_matrix_proposed <- matrix(0, nrow = epidemic_size, ncol = epidemic_size)
-    for(j in 1:epidemic_size){
+    for (j in 1:epidemic_size) {
       ind_matrix_proposed[j, ] <- (infections_proposed[1:epidemic_size] < (infections_proposed[j] - lag)) * (removals > (infections_proposed[j] - lag))
     }
     chi_prob_proposed <- apply(ind_matrix_proposed, 1, sum)
@@ -136,29 +124,29 @@ peirr_bayes <- function(removals,
   }
 
   # utlity for infection time metropolis hastings step
-  update_remove_prob = function(removals, infections, removals_proposed, beta_shape, beta_rate, lag){
+  update_removal_prob = function(removals, infections, removals_proposed, beta_shape, beta_rate, lag) {
     # initialize
     epidemic_size = length(removals)
     population_size = length(infections)
 
     # check that rp has the same length as r
-    if(length(removals_proposed) != length(removals)){
+    if (length(removals_proposed) != length(removals)) {
       stop("Observed and proposed removal time vectors must have the same length.")
     }
 
     # compute tau matrices
     tau_matrix = matrix(0, nrow = epidemic_size, ncol = population_size)
-    for(j in 1:epidemic_size){
+    for (j in 1:epidemic_size) {
       tau_matrix[j, ] = sapply(infections - lag, min, removals[j]) - sapply(infections - lag, min, infections[j])
     }
     tau_matrix_proposed = matrix(0, nrow = epidemic_size, ncol = population_size)
-    for(j in 1:epidemic_size){
+    for (j in 1:epidemic_size) {
       tau_matrix_proposed[j, ] = sapply(infections - lag, min, removals_proposed[j]) - sapply(infections - lag, min, infections[j])
     }
 
     # compute
     ind_matrix = matrix(0, nrow = epidemic_size, ncol = epidemic_size)
-    for(j in 1:epidemic_size){
+    for (j in 1:epidemic_size) {
       ind_matrix[j, ] = (infections[1:epidemic_size] < (infections[j] - lag)) * (removals > (infections[j] - lag))
     }
     # L1 comes from page 25 of the stockdale 2019 thesis
@@ -169,7 +157,7 @@ peirr_bayes <- function(removals,
     chi_prob = chi_prob[chi_prob > 0]
 
     ind_matrix_proposed = matrix(0, nrow = epidemic_size, ncol = epidemic_size)
-    for(j in 1:epidemic_size){
+    for (j in 1:epidemic_size) {
       ind_matrix_proposed[j, ] = (infections_proposed[1:epidemic_size] < (infections_proposed[j] - lag)) * (removals_proposed > (infections_proposed[j] - lag))
     }
     chi_prob_proposed = apply(ind_matrix_proposed, 1, sum)
@@ -181,23 +169,35 @@ peirr_bayes <- function(removals,
     return(ell_ratio)
   }
 
+  ### set up initialization and prior ###
+
+  # priors on beta and gamma come from initial estimate
+  beta_rate <- beta_shape / beta_init
+  gamma_rate <- gamma_shape / gamma_init
+  beta_curr <- beta_rate / population_size
+  if (update_gamma) {
+    gamma_curr <- rgamma(1, shape=gamma_shape, rate=gamma_rate)
+  } else {
+    gamma_curr <- gamma_init
+  }
+
   # start the sampler
 
   # initialize
   epidemic_size <- sum((!is.na(infections)) | (!is.na(removals)))
   storage <- array(NA, dim = c(4, num_iter))
 
-  if(sum(!is.na(infections)) == epidemic_size && sum(!is.na(removals)) == epidemic_size){
+  if (sum(!is.na(infections)) == epidemic_size && sum(!is.na(removals)) == epidemic_size) {
     # premature exit
     # because complete data
     out <- bayes_complete(removals,
                                infections,
                                population_size,
-                               beta_rate = b,
-                               beta_shape = bshape,
-                               gamma_rate = grate,
-                               gamma_shape = gshape,
-                               num_iter = num.iter,
+                               beta_rate = beta_rate,
+                               beta_shape = beta_shape,
+                               gamma_rate = gamma_rate,
+                               gamma_shape = gamma_shape,
+                               num_iter = num_iter,
                                lag=lag
                                )
     storage[1, ] <- out$infection_rates
@@ -216,7 +216,7 @@ peirr_bayes <- function(removals,
   removals_augmented <- removals
   infections_augmented[is.na(infections)] <- removals[is.na(infections)] - (rgamma(num_nan_infections, shape = num_renewals, rate = 1) / gamma_curr)
   removals_augmented[is.na(removals)] <- infections[is.na(removals)] + (rgamma(num_nan_removals, shape = num_renewals, rate = 1) / gamma_curr)
-  while(!check_if_epidemic(removals_augmented, infections_augmented, lag)){ # must be epidemic
+  while (!check_if_epidemic(removals_augmented, infections_augmented, lag)) { # must be epidemic
     # can get hung for poorly drawn gamma
     if (update_gamma) {
       gamma_curr <- rgamma(1, shape=gamma_shape, rate=gamma_rate)
@@ -233,7 +233,7 @@ peirr_bayes <- function(removals,
 
     # beta gibbs step
     tau_matrix <- matrix(0, nrow = epidemic_size, ncol = population_size)
-    for(j in 1:epidemic_size){
+    for (j in 1:epidemic_size) {
       tau_matrix[j, ] <- sapply(infections_augmented - lag, min, removals_augmented[j]) - sapply(infections_augmented - lag, min, infections_augmented[j])
     }
     beta_curr <- rgamma(1, shape = beta_shape + epidemic_size - 1, rate = beta_rate + sum(tau_matrix))
@@ -242,9 +242,9 @@ peirr_bayes <- function(removals,
     # infection times metropolis hastings step
     successes <- 0
     if (num_nan_infections > 0) {
-      for(j in 1:num_update_infections){
+      for (j in 1:num_update_infections) {
         ctr <- 1
-        if (sum(is.na(infections))==1) {
+        if (sum(is.na(infections)) == 1) {
           l <- (1:epidemic_size)[is.na(infections)]
         } else {
           l <- sample((1:epidemic_size)[is.na(infections)], 1)
@@ -252,9 +252,9 @@ peirr_bayes <- function(removals,
         new_infection <- removals_augmented[l] - (rgamma(1, shape = num_renewals, rate = 1) / gamma_curr)
         infections_proposed <- infections_augmented
         infections_proposed[l] <- new_infection
-        while ((!check_if_epidemic(removals_augmented, infections_proposed[1:epidemic_size], lag)) && (ctr <= num_tries)){
+        while ((!check_if_epidemic(removals_augmented, infections_proposed[1:epidemic_size], lag)) && (ctr <= num_tries)) {
           ctr <- ctr + 1
-          if (sum(is.na(infections))==1) {
+          if (sum(is.na(infections)) == 1) {
             l <- (1:epidemic_size)[is.na(infections)]
           } else {
             l <- sample((1:epidemic_size)[is.na(infections)], 1)
@@ -264,8 +264,9 @@ peirr_bayes <- function(removals,
           infections_proposed[l] <- new_infection
         }
         if (check_if_epidemic(removals_augmented, infections_proposed[1:epidemic_size], lag)) { # must be epidemic
-          accept_prob <- min(1, exp(update_infect_prob(removals_augmented, infections_augmented, infections_proposed, beta_shape, beta_rate, lag=lag)))
-          if(runif(1) < accept_prob){
+          proposal_log_prob <- update_infected_prob(removals_augmented, infections_augmented, infections_proposed, beta_shape, beta_rate, lag=lag)
+          accept_prob <- min(1, exp(proposal_log_prob))
+          if (runif(1) < accept_prob) {
             infections_augmented[l] <- new_infection
             successes <- successes + 1
           }
@@ -277,9 +278,9 @@ peirr_bayes <- function(removals,
     # removal times metropolis hastings step
     successes <- 0
     if (num_nan_removals > 0) {
-      for(j in 1:num_update_removals){
+      for (j in 1:num_update_removals) {
         ctr <- 1
-        if (sum(is.na(removals))==1) {
+        if (sum(is.na(removals)) == 1) {
           l <- (1:epidemic_size)[is.na(removals)]
         } else {
           l <- sample((1:epidemic_size)[is.na(removals)], 1)
@@ -289,7 +290,7 @@ peirr_bayes <- function(removals,
         removals_proposed[l] <- new_removal
         while ((!check_if_epidemic(removals_proposed, infections_augmented[1:epidemic_size], lag)) && (ctr <= num_tries)) {
           ctr <- ctr + 1
-          if (sum(is.na(removals))==1) {
+          if (sum(is.na(removals)) == 1) {
             l <- (1:epidemic_size)[is.na(removals)]
           } else {
             l <- sample((1:epidemic_size)[is.na(removals)], 1)
@@ -299,7 +300,8 @@ peirr_bayes <- function(removals,
           removals_proposed[l] <- new_removal
         }
         if (check_if_epidemic(removals_proposed, infections_augmented[1:epidemic_size], lag)) { # must be epidemic
-          accept_prob <- min(1, exp(update_removal_prob(infections_augmented, removals_augmented, removals_proposed, beta_shape, beta_rate, lag=lag)))
+          proposal_log_prob <- update_removal_prob(removals_augmented, infections_augmented, removals_proposed, beta_shape, beta_rate, lag=lag)
+          accept_prob <- min(1, exp(proposal_log_prob))
           if (runif(1) < accept_prob) {
             removals_augmented[l] <- new_removal
             successes <- successes + 1
@@ -316,13 +318,13 @@ peirr_bayes <- function(removals,
     storage[2, k] <- gamma_curr
 
     # iteration update
-    if(!(k %% U)){
+    if (!(k %% num_print)) {
       print(k)
     }
   }
-
-  return(list(infection_rates = storage[1, ],
-              removal_rates = storage[2, ],
+  
+  return(list(infection_rate = storage[1, ],
+              removal_rate = storage[2, ],
               prop_infection_updated = storage[3, ],
               prop_removal_updated = storage[4, ]
               ))

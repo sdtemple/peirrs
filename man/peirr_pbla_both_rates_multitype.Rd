@@ -14,11 +14,11 @@ peirr_pbla_both_rates_multitype(
 )
 }
 \arguments{
-\item{removals}{numeric: removal times}
+\item{removals}{numeric: removal times (as large a vector as population size, with NAs for uninfected)}
 
-\item{removal_classes}{numeric: removal time classes}
+\item{removal_classes}{numeric: removal time classes (as large a vector as population size, with NAs for uninfected)}
 
-\item{infection_classes}{numeric: infection time classes}
+\item{infection_classes}{numeric: infection time classes (as large a vector as population size, with NAs for uninfected)}
 
 \item{num_renewals}{integer: erlang shape}
 

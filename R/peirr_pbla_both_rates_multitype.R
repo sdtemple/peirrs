@@ -2,9 +2,9 @@
 #'
 #' Estimate multiple infection and removal rates with PBLA
 #'
-#' @param removals numeric: removal times
-#' @param removal_classes numeric: removal time classes
-#' @param infection_classes numeric: infection time classes
+#' @param removals numeric: removal times (as large a vector as population size, with NAs for uninfected)
+#' @param removal_classes numeric: removal time classes (as large a vector as population size, with NAs for uninfected)
+#' @param infection_classes numeric: infection time classes (as large a vector as population size, with NAs for uninfected)
 #' @param num_renewals integer: erlang shape
 #' @param num_patient_zeros integer: patient zeros
 #' @param lag numeric: fixed lag

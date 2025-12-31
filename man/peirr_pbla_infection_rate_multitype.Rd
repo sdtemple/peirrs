@@ -17,13 +17,13 @@ peirr_pbla_infection_rate_multitype(
 )
 }
 \arguments{
-\item{removals}{numeric: removal times}
+\item{removals}{numeric: removal times (as large a vector as population size, with NAs for uninfected)}
 
-\item{infections}{numeric: infection times}
+\item{infections}{numeric: infection times (as large a vector as population size, with NAs for uninfected)}
 
-\item{removal_classes}{numeric: removal time classes}
+\item{removal_classes}{numeric: removal time classes (as large a vector as population size, with NAs for uninfected)}
 
-\item{infection_classes}{numeric: infection time classes}
+\item{infection_classes}{numeric: infection time classes (as large a vector as population size, with NAs for uninfected)}
 
 \item{num_renewals}{integer: erlang shape}
 
@@ -34,8 +34,6 @@ peirr_pbla_infection_rate_multitype(
 \item{known_gamma}{numeric: removal rates}
 
 \item{median_gamma}{bool: TRUE for median, and FALSE for mean in estimating the removal rate}
-
-\item{population_size}{integer: population size}
 }
 \value{
 numeric list (infection_rate, removal_rate)
