@@ -44,14 +44,14 @@
 #'
 #' @export
 simulate_distance_matrix <- function(population_size,
-                         kernel=exp,
-                         inverse_kernel=log,
-                         mu=0.9,
-                         sigma=0.01,
-                         method='euclidean',
-                         runif_max=100,
-                         scalar=-0.05,
-                         num_tries=1000
+                         kernel = exp,
+                         inverse_kernel = log,
+                         mu = 0.9,
+                         sigma = 0.01,
+                         method = 'euclidean',
+                         runif_max = 100,
+                         scalar = -0.05,
+                         num_tries = 1000
                          ) {
 
   # some double checks, especially for user-defined inverse

@@ -18,10 +18,10 @@
 peirr_tau_multitype <- function(removals, infections,
                                 removal_classes, infection_classes,
                                 infection_class_sizes,
-                                lag=0,
-                                median_tau=FALSE,
-                                median_gamma=FALSE
-                                ){
+                                lag = 0,
+                                median_tau = FALSE,
+                                median_gamma = FALSE
+                                ) {
 
   # make sure one or the other is finite
   or.finite <- is.finite(removals) | is.finite(infections)

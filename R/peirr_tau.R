@@ -13,7 +13,9 @@
 #' @return numeric list (infection.rate, removal.rate, R0)
 #'
 #' @export
-peirr_tau <- function(removals, infections, population_size,
+peirr_tau <- function(removals, 
+                      infections, 
+                      population_size,
                       lag = 0,
                       median_tau = FALSE,
                       median_gamma = FALSE
@@ -25,7 +27,10 @@ peirr_tau <- function(removals, infections, population_size,
   removals <- removals[or_finite]
 
   # estimate of removal rate
-  gamma_estim <- peirr_removal_rate(removals, infections, median_gamma=median_gamma)
+  gamma_estim <- peirr_removal_rate(removals, 
+                                    infections, 
+                                    median_gamma=median_gamma
+                                    )
 
   # number of infected
   epidemic_size <- sum(!is.na(removals) | !is.na(infections))
@@ -53,10 +58,22 @@ peirr_tau <- function(removals, infections, population_size,
     for (k in (1:epidemic_size)[-j]) {
       removals_k <- removals[k]
       infections_k <- infections[k]
-      tau_kj <- tau_moment(removals_k, removals_j, infections_k, infections_j, gamma_estim, gamma_estim, lag, median_tau)
+      tau_kj <- tau_moment(removals_k, 
+                            removals_j, 
+                            infections_k, 
+                            infections_j, 
+                            gamma_estim, 
+                            gamma_estim, 
+                            lag, 
+                            median_tau
+                            )
+
       if (is.na(tau_kj)) {
-        print(c(removals_k, removals_j, infections_k, infections_j, gamma_estim, gamma_estim))
+        print(c(removals_k, removals_j, 
+                infections_k, infections_j, 
+                gamma_estim, gamma_estim))
         }
+
       tau_sum <- tau_sum + tau_kj
     }
   }
@@ -69,10 +86,12 @@ peirr_tau <- function(removals, infections, population_size,
   num_not_complete <- length(removals) - length(removals_complete)
   median_scalar <- 1
   if (median_tau) {median_scalar <- log(2)}
-  complete_period_sum <- num_not_complete / gamma_estim * median_scalar + sum(removals_complete - infections_complete)
+  complete_period_sum <- num_not_complete / gamma_estim * median_scalar + 
+    sum(removals_complete - infections_complete)
 
   # maximizes give conditional expectations
-  beta_estim <- (epidemic_size - 1) / (tau_sum + (population_size - epidemic_size) * complete_period_sum)
+  beta_estim <- (epidemic_size - 1) / (tau_sum + 
+    (population_size - epidemic_size) * complete_period_sum)
 
   return(list(infection_rate = beta_estim * population_size,
               removal_rate = gamma_estim,

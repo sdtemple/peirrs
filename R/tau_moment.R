@@ -14,7 +14,14 @@
 #' @return numeric: expectation of some pair-wise tau
 #'
 #' @export
-tau_moment <- function(rk, rj, ik, ij, lambdak, lambdaj, lag=0, impute_median=TRUE){
+tau_moment <- function(rk, 
+                        rj, 
+                        ik, 
+                        ij, 
+                        lambdak, 
+                        lambdaj, 
+                        lag = 0, 
+                        impute_median = TRUE) {
 
   # update these if there is a lag
   if (is.na(ij)) {

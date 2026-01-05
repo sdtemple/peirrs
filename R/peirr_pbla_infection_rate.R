@@ -25,8 +25,22 @@ peirr_pbla_infection_rate <- function(removals,
                                       ) {
 
   # PBLA function with fixed removal rate
-  pb <- function(beta_estim, pbla, gamma_estim, removals, population_size, num_renewals, num_patient_zeros, lag) {
-    pbla(removals, beta_estim, gamma_estim, population_size, num_renewals, num_patient_zeros, lag)
+  pb <- function(beta_estim, 
+                  pbla, 
+                  gamma_estim, 
+                  removals, 
+                  population_size, 
+                  num_renewals, 
+                  num_patient_zeros, 
+                  lag) {
+    pbla(removals, 
+      beta_estim, 
+      gamma_estim, 
+      population_size, 
+      num_renewals, 
+      num_patient_zeros, 
+      lag
+      )
   }
 
   # estimate of removal rate

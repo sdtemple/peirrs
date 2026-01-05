@@ -46,22 +46,22 @@
 #' to ensure consistency with epidemic dynamics.
 #' @export
 peirr_bayes_spatial <- function(removals,
-                        infections,
-                        population_size,
-                        kernel_spatial,
-                        matrix_distance,
-                        num_renewals=1,
-                        beta_init=1,
-                        gamma_init=1,
-                        beta_shape=1,
-                        gamma_shape=1,
-                        num_update=10,
-                        num_iter=500,
-                        num_print=100,
-                        num_tries=5,
-                        update_gamma=FALSE,
-                        lag=0
-){
+                                infections,
+                                population_size,
+                                kernel_spatial,
+                                matrix_distance,
+                                num_renewals = 1,
+                                beta_init = 1,
+                                gamma_init = 1,
+                                beta_shape = 1,
+                                gamma_shape = 1,
+                                num_update = 10,
+                                num_iter = 500,
+                                num_print = 100,
+                                num_tries = 5,
+                                update_gamma = FALSE,
+                                lag = 0
+                                ) {
 
   ### utility function local to ###
 
@@ -70,7 +70,9 @@ peirr_bayes_spatial <- function(removals,
     epidemic_size = length(removals)
     ind_matrix = matrix(0, nrow = epidemic_size, ncol = epidemic_size)
     for(j in 1:epidemic_size){
-      ind_matrix[j,] = (infections[1:epidemic_size] < (infections[j] - lag)) * (removals > (infections[j] - lag))
+      ind_matrix[j,] = ((infections[1:epidemic_size] < (infections[j] - lag)) * 
+                        (removals > (infections[j] - lag))
+                        )    
     }
     chi_matrix = apply(ind_matrix, 1, sum)
     chi_matrix = chi_matrix[chi_matrix == 0]
@@ -82,7 +84,14 @@ peirr_bayes_spatial <- function(removals,
   }
 
   # utlity for infection time metropolis hastings step
-  update_infected_prob = function(removals, infections, infections_proposed, beta_shape, beta_rate, lag, kernel_spatial, matrix_distance){
+  update_infected_prob = function(removals, 
+                                  infections, 
+                                  infections_proposed, 
+                                  beta_shape, 
+                                  beta_rate, 
+                                  lag, 
+                                  kernel_spatial, 
+                                  matrix_distance) {
 
     # initialize
     epidemic_size = length(removals)
@@ -94,17 +103,23 @@ peirr_bayes_spatial <- function(removals,
     # compute tau matrices
     tau_matrix = matrix(0, nrow = epidemic_size, ncol = population_size)
     for (j in 1:epidemic_size) {
-      tau_matrix[j,] = (sapply(infections - lag, min, removals[j]) - sapply(infections - lag, min, infections[j])) * kernel_spatial(matrix_distance[j,])
+      tau_matrix[j,] = (sapply(infections - lag, min, removals[j]) - 
+                        sapply(infections - lag, min, infections[j])) * 
+                        kernel_spatial(matrix_distance[j,])
     }
     tau_matrix_proposed = matrix(0, nrow = epidemic_size, ncol = population_size)
     for (j in 1:epidemic_size) {
-      tau_matrix_proposed[j,] = (sapply(infections_proposed - lag, min, removals[j]) - sapply(infections_proposed - lag, min, infections_proposed[j])) * kernel_spatial(matrix_distance[j,])
+      tau_matrix_proposed[j,] = (sapply(infections_proposed - lag, min, removals[j]) - 
+                                 sapply(infections_proposed - lag, min, infections_proposed[j])) * 
+                                 kernel_spatial(matrix_distance[j,])
     }
 
     # compute
     ind_matrix = matrix(0, nrow = epidemic_size, ncol = epidemic_size)
     for (j in 1:epidemic_size) {
-      ind_matrix[j,] = (infections[1:epidemic_size] < (infections[j] - lag)) * (removals > (infections[j] - lag)) * kernel_spatial(matrix_distance[j,1:epidemic_size])
+      ind_matrix[j,] = (infections[1:epidemic_size] < (infections[j] - lag)) * 
+                        (removals > (infections[j] - lag)) * 
+                        kernel_spatial(matrix_distance[j,1:epidemic_size])
     }
     # L1 comes from page 25 of the stockdale 2019 thesis
     # Integrated out formula is page 32 of my prelim
@@ -115,7 +130,9 @@ peirr_bayes_spatial <- function(removals,
 
     ind_matrix_proposed = matrix(0, nrow = epidemic_size, ncol = epidemic_size)
     for (j in 1:epidemic_size) {
-      ind_matrix_proposed[j,] = (infections_proposed[1:epidemic_size] < (infections_proposed[j] - lag)) * (removals > (infections_proposed[j] - lag)) * kernel_spatial(matrix_distance[j,1:epidemic_size])
+      ind_matrix_proposed[j,] = (infections_proposed[1:epidemic_size] < (infections_proposed[j] - lag)) * 
+                                (removals > (infections_proposed[j] - lag)) * 
+                                kernel_spatial(matrix_distance[j,1:epidemic_size])
     }
     chi_prob_proposed = apply(ind_matrix_proposed, 1, sum)
     chi_prob_proposed = chi_prob_proposed[chi_prob_proposed > 0]
@@ -127,7 +144,14 @@ peirr_bayes_spatial <- function(removals,
   }
 
   # utlity for infection time metropolis hastings step
-  update_removal_prob = function(removals, infections, removals_proposed, beta_shape, beta_rate, lag, kernel_spatial, matrix_distance){
+  update_removal_prob = function(removals, 
+                                  infections, 
+                                  removals_proposed, 
+                                  beta_shape, 
+                                  beta_rate, 
+                                  lag, 
+                                  kernel_spatial, 
+                                  matrix_distance) {
 
     # initialize
     epidemic_size = length(removals)
@@ -141,17 +165,23 @@ peirr_bayes_spatial <- function(removals,
     # compute tau matrices
     tau_matrix = matrix(0, nrow = epidemic_size, ncol = population_size)
     for(j in 1:epidemic_size){
-      tau_matrix[j,] = (sapply(infections - lag, min, removals[j]) - sapply(infections - lag, min, infections[j]))  * kernel_spatial(matrix_distance[j,])
+      tau_matrix[j,] = (sapply(infections - lag, min, removals[j]) - 
+                        sapply(infections - lag, min, infections[j])) * 
+                        kernel_spatial(matrix_distance[j,])
     }
     tau_matrix_proposed = matrix(0, nrow = epidemic_size, ncol = population_size)
     for(j in 1:epidemic_size){
-      tau_matrix_proposed[j,] = (sapply(infections - lag, min, removals_proposed[j]) - sapply(infections - lag, min, infections[j])) * kernel_spatial(matrix_distance[j,])
+      tau_matrix_proposed[j,] = (sapply(infections - lag, min, removals_proposed[j]) - 
+                                 sapply(infections - lag, min, infections[j])) * 
+                                 kernel_spatial(matrix_distance[j,])
     }
 
     # compute
     ind_matrix = matrix(0, nrow = epidemic_size, ncol = epidemic_size)
     for(j in 1:epidemic_size){
-      ind_matrix[j,] = (infections[1:epidemic_size] < (infections[j] - lag)) * (removals > (infections[j] - lag)) * kernel_spatial(matrix_distance[j,1:epidemic_size])
+      ind_matrix[j,] = (infections[1:epidemic_size] < (infections[j] - lag)) * 
+                        (removals > (infections[j] - lag)) * 
+                        kernel_spatial(matrix_distance[j, 1:epidemic_size])
     }
     # L1 comes from page 25 of the stockdale 2019 thesis
     # Integrated out formula is page 32 of my prelim
@@ -162,7 +192,9 @@ peirr_bayes_spatial <- function(removals,
 
     ind_matrix_proposed = matrix(0, nrow = epidemic_size, ncol = epidemic_size)
     for(j in 1:epidemic_size){
-      ind_matrix_proposed[j,] = (infections[1:epidemic_size] < (infections[j] - lag)) * (removals_proposed > (infections[j] - lag)) * kernel_spatial(matrix_distance[j,1:epidemic_size])
+      ind_matrix_proposed[j,] = (infections[1:epidemic_size] < (infections[j] - lag)) * 
+                                (removals_proposed > (infections[j] - lag)) * 
+                                kernel_spatial(matrix_distance[j, 1:epidemic_size])
     }
     chi_prob_proposed = apply(ind_matrix_proposed, 1, sum)
     chi_prob_proposed = chi_prob_proposed[chi_prob_proposed > 0]
@@ -179,6 +211,7 @@ peirr_bayes_spatial <- function(removals,
   beta_rate <- beta_shape / beta_init
   gamma_rate <- gamma_shape / gamma_init
   beta_curr <- beta_rate / population_size
+  beta_rate <- beta_rate / population_size
   if (update_gamma) {
     gamma_curr <- rgamma(1, shape=gamma_shape, rate=gamma_rate)
   } else {
@@ -193,7 +226,29 @@ peirr_bayes_spatial <- function(removals,
   tau_matrix = matrix(0, nrow = epidemic_size, ncol = population_size)
 
   if (sum(!is.na(infections)) == epidemic_size && sum(!is.na(removals)) == epidemic_size) {
-    stop("No implementation for complete spatial data")
+    # premature exit
+    # because complete data
+    out <- bayes_complete_spatial(removals,
+                                  infections,
+                                  population_size,
+                                  kernel_spatial,
+                                  matrix_distance,
+                                  beta_init=beta_init,
+                                  gamma_init=gamma_init,
+                                  beta_shape=beta_shape,
+                                  gamma_shape=gamma_shape,
+                                  num_iter = num_iter,
+                                  lag=lag
+                                  )
+    storage[1, ] <- out$infection_rate
+    storage[2, ] <- out$removal_rate
+    storage[3, ] <- rep(NA, num_iter)
+    storage[4, ] <- rep(NA, num_iter)
+  return(list(infection_rate = storage[1, ],
+              removal_rate = storage[2, ],
+              prop_infection_updated = storage[3, ],
+              prop_removal_updated = storage[4, ]
+              ))
   }
 
   # first data augmentation
@@ -203,8 +258,10 @@ peirr_bayes_spatial <- function(removals,
   num_update_removals <- min(num_nan_removals, num_update)
   infections_augmented <- infections
   removals_augmented <- removals
-  infections_augmented[is.na(infections)] <- removals[is.na(infections)] - (rgamma(num_nan_infections, shape = num_renewals, rate = 1) / gamma_curr)
-  removals_augmented[is.na(removals)] <- infections[is.na(removals)] + (rgamma(num_nan_removals, shape = num_renewals, rate = 1) / gamma_curr)
+  infections_augmented[is.na(infections)] <- removals[is.na(infections)] - 
+    (rgamma(num_nan_infections, shape = num_renewals, rate = 1) / gamma_curr)
+  removals_augmented[is.na(removals)] <- infections[is.na(removals)] + 
+    (rgamma(num_nan_removals, shape = num_renewals, rate = 1) / gamma_curr)
   while (!check_if_epidemic(removals_augmented, infections_augmented, lag)) { # must be epidemic
     # can get hung for poorly drawn gamma
     if (update_gamma) {
@@ -212,8 +269,10 @@ peirr_bayes_spatial <- function(removals,
     } else {
       gamma_curr <- gamma_init
     }
-    infections_augmented[is.na(infections)] <- removals[is.na(infections)] - (rgamma(num_nan_infections, shape = num_renewals, rate = 1) / gamma_curr)
-    removals_augmented[is.na(removals)] <- infections[is.na(removals)] + (rgamma(num_nan_removals, shape = num_renewals, rate = 1) / gamma_curr)
+    infections_augmented[is.na(infections)] <- removals[is.na(infections)] - 
+      (rgamma(num_nan_infections, shape = num_renewals, rate = 1) / gamma_curr)
+    removals_augmented[is.na(removals)] <- infections[is.na(removals)] + 
+      (rgamma(num_nan_removals, shape = num_renewals, rate = 1) / gamma_curr)
   }
   infections_augmented <- c(infections_augmented, rep(Inf, population_size - epidemic_size))
 
@@ -223,7 +282,9 @@ peirr_bayes_spatial <- function(removals,
     # beta gibbs step
     tau_matrix = matrix(0, nrow = epidemic_size, ncol = population_size)
     for(j in 1:epidemic_size){
-      tau_matrix[j,] = (sapply(infections_augmented - lag, min, removals_augmented[j]) - sapply(infections_augmented - lag, min, infections_augmented[j]))  * kernel_spatial(matrix_distance[j,])
+      tau_matrix[j,] = (sapply(infections_augmented - lag, min, removals_augmented[j]) - 
+        sapply(infections_augmented - lag, min, infections_augmented[j])) * 
+        kernel_spatial(matrix_distance[j,])
     }
     # may still have an issue here
     beta_curr = rgamma(1, shape = beta_shape + epidemic_size - 1, rate = beta_rate + sum(tau_matrix))
@@ -261,7 +322,15 @@ peirr_bayes_spatial <- function(removals,
         }
 
         if (check_if_epidemic(removals_augmented, infections_proposed[1:population_size], lag)) { # must be epidemic
-          proposal_log_prob <- update_infected_prob(removals_augmented, infections_augmented, infections_proposed, beta_shape, beta_rate, lag=lag, kernel_spatial=kernel_spatial, matrix_distance=matrix_distance)
+          proposal_log_prob <- update_infected_prob(removals_augmented, 
+                                                    infections_augmented, 
+                                                    infections_proposed, 
+                                                    beta_shape, 
+                                                    beta_rate, 
+                                                    lag=lag, 
+                                                    kernel_spatial=kernel_spatial, 
+                                                    matrix_distance=matrix_distance
+                                                    )
           accept_prob = min(1, exp(proposal_log_prob))
           if (runif(1) < accept_prob) {
             infections_augmented[l] = new_infection
@@ -304,7 +373,15 @@ peirr_bayes_spatial <- function(removals,
         }
 
         if (check_if_epidemic(removals_proposed, infections_augmented[1:population_size], lag)) { # must be epidemic
-          proposal_log_prob <- update_removal_prob(removals_augmented, infections_augmented, removals_proposed, beta_shape, beta_rate, lag=lag, kernel_spatial=kernel_spatial, matrix_distance=matrix_distance)
+          proposal_log_prob <- update_removal_prob(removals_augmented, 
+                                                    infections_augmented, 
+                                                    removals_proposed, 
+                                                    beta_shape, 
+                                                    beta_rate, 
+                                                    lag=lag, 
+                                                    kernel_spatial=kernel_spatial, 
+                                                    matrix_distance=matrix_distance
+                                                    )
           accept_prob = min(1, exp(proposal_log_prob))
           if (runif(1) < accept_prob) {
             removals_augmented[l] = new_removal
@@ -317,7 +394,8 @@ peirr_bayes_spatial <- function(removals,
 
     # gamma gibbs step
     if (update_gamma) {
-      gamma_curr = rgamma(1, gamma_shape + epidemic_size, gamma_rate + sum((removals_augmented - infections_augmented[1:epidemic_size])))
+      gamma_curr = rgamma(1, gamma_shape + epidemic_size, gamma_rate + 
+        sum((removals_augmented - infections_augmented[1:epidemic_size])))
     }
     storage[2, k] = gamma_curr
 

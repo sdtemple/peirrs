@@ -46,18 +46,18 @@
 peirr_bayes <- function(removals,
                         infections,
                         population_size,
-                        num_renewals=1,
-                        beta_init=1,
-                        gamma_init=1,
-                        beta_shape=1,
-                        gamma_shape=1,
-                        num_iter=500,
-                        num_update=10,
-                        num_tries=5,
-                        num_print=100,
-                        update_gamma=FALSE,
-                        lag=0
-){
+                        num_renewals = 1,
+                        beta_init = 1,
+                        gamma_init = 1,
+                        beta_shape = 1,
+                        gamma_shape = 1,
+                        num_iter = 500,
+                        num_update = 10,
+                        num_tries = 5,
+                        num_print = 100,
+                        update_gamma = FALSE,
+                        lag = 0
+                        ){
 
   ### utility function local to ###
 
@@ -175,6 +175,7 @@ peirr_bayes <- function(removals,
   beta_rate <- beta_shape / beta_init
   gamma_rate <- gamma_shape / gamma_init
   beta_curr <- beta_rate / population_size
+  beta_rate <- beta_rate / population_size
   if (update_gamma) {
     gamma_curr <- rgamma(1, shape=gamma_shape, rate=gamma_rate)
   } else {
@@ -193,18 +194,22 @@ peirr_bayes <- function(removals,
     out <- bayes_complete(removals,
                                infections,
                                population_size,
-                               beta_rate = beta_rate,
-                               beta_shape = beta_shape,
-                               gamma_rate = gamma_rate,
-                               gamma_shape = gamma_shape,
+                        beta_init=beta_init,
+                        gamma_init=gamma_init,
+                        beta_shape=beta_shape,
+                        gamma_shape=gamma_shape,
                                num_iter = num_iter,
                                lag=lag
                                )
-    storage[1, ] <- out$infection_rates
-    storage[2, ] <- out$removal_rates
+    storage[1, ] <- out$infection_rate
+    storage[2, ] <- out$removal_rate
     storage[3, ] <- rep(NA, num_iter)
     storage[4, ] <- rep(NA, num_iter)
-    return(storage)
+  return(list(infection_rate = storage[1, ],
+              removal_rate = storage[2, ],
+              prop_infection_updated = storage[3, ],
+              prop_removal_updated = storage[4, ]
+              ))
   }
 
   # first data augmentation

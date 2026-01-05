@@ -21,16 +21,23 @@ sort_sem <- function(matrix_time) {
     removal_rates <- matrix_time[, 6][ind]
     population_size <- length(removals)
     # formatting
-    output <- matrix(c(infections, removals, infection_classes, infection_rates, removal_classes, removal_rates),
-                     nrow = population_size,
-                     ncol = 6,
-                     byrow = FALSE)
+    output <- matrix(c(infections, 
+                        removals, 
+                        infection_classes, 
+                        infection_rates, 
+                        removal_classes, 
+                        removal_rates),
+                        nrow = population_size,
+                        ncol = 6,
+                        byrow = FALSE
+                        )
     colnames(output) <- c("infection",
                           "removal",
                           "infection_class",
                           "infection_rate",
                           "removal_class",
-                          "removal_rate")
+                          "removal_rate"
+                          )
     output
   } else {
     output <- cbind(infections, removals)

@@ -9,14 +9,20 @@
 #' @return float: Removal rate estimate
 #'
 #' @export
-peirr_removal_rate <- function(removals, infections, median_gamma=TRUE) {
+peirr_removal_rate <- function(removals, 
+                                infections, 
+                                median_gamma = TRU
+                                ) {
+
   ind <- (!is.na(removals)) * (!is.na(infections))
   ind <- which(ind == 1, arr.ind=TRUE)
   removals <- removals[ind]
   infections <- infections[ind]
   complete_period <- removals - infections
+  
   if (median_gamma) {
     return(1 / median(complete_period) * log(2))
+
   } else {
     return(length(complete_period) / sum(complete_period))
   }

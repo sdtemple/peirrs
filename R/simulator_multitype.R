@@ -20,26 +20,32 @@ simulator_multitype <- function(beta,
                       gamma,
                       infection_class_sizes,
                       removal_class_sizes,
-                      num_renewals=1,
-                      lag=0,
-                      prop_complete=0.5,
-                      prop_infection_missing=1,
-                      min_epidemic_size=10,
-                      max_epidemic_size=Inf
-                      ){
+                      num_renewals = 1,
+                      lag = 0,
+                      prop_complete = 0.5,
+                      prop_infection_missing = 1,
+                      min_epidemic_size = 10,
+                      max_epidemic_size = Inf
+                      ) {
   sample_size <- 0
   gamma_estim <- NA
   if (prop_complete <= 0) {
     stop("prop_complete <= 0 error. Must have some complete infectious periods.")
   }
-  while((sample_size <= min_epidemic_size) || (sample_size >= max_epidemic_size) || is.na(gamma_estim) ){
+
+  while((sample_size <= min_epidemic_size) || 
+    (sample_size >= max_epidemic_size) || 
+    is.na(gamma_estim) 
+    ) {
     # main simulation
     epidemic = simulate_sem_multitype(beta, gamma, infection_class_sizes, removal_class_sizes, num_renewals, lag)
     epidemic$matrix_time = filter_sem(epidemic$matrix_time)
     epidemic$matrix_time = decomplete_sem(epidemic$matrix_time, prop_complete=prop_complete, prop_infection_missing=prop_infection_missing)
     epidemic$matrix_time = sort_sem(epidemic$matrix_time)
+
     # calculate the sample size
     sample_size = dim(epidemic$matrix_time)[1]
+
     # ensure there are r and i enough to estimate all gammas
     gamma_estim <- 0
     for(removal_class in 1:length(removal_class_sizes)){
@@ -54,5 +60,6 @@ simulator_multitype <- function(beta,
       gamma_estim <- gamma_estim + 1 / mean(period_kept)
     }
   }
+
   return(epidemic)
 }

@@ -19,12 +19,12 @@ peirr_pbla_infection_rate_multitype <- function(removals,
                                       infections,
                                       removal_classes,
                                       infection_classes,
-                                      num_renewals=1,
-                                      num_patient_zeros=1,
-                                      lag=0,
+                                      num_renewals = 1,
+                                      num_patient_zeros = 1,
+                                      lag = 0,
                                       known_gamma = NULL,
                                       median_gamma = FALSE
-                                      ){
+                                      ) {
 
   # PBLA function with fixed removal rate
   pb <- function(beta_estims, pbla, gamma_estims, beta_map, gamma_map, removals, num_renewals, num_patient_zeros, lag) {
@@ -50,7 +50,11 @@ peirr_pbla_infection_rate_multitype <- function(removals,
       removals_kept <- removals[indicators]
       infections_kept <- infections[indicators]
       # find those that are complete
-      filter_by <- (!is.na(removals_kept)) & (!is.na(infections_kept)) & (is.finite(removals_kept)) & (is.finite(infections_kept))
+      filter_by <- (!is.na(removals_kept)) & 
+        (!is.na(infections_kept)) & 
+        (is.finite(removals_kept)) & 
+        (is.finite(infections_kept)
+        )
       filters <- which(filter_by == 1)
       removals_kept_v2 <- removals_kept[filters]
       infections_kept_v2 <- infections_kept[filters]

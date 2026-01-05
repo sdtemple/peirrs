@@ -47,18 +47,18 @@
 #'
 #' @export
 peirr_bootstrap_multitype <- function(num_bootstrap,
-                            beta,
-                            gamma,
-                            infection_class_sizes,
-                            removal_class_sizes,
-                            epidemic_size,
-                            prop_complete,
-                            prop_infection_missing,
-                            num_renewals=1,
-                            lag=0,
-                            within=0.1,
-                            etc=NULL
-){
+                                      beta,
+                                      gamma,
+                                      infection_class_sizes,
+                                      removal_class_sizes,
+                                      epidemic_size,
+                                      prop_complete,
+                                      prop_infection_missing,
+                                      num_renewals = 1,
+                                      lag = 0,
+                                      within = 0.1,
+                                      etc = NULL
+                                      ) {
 
   # for matrix setup and filling
   num_beta = length(beta)
@@ -92,11 +92,21 @@ peirr_bootstrap_multitype <- function(num_bootstrap,
     infections = X[,1]
     infection_classes = X[,3]
     bth_estimate = do.call(peirr_tau_multitype,
-                           c(list(removals=removals, infections=infections, removal_classes=removal_classes, infection_classes=infection_classes, infection_class_sizes=infection_class_sizes, lag=lag), etc)
+                           c(list(removals=removals, 
+                                  infections=infections, 
+                                  removal_classes=removal_classes, 
+                                  infection_classes=infection_classes, 
+                                  infection_class_sizes=infection_class_sizes, 
+                                  lag=lag), 
+                                  etc
+                            )
                            )
     # print(bth.estimate)
     storage[1:num_beta, l] = bth_estimate$infection_rate
     storage[(num_beta+1):num_param, l] = bth_estimate$removal_rate
   }
-  return(list(infection_rate=storage[1:num_beta, ], removal_rate=storage[(num_beta+1):num_param, ]))
+  return(list(infection_rate=storage[1:num_beta, ], 
+              removal_rate=storage[(num_beta+1):num_param, ]
+              )
+        )
 }

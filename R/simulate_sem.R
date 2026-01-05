@@ -11,7 +11,12 @@
 #' @return numeric list: matrix of (infection times, removal times), matrix of (St, It, Et, Rt, Time)
 #'
 #' @export
-simulate_sem <- function(beta, gamma, population_size, num_renewals = 1, lag = 0) {
+simulate_sem <- function(beta, 
+                          gamma, 
+                          population_size, 
+                          num_renewals = 1, 
+                          lag = 0
+                          ) {
 
   # initialize vectors
   t <- 0
@@ -48,6 +53,7 @@ simulate_sem <- function(beta, gamma, population_size, num_renewals = 1, lag = 0
       # no infecteds but there are exposeds
       # the closest exposure wait
       t <- min.time + .Machine$double.eps
+
     } else {
       # simulate time
       irate <- betaN * It * St
@@ -57,6 +63,7 @@ simulate_sem <- function(beta, gamma, population_size, num_renewals = 1, lag = 0
       if (t > min.time) {
         # update time to make an exposed infectious
         t <- min.time + .Machine$double.eps
+
       } else {
         # there is infection or removal before
         # simulate transition
@@ -70,6 +77,7 @@ simulate_sem <- function(beta, gamma, population_size, num_renewals = 1, lag = 0
             argx <- which( is.infinite(infections) & is.infinite(removals) )
           }
           infections[argx] <- t + lag # fixed exposure period
+
         } else {
 
           # remove an infected
@@ -82,10 +90,12 @@ simulate_sem <- function(beta, gamma, population_size, num_renewals = 1, lag = 0
             argx <- which( is.infinite(removals) & (infections <= t) )
             # & (i <= t) means can't be removed before infectious when exposed
           }
+
           renewals[argx] <- renewals[argx] + 1
           if (renewals[argx] == num_renewals) { # after m renewals
             removals[argx] <- t
           }
+
         }
       }
     }
@@ -106,6 +116,7 @@ simulate_sem <- function(beta, gamma, population_size, num_renewals = 1, lag = 0
     removal_recording <- c(removal_recording, Rt)
     time_recording <- c(time_recording, t)
     ctr <- ctr + 1
+
   }
 
   # there should be no negatives
@@ -118,16 +129,21 @@ simulate_sem <- function(beta, gamma, population_size, num_renewals = 1, lag = 0
 
   # formatting
   output <- matrix(c(infections, removals),
-                  nrow = population_size,
-                  ncol = 2,
-                  byrow = FALSE)
+                    nrow = population_size,
+                    ncol = 2, 
+                    byrow = FALSE
+                    )
   colnames(output) <- c("infection", "removal")
 
-  recording <- matrix(c(susceptible_recording, exposed_recording, infection_recording, removal_recording, time_recording),
-                     nrow = ctr,
-                     ncol = 5,
-                     byrow = FALSE
-                     )
+  recording <- matrix(c(susceptible_recording, 
+                        exposed_recording, 
+                        infection_recording, 
+                        removal_recording, 
+                        time_recording),
+                      nrow = ctr,
+                      ncol = 5,
+                      byrow = FALSE
+                      )
   colnames(recording) <- c("St", "Et", "It", "Rt", "Time")
 
   return(list(matrix_time = output,

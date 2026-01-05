@@ -17,7 +17,8 @@ simulate_sem_multitype <- function(beta,
                                    infection_class_sizes,
                                    removal_class_sizes,
                                    num_renewals = 1,
-                                   lag = 0) {
+                                   lag = 0
+                                   ) {
 
   if (sum(removal_class_sizes) != sum(infection_class_sizes)) {
     stop("Infection and removal rate classes do not add up")

@@ -13,14 +13,16 @@
 #'
 #' @export
 peirr_pbla_both_rates_multitype <- function(removals,
-                                  removal_classes,
-                                  infection_classes,
-                                  num_renewals=1,
-                                  num_patient_zeros=1,
-                                  lag=0){
+                                            removal_classes,
+                                            infection_classes,
+                                            num_renewals = 1,
+                                            num_patient_zeros = 1,
+                                            lag = 0
+                                            ) {
 
   # jointly optimize the likelihood
-  num_rates <- length(unique(removal_classes,na.rm=TRUE)) + length(unique(infection_classes,na.rm=TRUE))
+  num_rates <- length(unique(removal_classes,na.rm=TRUE)) + 
+    length(unique(infection_classes,na.rm=TRUE))
   num_beta_rates <- length(unique(infection_classes,na.rm=TRUE))
 
   epidemic_size <- sum(is.finite(removals))

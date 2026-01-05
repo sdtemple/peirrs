@@ -13,7 +13,14 @@
 #' @return numeric list: matrix of (infection times, removal times, spatial coordinates), matrix of (St, It, Et, Rt, Time), matrix of N by N distances
 #'
 #' @export
-simulate_sem_spatial <- function(beta, gamma, population_size, kernel_spatial, matrix_distance, num_renewals = 1, lag = 0) {
+simulate_sem_spatial <- function(beta, 
+                                  gamma, 
+                                  population_size, 
+                                  kernel_spatial, 
+                                  matrix_distance, 
+                                  num_renewals = 1, 
+                                  lag = 0
+                                  ) {
 
   # initialize vectors
   t <- 0
