@@ -57,7 +57,7 @@ peirr_bayes <- function(removals,
                         num_print = 100,
                         update_gamma = FALSE,
                         lag = 0
-                        ){
+                        ) {
 
   ### utility function local to ###
 

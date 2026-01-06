@@ -96,7 +96,6 @@ bayes_complete_multitype <- function(removals,
   gamma_init = gamma_init[gamma_order]
 
   # sample removal rates
-  unique_removal_classes = order(unique(removal_classes))
   for (class_num in 1:num_gamma) {
     removal_class = unique_removal_classes[class_num]
     removals_filt = removals[removal_classes == removal_class]
@@ -112,25 +111,25 @@ bayes_complete_multitype <- function(removals,
   }
 
   # sample infection rates
-  tau = matrix(0, nrow = epidemic_size, ncol = epidemic_size)
+  tau_matrix = matrix(0, nrow = epidemic_size, ncol = epidemic_size)
   for (j in 1:epidemic_size) {
-    tau[j, 1:epidemic_size] = (sapply(infections[1:epidemic_size] - lag, min, removals[j]) - 
+    tau_matrix[j, 1:epidemic_size] = (sapply(infections[1:epidemic_size] - lag, min, removals[j]) - 
       sapply(infections[1:epidemic_size] - lag, min, infections[j])
       )
   }
   period_sum = sum(removals - infections[1:epidemic_size])
   for (class_num in 1:num_beta) {
     infection_class = unique_infection_classes[class_num]
-    tau_filt = tau[infection_classes[1:epidemic_size] == infection_class, ]
+    tau_filt = tau_matrix[infection_classes[1:epidemic_size] == infection_class, ]
     tau_filt_sum = sum(tau_filt)
     num_infected = nrow(tau_filt)
     num_not_infected = sum(infection_classes == infection_class) - num_infected
     beta_samples[class_num, ] = rgamma(num_iter,
-                                        rate = beta_rate[class_num] + 
-                                          tau_filt_sum + 
-                                          num_not_infected * period_sum,
-                                        shape = beta_shape[class_num] + num_infected
-                                        )
+                                      rate = beta_rate[class_num] + 
+                                        tau_filt_sum + 
+                                        num_not_infected * period_sum,
+                                      shape = beta_shape[class_num] + num_infected
+                                      )
   }
 
   return(list(infection_rate = beta_samples * population_size,
