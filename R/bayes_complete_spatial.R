@@ -30,6 +30,7 @@ bayes_complete_spatial <- function(removals,
                                     beta_shape = 1,
                                     gamma_shape = 1,
                                     num_iter = 1e4,
+                                    num_renewals = 1,
                                     lag = 0
                                     ) {
   
@@ -58,7 +59,7 @@ bayes_complete_spatial <- function(removals,
   # sample removal rates
   gamma_samples = rgamma(num_iter,
                          rate=gamma_rate + period_sum,
-                         shape=gamma_shape + epidemic_size
+                         shape=gamma_shape + epidemic_size * num_renewals
                          )
                          
   return(list(infection_rate=beta_samples * population_size,

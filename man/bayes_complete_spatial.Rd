@@ -15,6 +15,7 @@ bayes_complete_spatial(
   beta_shape = 1,
   gamma_shape = 1,
   num_iter = 10000,
+  num_renewals = 1,
   lag = 0
 )
 }

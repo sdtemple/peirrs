@@ -10,7 +10,6 @@ peirr_bayes_spatial(
   population_size,
   kernel_spatial,
   matrix_distance,
-  num_renewals = 1,
   beta_init = 1,
   gamma_init = 1,
   beta_shape = 1,
@@ -20,6 +19,7 @@ peirr_bayes_spatial(
   num_print = 100,
   num_tries = 5,
   update_gamma = FALSE,
+  num_renewals = 1,
   lag = 0
 )
 }
@@ -33,9 +33,6 @@ peirr_bayes_spatial(
 \item{kernel_spatial}{function: symmetric function of distance}
 
 \item{matrix_distance}{numeric: two-dimensional distance matrix}
-
-\item{num_renewals}{A numeric shape parameter for the gamma distribution used in data augmentation.
-Default is 1.}
 
 \item{beta_init}{A numeric initial estimate for the beta (transmission rate) parameter.
 Default is 1.}
@@ -61,6 +58,9 @@ Default is 5.}
 
 \item{update_gamma}{bool: TRUE to update removal rate estimate from initial estimate
 Default is FALSE.}
+
+\item{num_renewals}{A numeric shape parameter for the gamma distribution used in data augmentation.
+Default is 1.}
 
 \item{lag}{numeric: fixed exposure period}
 }

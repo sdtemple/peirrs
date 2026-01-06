@@ -4,7 +4,7 @@
 \alias{peirr_removal_rate}
 \title{Removal rate estimator}
 \usage{
-peirr_removal_rate(removals, infections, median_gamma = TRUE)
+peirr_removal_rate(removals, infections, median_gamma = TRU)
 }
 \arguments{
 \item{removals}{numeric vector: removal times}

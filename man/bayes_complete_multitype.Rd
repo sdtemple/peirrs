@@ -9,11 +9,13 @@ bayes_complete_multitype(
   infections,
   removal_classes,
   infection_classes,
+  infection_class_sizes,
   beta_init,
   beta_shape,
   gamma_init,
   gamma_shape,
   num_iter = 10000,
+  num_renewals = 1,
   lag = 0
 )
 }
@@ -69,10 +71,8 @@ removals <- X[, 2]
 infections <- X[, 1]
 removal_classes <- X[, 5]
 infection_classes <- X[, 4]
-removal_classes <- removal_classes[is.finite(removals)]
-removals <- removals[is.finite(removals)]
 priors <- c(1, 1)
-output <- bayes_complete_multitype(removals, infections, removal_classes, infection_classes, priors, priors, priors, priors, num_iter=1000, lag=0)
+output <- bayes_complete_multitype(removals, infections, removal_classes, infection_classes, infection_class_sizes, priors, priors, priors, priors, num_iter=1000, lag=0)
 hist(output$infection_rate[1,])
 hist(output$removal_rate[2,])
 

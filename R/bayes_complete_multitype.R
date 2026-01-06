@@ -42,10 +42,8 @@
 #' infections <- X[, 1]
 #' removal_classes <- X[, 5]
 #' infection_classes <- X[, 4]
-#' removal_classes <- removal_classes[is.finite(removals)]
-#' removals <- removals[is.finite(removals)]
 #' priors <- c(1, 1)
-#' output <- bayes_complete_multitype(removals, infections, removal_classes, infection_classes, priors, priors, priors, priors, num_iter=1000, lag=0)
+#' output <- bayes_complete_multitype(removals, infections, removal_classes, infection_classes, infection_class_sizes, priors, priors, priors, priors, num_iter=1000, lag=0)
 #' hist(output$infection_rate[1,])
 #' hist(output$removal_rate[2,])
 #'
@@ -54,13 +52,38 @@ bayes_complete_multitype <- function(removals,
                                     infections,
                                     removal_classes,
                                     infection_classes,
+                                    infection_class_sizes,
                                     beta_init,
                                     beta_shape,
                                     gamma_init,
                                     gamma_shape,
                                     num_iter = 1e4,
+                                    num_renewals = 1,
                                     lag = 0
                                     ) {
+
+  # input checks
+  if (length(removals) != length(removal_classes)) {
+    stop("Removal times and removal classes must have the same length")
+  }
+  if (length(infections) != length(infection_classes)) {
+    stop("Infection times and infection classes must have the same length")
+  }
+  if (length(infections) != length(removals)) {
+    stop("Infection and removal vectors must have the same length")
+  }
+  if (length(unique(removal_classes)) != length(gamma_shape)) {
+    stop("Incorrect vector size of removal rate shape parameters")
+  }
+  if (length(unique(infection_classes)) != length(beta_shape)) {
+    stop("Incorrect vector size of infection rate shape parameters")
+  }
+  if (length(beta_init) != length(beta_shape)) {
+    stop("Initial infection rates and shape parameters must have the same length")
+  }
+  if (length(gamma_init) != length(gamma_shape)) {
+    stop("Initial removal rates and shape parameters must have the same length")
+  }
 
   # set up matrices to store samples
   num_gamma = length(unique(removal_classes))
@@ -68,9 +91,22 @@ bayes_complete_multitype <- function(removals,
   num_beta = length(unique(infection_classes))
   beta_samples = matrix(0, nrow=num_beta, ncol=num_iter)
 
-  # initializations
+  # augment the infections vector
   epidemic_size = length(removals)
-  population_size = length(infections)  # assumes all individuals infected
+  population_size = sum(infection_class_sizes)
+  if (length(infections) != population_size) {
+    na_add <- population_size - epidemic_size
+    infections <- c(infections, rep(NA, na_add))
+    for (class in unique(infection_classes)) {
+      class_size <- infection_class_sizes[which(unique(infection_classes) == class)]
+      infection_classes <- c(infection_classes, rep(class, class_size - sum(infection_classes == class)))
+    }
+  }
+  if (population_size != length(infections)) {
+    stop("Error in extending the infections vector to the population size")
+  }
+
+  # initializations
   beta_rate <- beta_shape / beta_init
   gamma_rate <- gamma_shape / gamma_init
   beta_rate <- beta_rate / population_size
@@ -105,8 +141,8 @@ bayes_complete_multitype <- function(removals,
     period_sum = sum(period_filt)
     period_num = length(period_filt)
     gamma_samples[class_num, ] = rgamma(num_iter,
-                                        rate = gamma_rate[class_num] + period_sum,
-                                        shape = gamma_shape[class_num] + period_num
+                                        shape = gamma_shape[class_num] + period_num * num_renewals,
+                                        rate = gamma_rate[class_num] + period_sum
                                         )
   }
 
@@ -120,15 +156,15 @@ bayes_complete_multitype <- function(removals,
   period_sum = sum(removals - infections[1:epidemic_size])
   for (class_num in 1:num_beta) {
     infection_class = unique_infection_classes[class_num]
-    tau_filt = tau_matrix[infection_classes[1:epidemic_size] == infection_class, ]
+    tau_filt = tau_matrix[, infection_classes[1:epidemic_size] == infection_class]
     tau_filt_sum = sum(tau_filt)
-    num_infected = nrow(tau_filt)
+    num_infected = ncol(tau_filt)
     num_not_infected = sum(infection_classes == infection_class) - num_infected
     beta_samples[class_num, ] = rgamma(num_iter,
+                                      shape = beta_shape[class_num] + num_infected,
                                       rate = beta_rate[class_num] + 
                                         tau_filt_sum + 
                                         num_not_infected * period_sum,
-                                      shape = beta_shape[class_num] + num_infected
                                       )
   }
 

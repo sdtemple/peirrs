@@ -50,7 +50,6 @@ peirr_bayes_spatial <- function(removals,
                                 population_size,
                                 kernel_spatial,
                                 matrix_distance,
-                                num_renewals = 1,
                                 beta_init = 1,
                                 gamma_init = 1,
                                 beta_shape = 1,
@@ -60,6 +59,7 @@ peirr_bayes_spatial <- function(removals,
                                 num_print = 100,
                                 num_tries = 5,
                                 update_gamma = FALSE,
+                                num_renewals = 1,
                                 lag = 0
                                 ) {
 
@@ -237,18 +237,19 @@ peirr_bayes_spatial <- function(removals,
                                   gamma_init=gamma_init,
                                   beta_shape=beta_shape,
                                   gamma_shape=gamma_shape,
-                                  num_iter = num_iter,
+                                  num_iter=num_iter,
+                                  num_renewals=num_renewals,
                                   lag=lag
                                   )
     storage[1, ] <- out$infection_rate
     storage[2, ] <- out$removal_rate
     storage[3, ] <- rep(NA, num_iter)
     storage[4, ] <- rep(NA, num_iter)
-  return(list(infection_rate = storage[1, ],
-              removal_rate = storage[2, ],
-              prop_infection_updated = storage[3, ],
-              prop_removal_updated = storage[4, ]
-              ))
+    return(list(infection_rate = storage[1, ],
+                removal_rate = storage[2, ],
+                prop_infection_updated = storage[3, ],
+                prop_removal_updated = storage[4, ]
+                ))
   }
 
   # first data augmentation
@@ -287,7 +288,10 @@ peirr_bayes_spatial <- function(removals,
         kernel_spatial(matrix_distance[j,])
     }
     # may still have an issue here
-    beta_curr = rgamma(1, shape = beta_shape + epidemic_size - 1, rate = beta_rate + sum(tau_matrix))
+    beta_curr = rgamma(1, 
+                      shape = beta_shape + epidemic_size - 1, 
+                      rate = beta_rate + sum(tau_matrix)
+                      )
     storage[1, k] = beta_curr * population_size
 
     # infection times metropolis hastings step
@@ -308,17 +312,12 @@ peirr_bayes_spatial <- function(removals,
         infections_proposed[l] = new_infection
 
         while ((!check_if_epidemic(removals_augmented, infections_proposed[1:population_size], lag)) && (ctr <= num_tries)) {
+
           ctr = ctr + 1
-
-          if (sum(is.na(infections)) == 1) {
-            l = (1:epidemic_size)[is.na(infections)]
-          } else {
-            l = sample((1:epidemic_size)[is.na(infections)], 1)
-          }
-
           new_infection = removals_augmented[l] - (rgamma(1, shape = num_renewals, rate = 1) / gamma_curr)
           infections_proposed = infections_augmented
           infections_proposed[l] = new_infection
+
         }
 
         if (check_if_epidemic(removals_augmented, infections_proposed[1:population_size], lag)) { # must be epidemic
@@ -346,8 +345,8 @@ peirr_bayes_spatial <- function(removals,
     if (num_nan_removals > 0) {
 
       for(j in 1:num_update_removals){
-        ctr = 1
 
+        ctr = 1
         if (sum(is.na(removals)) == 1) {
           l = (1:epidemic_size)[is.na(removals)]
         } else {
@@ -359,17 +358,12 @@ peirr_bayes_spatial <- function(removals,
         removals_proposed[l] = new_removal
 
         while ((!check_if_epidemic(removals_proposed, infections_augmented[1:population_size], lag)) && (ctr <= num_tries)) {
+          
           ctr = ctr + 1
-
-          if (sum(is.na(removals)) == 1) {
-            l = (1:epidemic_size)[is.na(removals)]
-          } else {
-            l = sample((1:epidemic_size)[is.na(removals)], 1)
-          }
-
           new_removal = infections_augmented[l] + (rgamma(1, shape = num_renewals, rate = 1) / gamma_curr)
           removals_proposed = removals_augmented
           removals_proposed[l] = new_removal
+
         }
 
         if (check_if_epidemic(removals_proposed, infections_augmented[1:population_size], lag)) { # must be epidemic
@@ -394,14 +388,17 @@ peirr_bayes_spatial <- function(removals,
 
     # gamma gibbs step
     if (update_gamma) {
-      gamma_curr = rgamma(1, gamma_shape + epidemic_size, gamma_rate + 
-        sum((removals_augmented - infections_augmented[1:epidemic_size])))
+      gamma_curr = rgamma(1, 
+                          shape = gamma_shape + epidemic_size * num_renewals, 
+                          rate = gamma_rate + 
+                            sum(removals_augmented - infections_augmented[1:epidemic_size])
+                          )
     }
     storage[2, k] = gamma_curr
 
     # iteration update
     if(!(k %% num_print)){
-      print(k)
+      print(paste0("Completed iteration ", k, " out of ", num_iter))
     }
   }
 
