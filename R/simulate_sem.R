@@ -45,7 +45,9 @@ simulate_sem <- function(beta,
 
     # closest infectious time after exposure
     min.time <- min(
-      i[is.infinite(r) & is.finite(i) & (i > t)],
+      infections[is.infinite(removals) & 
+        is.finite(infections) & 
+        (infections > t)],
       Inf
     )
 

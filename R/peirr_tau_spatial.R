@@ -15,11 +15,15 @@
 #' @return numeric list (infection.rate, removal.rate)
 #'
 #' @export
-peirr_tau_spatial <- function(removals, infections, population_size, kernel_spatial, matrix_distance,
-                      lag = 0,
-                      median_tau = FALSE,
-                      median_gamma = FALSE
-                      ) {
+peirr_tau_spatial <- function(removals, 
+                              infections, 
+                              population_size, 
+                              kernel_spatial, 
+                              matrix_distance,
+                              lag = 0,
+                              median_tau = FALSE,
+                              median_gamma = FALSE
+                              ) {
 
   # make sure one of the other is finite
   or.finite <- is.finite(removals) | is.finite(infections)

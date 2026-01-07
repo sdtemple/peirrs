@@ -15,8 +15,10 @@
 #' @return numeric list (infection_rates, removal_rates, etc)
 #'
 #' @export
-peirr_tau_multitype <- function(removals, infections,
-                                removal_classes, infection_classes,
+peirr_tau_multitype <- function(removals, 
+                                infections,
+                                removal_classes, 
+                                infection_classes,
                                 infection_class_sizes,
                                 lag = 0,
                                 median_tau = FALSE,
