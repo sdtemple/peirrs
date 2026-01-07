@@ -78,8 +78,8 @@ peirr_tau_spatial <- function(removals,
     for (j in 1:epidemic_size) {
       period <- removals[j] - infections[j]
       if (is.na(period)) { period <- 1 / gamma_estim * median_scalar }
-      for (k in (epidemic_size+1):population_size) {
-        not_infected_sum <- not_infected_sum + period * kernel_spatial(matrix_distance[j,k])
+      for (k in (epidemic_size + 1):population_size) {
+        not_infected_sum <- not_infected_sum + period * kernel_spatial(matrix_distance[j, k])
       }
     }
   }

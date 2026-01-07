@@ -33,7 +33,7 @@ tau_moment <- function(rk,
   # Hypoexponential CDF with two different rates
   hypo2.cdf <- function(x, lambdak, lambdaj) {
     if (lambdak == lambdaj) {
-      return(pgamma(x,shape=2,rate=lambdaj))
+      return(pgamma(x, shape=2, rate=lambdaj))
     }
     first <- lambdaj / (lambdaj - lambdak) * exp(-lambdak * x)
     second <- lambdak / (lambdak - lambdaj) * exp(- lambdaj * x)
@@ -46,7 +46,13 @@ tau_moment <- function(rk,
   }
 
   # Expected tau: rk, rj, ik, ij observed
-  E.tau.rk.rj.ik.ij <- function(rk, rj, ik, ij, lambdak, lambdaj, impute_median=TRUE) {
+  E.tau.rk.rj.ik.ij <- function(rk, 
+                                rj, 
+                                ik, 
+                                ij, 
+                                lambdak, 
+                                lambdaj, 
+                                impute_median=TRUE) {
     # impute_median does nothing
     val <- 0
     if (ij < ik) {
@@ -60,7 +66,14 @@ tau_moment <- function(rk,
   }
 
   # Expected tau: rk, ik, ij observed
-  E.tau.rk.ik.ij <- function(rk, rj, ik, ij, lambdak, lambdaj, impute_median=TRUE) {
+  E.tau.rk.ik.ij <- function(rk, 
+                              rj, 
+                              ik, 
+                              ij, 
+                              lambdak, 
+                              lambdaj, 
+                              impute_median=TRUE
+                            ) {
     # impute_median does nothing
     val <- 0
     if (ij < ik) {
@@ -74,21 +87,35 @@ tau_moment <- function(rk,
   }
 
   # Expected tau: rj, ik, ij observed
-  E.tau.rj.ik.ij <- function(rk, rj, ik, ij, lambdak, lambdaj, impute_median=TRUE) {
+  E.tau.rj.ik.ij <- function(rk, 
+                              rj, 
+                              ik, 
+                              ij, 
+                              lambdak, 
+                              lambdaj, 
+                              impute_median=TRUE
+                            ) {
     # impute_median does nothing
     val <- 0
     if (ij < ik) {
       val <- 0
     } else if (ij > ik) {
-      H4 <- pexp(ij-ik,rate=lambdak,lower.tail=FALSE)
-      H5 <- (exp(-lambdak*(ij-ik))*(lambdak*(ik-ij)-1)+1)/lambdak
+      H4 <- pexp(ij - ik, rate=lambdak, lower.tail=FALSE)
+      H5 <- (exp(-lambdak * (ij - ik)) * (lambdak * (ik - ij) - 1) + 1) / lambdak
       val <- H4 + H5
     }
     return(val)
   }
 
   # Expected tau: rk, rj, ik observed
-  E.tau.rk.rj.ik <- function(rk, rj, ik, ij, lambdak, lambdaj, impute_median=TRUE) {
+  E.tau.rk.rj.ik <- function(rk, 
+                              rj, 
+                              ik, 
+                              ij, 
+                              lambdak, 
+                              lambdaj, 
+                              impute_median=TRUE
+                            ) {
     # impute_median does nothing
     val <- 0
     if (rj < ik) {
@@ -98,14 +125,24 @@ tau_moment <- function(rk,
       val <- H6
     } else {
       H8 <- (rk - ik) * pexp(rj - rk, rate = lambdaj, lower.tail = TRUE)
-      H7 <- (exp(-lambdaj * rj) * (exp(lambdaj * ik) + exp(lambdaj * rk) * (lambdaj * (rk - ik) - 1))) / lambdaj
+      H7 <- (exp(-lambdaj * rj) * 
+        (exp(lambdaj * ik) + 
+        exp(lambdaj * rk) * 
+        (lambdaj * (rk - ik) - 1))) / lambdaj
       val <- H7 + H8
     }
     return(val)
   }
 
   # Expected tau: rk, rj, ij observed
-  E.tau.rk.rj.ij <- function(rk, rj, ik, ij, lambdak, lambdaj, impute_median=TRUE) {
+  E.tau.rk.rj.ij <- function(rk, 
+                            rj, 
+                            ik, 
+                            ij, 
+                            lambdak, 
+                            lambdaj, 
+                            impute_median=TRUE
+                            ) {
     median_scalar = 1
     if (impute_median) {median_scalar=log(2)}
     val <- 0
@@ -118,15 +155,24 @@ tau_moment <- function(rk,
   }
 
   # Expected tau: rk, rj observed
-  E.tau.rk.rj <- function(rk, rj, ik, ij, lambdak, lambdaj, impute_median=TRUE) {
+  E.tau.rk.rj <- function(rk, 
+                          rj, 
+                          ik, 
+                          ij, 
+                          lambdak, 
+                          lambdaj, 
+                          impute_median=TRUE
+                          ) {
     median_scalar=1
     if (impute_median) {median_scalar=log(2)}
     val <- 0
     if (rj < rk) {
-      H1 <- pexp(rk - rj, rate = lambdak, lower.tail = FALSE) * lambdaj / lambdak / (lambdak + lambdaj)
+      H1 <- pexp(rk - rj, rate = lambdak, lower.tail = FALSE) * 
+        lambdaj / lambdak / (lambdak + lambdaj)
       val <- H1
     } else {
-      H2 <- pexp(rj - rk, rate = lambdaj, lower.tail = FALSE) * lambdaj / lambdak / (lambdak + lambdaj)
+      H2 <- pexp(rj - rk, rate = lambdaj, lower.tail = FALSE) * 
+        lambdaj / lambdak / (lambdak + lambdaj)
       H3 <- pexp(rj - rk, rate = lambdaj, lower.tail = TRUE) / lambdak
       val <- H2 + H3
     }
@@ -153,7 +199,14 @@ tau_moment <- function(rk,
 
   # Expected tau: rj, ik observed
   # This integral problem is extremely hard
-  E.tau.rj.ik <- function(rk, rj, ik, ij, lambdak, lambdaj, impute_median=TRUE) {
+  E.tau.rj.ik <- function(rk, 
+                          rj, 
+                          ik, 
+                          ij, 
+                          lambdak, 
+                          lambdaj, 
+                          impute_median=TRUE
+                          ) {
     # impute_median does nothing
     val <- 0
     func1 <- function(x, rate1, rate2, rate3) {
@@ -171,36 +224,67 @@ tau_moment <- function(rk,
         H13 <- rj - ik
         H27 <- rj - ik
       } else {
-        H15 <- lambdak / ((lambdaj - lambdak)^2) * integral.upp.low(func1, ik, rj, lambdak, lambdaj, 0)
+        H15 <- lambdak / ((lambdaj - lambdak)^2) * 
+          integral.upp.low(func1, ik, rj, lambdak, lambdaj, 0)
         H14 <- H15
         H13 <- integral.upp.low(func2, rj, ik, lambdak, lambdaj, 0)
-        H27 <- (exp((lambdaj - lambdak) * rj) - exp((lambdaj - lambdak) * ik)) / (lambdaj - lambdak)
+        H27 <- (exp((lambdaj - lambdak) * rj) - 
+          exp((lambdaj - lambdak) * ik)) / 
+          (lambdaj - lambdak)
       }
       H12 <- H13 + H14
-      H11 <- (1 + lambdak * ik) * exp(-lambdak * ik) * (exp(lambdaj * rj) - exp(lambdaj * ik)) / lambdaj
+      H11 <- (1 + lambdak * ik) * 
+        exp(-lambdak * ik) * 
+        (exp(lambdaj * rj) - 
+        exp(lambdaj * ik)) / 
+        lambdaj
       H10 <- (H11 - H12) / (lambdak^2)
-      H9 <- ((exp(lambdaj * rj) - exp(lambdaj * ik)) * exp(-lambdak * ik) / lambdaj - H27) * ik / lambdak
-      E1 <- (H10 - H9) * lambdak * lambdaj * exp(-lambdaj * rj) * exp(lambdak * ik)
+      H9 <- ((exp(lambdaj * rj) - exp(lambdaj * ik)) * 
+        exp(-lambdak * ik) / lambdaj - H27) * 
+        ik / lambdak
+      E1 <- (H10 - H9) * 
+        lambdak * 
+        lambdaj * 
+        exp(-lambdaj * rj) * 
+        exp(lambdak * ik)
 
       # ik < ij < rj < rk case
-      H18 <- exp(- lambdak * rj) * integral.upp.low(func1, rj, ik, 0, lambdaj, 0) / lambdak / (lambdaj^2)
-      H19 <- ik / lambdak / lambdaj * exp(-lambdak * rj) * (exp(lambdaj * rj) - exp(lambdaj * ik))
-      H16 <- lambdak * lambdaj * exp(-lambdaj * rj) * exp(lambdak * ik) * (H18 - H19)
+      H18 <- exp(- lambdak * rj) * 
+        integral.upp.low(func1, rj, ik, 0, lambdaj, 0) / 
+        lambdak / 
+        (lambdaj^2)
+      H19 <- ik / lambdak / lambdaj * 
+        exp(-lambdak * rj) * 
+        (exp(lambdaj * rj) - exp(lambdaj * ik))
+      H16 <- lambdak * lambdaj * 
+        exp(-lambdaj * rj) * 
+        exp(lambdak * ik) * 
+        (H18 - H19)
 
       # ik < ij < rk < rj case
       if (lambdaj == lambdak) {
         H22 <- (rj^2 - ik^2) / 2
         H25 <- rj - ik
       } else {
-        H24 <- integral.upp.low(func1, ik, rj, lambdak, lambdaj, 0) / ((lambdaj - lambdak)^2)
+        H24 <- integral.upp.low(func1, ik, rj, lambdak, lambdaj, 0) / 
+          ((lambdaj - lambdak)^2)
         H22 <- H24
-        H25 <- (exp((lambdaj - lambdak) * rj) - exp((lambdaj - lambdak) * ik)) / (lambdaj - lambdak)
+        H25 <- (exp((lambdaj - lambdak) * rj) - 
+          exp((lambdaj - lambdak) * ik)) / 
+          (lambdaj - lambdak)
       }
-      H26 <- (exp(lambdaj * rj) - exp(lambdaj * ik)) * exp(-lambdak * rj) / lambdaj
+      H26 <- (exp(lambdaj * rj) - exp(lambdaj * ik)) * 
+        exp(-lambdak * rj) / 
+        lambdaj
       H21 <- ik * (H25 - H26) / lambdak
-      H23 <- integral.upp.low(func1, rj, ik, 0, lambdaj, 0) / (lambdaj^2) * exp(-lambdak * rj)
+      H23 <- integral.upp.low(func1, rj, ik, 0, lambdaj, 0) / 
+        (lambdaj^2) * 
+        exp(-lambdak * rj)
       H20 <- (H22 - H23) / lambdak
-      H17 <- lambdak * lambdaj * exp(-lambdaj * rj) * exp(lambdak * ik) * (H20 - H21)
+      H17 <- lambdak * lambdaj * 
+        exp(-lambdaj * rj) * 
+        exp(lambdak * ik) * 
+        (H20 - H21)
 
       # combine as ik < ij < rk
       E2 <- H16 + H17

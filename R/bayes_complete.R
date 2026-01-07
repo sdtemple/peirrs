@@ -44,13 +44,19 @@ bayes_complete <- function(removals,
   beta_rate <- beta_rate / population_size
   epidemic_size <- length(removals)
   tau_matrix <- matrix(0, nrow = epidemic_size, ncol = population_size)
+
+  if (epidemic_size > population_size) {
+    stop("Epidemic size cannot be larger than population size.")
+  }
   
   # compute tau matrix
   for (j in 1:epidemic_size) {
     tau_matrix[j, 1:epidemic_size] <- sapply(infections - lag, min, removals[j]) - 
       sapply(infections - lag, min, infections[j])
   }
-  tau_matrix[, (epidemic_size + 1):population_size] <- removals - infections
+  if (epidemic_size < population_size) {
+    tau_matrix[, (epidemic_size + 1):population_size] <- removals - infections
+  }
   tau_sum <- sum(tau_matrix)
   period_sum <- sum(removals - infections)
 
