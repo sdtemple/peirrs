@@ -41,23 +41,23 @@ bayes_complete_spatial <- function(removals,
   epidemic_size = length(removals)
 
   # compute the tau matrix
-  infections_augmented = c(infections, rep(Inf, population_size - epidemic_size))
-  tau_matrix = matrix(0, nrow = epidemic_size, ncol = population_size)
+  infections_augmented <- c(infections, rep(Inf, population_size - epidemic_size))
+  tau_matrix <- matrix(0, nrow = epidemic_size, ncol = population_size)
   for(j in 1:epidemic_size){
       tau_matrix[j, ] <- (sapply(infections_augmented - lag, min, removals[j]) - 
         sapply(infections_augmented - lag, min, infections[j]))  * kernel_spatial(matrix_distance[j,])
   }
-  tau_sum = sum(tau_matrix)
-  period_sum = sum(removals[1:epidemic_size] - infections[1:epidemic_size])
+  tau_sum <- sum(tau_matrix)
+  period_sum <- sum(removals[1:epidemic_size] - infections[1:epidemic_size])
 
   # sample infection rates
-  beta_samples = rgamma(num_iter,
+  beta_samples <- rgamma(num_iter,
                         rate=beta_rate + tau_sum,
                         shape=beta_shape + epidemic_size - 1
                         )
 
   # sample removal rates
-  gamma_samples = rgamma(num_iter,
+  gamma_samples <- rgamma(num_iter,
                          rate=gamma_rate + period_sum,
                          shape=gamma_shape + epidemic_size * num_renewals
                          )

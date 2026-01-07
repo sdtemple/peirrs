@@ -64,7 +64,7 @@ peirr_bayes_multitype <- function(removals,
   ### utility function local to ###
 
   # indicates data consistent with epidemic
-  check_if_epidemic = function(removals, infections, lag) {
+  check_if_epidemic <- function(removals, infections, lag) {
 
     epidemic_size = length(removals)
     ind_matrix = matrix(0, nrow = epidemic_size, ncol = epidemic_size)
@@ -83,7 +83,7 @@ peirr_bayes_multitype <- function(removals,
   }
 
   # utlity for infection time metropolis hastings step
-  update_infected_prob = function(removals, 
+  update_infected_prob <- function(removals, 
                                   infections, 
                                   infections_proposed,
                                   infections_classes, 
@@ -174,7 +174,7 @@ peirr_bayes_multitype <- function(removals,
   }
 
   # utlity for infection time metropolis hastings step
-  update_removal_prob = function(removals, 
+  update_removal_prob <- function(removals, 
                                   infections, 
                                   removals_proposed,
                                   infection_classes, 
@@ -296,16 +296,16 @@ peirr_bayes_multitype <- function(removals,
   updated_samples = matrix(0, nrow=2, ncol=num_iter)  # row 1: infection, row 2: removal
 
   # sort the infections and removals
-  removals_order = order(removals)
-  removals = removals[removals_order]
-  removal_classes = removal_classes[removals_order]
-  infections[1:epidemic_size] = infections[1:epidemic_size][removals_order]
-  infection_classes[1:epidemic_size] = infection_classes[1:epidemic_size][removals_order]
+  removals_order <- order(removals)
+  removals <- removals[removals_order]
+  removal_classes <- removal_classes[removals_order]
+  infections[1:epidemic_size] <- infections[1:epidemic_size][removals_order]
+  infection_classes[1:epidemic_size] <- infection_classes[1:epidemic_size][removals_order]
   # additional infections are NA of Inf
 
   # reorder unique classes and their priors
-  unique_infection_classes = unique(infection_classes)
-  unique_removal_classes = unique(removal_classes)
+  unique_infection_classes <- unique(infection_classes)
+  unique_removal_classes <- unique(removal_classes)
   # some input checks
   if (length(unique_removal_classes) != length(gamma_init)) {
     stop("Incorrect vector size of initial removal rates")
@@ -326,21 +326,23 @@ peirr_bayes_multitype <- function(removals,
     stop("Infection times and infection classes must have the same length")
   }
 
-  gamma_order = order(unique_removal_classes)
-  beta_order = order(unique_infection_classes)
-  unique_infection_classes = unique_infection_classes[beta_order]
-  unique_removal_classes = unique_removal_classes[gamma_order]
-  beta_shape = beta_shape[beta_order]
-  beta_init = beta_init[beta_order]
-  gamma_shape = gamma_shape[gamma_order]
-  gamma_init = gamma_init[gamma_order]
+  gamma_order <- order(unique_removal_classes)
+  beta_order <- order(unique_infection_classes)
+  unique_infection_classes <- unique_infection_classes[beta_order]
+  unique_removal_classes <- unique_removal_classes[gamma_order]
+  beta_shape <- beta_shape[beta_order]
+  beta_init <- beta_init[beta_order]
+  gamma_shape <- gamma_shape[gamma_order]
+  gamma_init <- gamma_init[gamma_order]
 
   # recode the categories if not 1,2,3,...
   for (g in 1:length(unique_removal_classes)) {
     removal_classes[removal_classes == unique_removal_classes[g]] <- g
   }
   
-  if (sum(!is.na(infections)) == epidemic_size && sum(!is.na(removals)) == epidemic_size) {
+  if (sum(!is.na(infections)) == epidemic_size && 
+    sum(!is.na(removals)) == epidemic_size
+    ) {
     # premature exit
     # because complete data
     out <- bayes_complete_multitype(removals,
@@ -415,18 +417,18 @@ peirr_bayes_multitype <- function(removals,
     # sample infection rates
     tau_matrix = matrix(0, nrow = epidemic_size, ncol = epidemic_size)
     for (j in 1:epidemic_size) {
-      tau_matrix[j, 1:epidemic_size] = (sapply(infections_augmented[1:epidemic_size] - lag, min, removals_augmented[j]) - 
+      tau_matrix[j, 1:epidemic_size] <- (sapply(infections_augmented[1:epidemic_size] - lag, min, removals_augmented[j]) - 
         sapply(infections_augmented[1:epidemic_size] - lag, min, infections_augmented[j])
         )
     }
-    period_sum = sum(removals_augmented - infections_augmented[1:epidemic_size])
+    period_sum <- sum(removals_augmented - infections_augmented[1:epidemic_size])
     for (class_num in 1:num_beta) {
-      infection_class = unique_infection_classes[class_num]
-      tau_filt = tau_matrix[, infection_classes[1:epidemic_size] == infection_class]
-      tau_filt_sum = sum(tau_filt)
-      num_infected = ncol(tau_filt)
-      num_not_infected = sum(infection_classes == infection_class) - num_infected
-      beta_samples[class_num, k] = rgamma(1,
+      infection_class <- unique_infection_classes[class_num]
+      tau_filt <- tau_matrix[, infection_classes[1:epidemic_size] == infection_class]
+      tau_filt_sum <- sum(tau_filt)
+      num_infected <- ncol(tau_filt)
+      num_not_infected <- sum(infection_classes == infection_class) - num_infected
+      beta_samples[class_num, k] <- rgamma(1,
                                           shape = beta_shape[class_num] + num_infected,
                                           rate = beta_rate[class_num] + 
                                             tau_filt_sum + 
@@ -530,14 +532,14 @@ peirr_bayes_multitype <- function(removals,
 
     # sample removal rates
     for (class_num in 1:num_gamma) {
-      removal_class = unique_removal_classes[class_num]
-      removals_filt = removals_augmented[removal_classes == removal_class]
-      infections_filt = infections_augmented[1:epidemic_size][removal_classes == removal_class]
-      period_filt = removals_filt - infections_filt
-      period_filt = period_filt[!is.na(period_filt)]
-      period_sum = sum(period_filt)
-      period_num = length(period_filt)
-      gamma_samples[class_num, k] = rgamma(1,
+      removal_class <- unique_removal_classes[class_num]
+      removals_filt <- removals_augmented[removal_classes == removal_class]
+      infections_filt <- infections_augmented[1:epidemic_size][removal_classes == removal_class]
+      period_filt <- removals_filt - infections_filt
+      period_filt <- period_filt[!is.na(period_filt)]
+      period_sum <- sum(period_filt)
+      period_num <- length(period_filt)
+      gamma_samples[class_num, k] <- rgamma(1,
                                           shape = gamma_shape[class_num] + period_num * num_renewals,
                                           rate = gamma_rate[class_num] + period_sum
                                           )

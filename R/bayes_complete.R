@@ -42,26 +42,26 @@ bayes_complete <- function(removals,
   beta_rate <- beta_shape / beta_init
   gamma_rate <- gamma_shape / gamma_init
   beta_rate <- beta_rate / population_size
-  epidemic_size = length(removals)
-  tau_matrix = matrix(0, nrow = epidemic_size, ncol = population_size)
+  epidemic_size <- length(removals)
+  tau_matrix <- matrix(0, nrow = epidemic_size, ncol = population_size)
   
   # compute tau matrix
   for (j in 1:epidemic_size) {
-    tau_matrix[j, 1:epidemic_size] = sapply(infections - lag, min, removals[j]) - 
+    tau_matrix[j, 1:epidemic_size] <- sapply(infections - lag, min, removals[j]) - 
       sapply(infections - lag, min, infections[j])
   }
-  tau_matrix[, (epidemic_size+1):population_size] = removals - infections
-  tau_sum = sum(tau_matrix)
-  period_sum = sum(removals - infections)
+  tau_matrix[, (epidemic_size + 1):population_size] <- removals - infections
+  tau_sum <- sum(tau_matrix)
+  period_sum <- sum(removals - infections)
 
   # sample infection rates
-  beta_samples = rgamma(num_iter,
+  beta_samples <- rgamma(num_iter,
                         rate=beta_rate + tau_sum,
                         shape=beta_shape + epidemic_size - 1
                         )
 
   # sample removal rates
-  gamma_samples = rgamma(num_iter,
+  gamma_samples <- rgamma(num_iter,
                          rate=gamma_rate + period_sum,
                          shape=gamma_shape + epidemic_size * num_renewals
                          )

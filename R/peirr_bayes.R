@@ -78,11 +78,17 @@ peirr_bayes <- function(removals,
   }
 
   # utlity for infection time metropolis hastings step
-  update_infected_prob = function(removals, infections, infections_proposed, beta_shape, beta_rate, lag) {
+  update_infected_prob = function(removals, 
+                                  infections, 
+                                  infections_proposed, 
+                                  beta_shape, 
+                                  beta_rate, 
+                                  lag
+                                  ) {
 
     # initialize
-    epidemic_size = length(removals)
-    population_size = length(infections)
+    epidemic_size <- length(removals)
+    population_size <- length(infections)
 
     if (length(infections_proposed) != length(infections)) {
       stop("Observed and proposed infection time vectors must have the same length.")
@@ -91,17 +97,20 @@ peirr_bayes <- function(removals,
     # compute tau matrices
     tau_matrix <- matrix(0, nrow = epidemic_size, ncol = population_size)
     for (j in 1:epidemic_size) {
-      tau_matrix[j, ] <- sapply(infections - lag, min, removals[j]) - sapply(infections - lag, min, infections[j])
+      tau_matrix[j, ] <- sapply(infections - lag, min, removals[j]) - 
+        sapply(infections - lag, min, infections[j])
     }
     tau_matrix_proposed <- matrix(0, nrow = epidemic_size, ncol = population_size)
     for (j in 1:epidemic_size) {
-      tau_matrix_proposed[j, ] <- sapply(infections_proposed - lag, min, removals[j]) - sapply(infections_proposed - lag, min, infections_proposed[j])
+      tau_matrix_proposed[j, ] <- sapply(infections_proposed - lag, min, removals[j]) - 
+        sapply(infections_proposed - lag, min, infections_proposed[j])
     }
 
     # compute
     ind_matrix <- matrix(0, nrow = epidemic_size, ncol = epidemic_size)
     for (j in 1:epidemic_size) {
-      ind_matrix[j, ] <- (infections[1:epidemic_size] < (infections[j] - lag)) * (removals > (infections[j] - lag))
+      ind_matrix[j, ] <- (infections[1:epidemic_size] < (infections[j] - lag)) * 
+        (removals > (infections[j] - lag))
     }
     # L1 comes from page 25 of the stockdale 2019 thesis
     # Integrated out formula is page 32 of my prelim
@@ -112,7 +121,8 @@ peirr_bayes <- function(removals,
 
     ind_matrix_proposed <- matrix(0, nrow = epidemic_size, ncol = epidemic_size)
     for (j in 1:epidemic_size) {
-      ind_matrix_proposed[j, ] <- (infections_proposed[1:epidemic_size] < (infections_proposed[j] - lag)) * (removals > (infections_proposed[j] - lag))
+      ind_matrix_proposed[j, ] <- (infections_proposed[1:epidemic_size] < (infections_proposed[j] - lag)) * 
+        (removals > (infections_proposed[j] - lag))
     }
     chi_prob_proposed <- apply(ind_matrix_proposed, 1, sum)
     chi_prob_proposed <- chi_prob_proposed[chi_prob_proposed > 0]
@@ -124,10 +134,16 @@ peirr_bayes <- function(removals,
   }
 
   # utlity for infection time metropolis hastings step
-  update_removal_prob = function(removals, infections, removals_proposed, beta_shape, beta_rate, lag) {
+  update_removal_prob = function(removals, 
+                                  infections, 
+                                  removals_proposed, 
+                                  beta_shape, 
+                                  beta_rate, 
+                                  lag
+                                  ) {
     # initialize
-    epidemic_size = length(removals)
-    population_size = length(infections)
+    epidemic_size <- length(removals)
+    population_size <- length(infections)
 
     # check that rp has the same length as r
     if (length(removals_proposed) != length(removals)) {
@@ -135,33 +151,37 @@ peirr_bayes <- function(removals,
     }
 
     # compute tau matrices
-    tau_matrix = matrix(0, nrow = epidemic_size, ncol = population_size)
+    tau_matrix <- matrix(0, nrow = epidemic_size, ncol = population_size)
     for (j in 1:epidemic_size) {
-      tau_matrix[j, ] = sapply(infections - lag, min, removals[j]) - sapply(infections - lag, min, infections[j])
+      tau_matrix[j, ] <- sapply(infections - lag, min, removals[j]) - 
+        sapply(infections - lag, min, infections[j])
     }
-    tau_matrix_proposed = matrix(0, nrow = epidemic_size, ncol = population_size)
+    tau_matrix_proposed <- matrix(0, nrow = epidemic_size, ncol = population_size)
     for (j in 1:epidemic_size) {
-      tau_matrix_proposed[j, ] = sapply(infections - lag, min, removals_proposed[j]) - sapply(infections - lag, min, infections[j])
+      tau_matrix_proposed[j, ] <- sapply(infections - lag, min, removals_proposed[j]) - 
+        sapply(infections - lag, min, infections[j])
     }
 
     # compute
-    ind_matrix = matrix(0, nrow = epidemic_size, ncol = epidemic_size)
+    ind_matrix <- matrix(0, nrow = epidemic_size, ncol = epidemic_size)
     for (j in 1:epidemic_size) {
-      ind_matrix[j, ] = (infections[1:epidemic_size] < (infections[j] - lag)) * (removals > (infections[j] - lag))
+      ind_matrix[j, ] <- (infections[1:epidemic_size] < (infections[j] - lag)) * 
+        (removals > (infections[j] - lag))
     }
     # L1 comes from page 25 of the stockdale 2019 thesis
     # Integrated out formula is page 32 of my prelim
     # There are typos in my exam, though
     # Assuming gamma density function for nice proposal
-    chi_prob = apply(ind_matrix, 1, sum)
-    chi_prob = chi_prob[chi_prob > 0]
+    chi_prob <- apply(ind_matrix, 1, sum)
+    chi_prob <- chi_prob[chi_prob > 0]
 
-    ind_matrix_proposed = matrix(0, nrow = epidemic_size, ncol = epidemic_size)
+    ind_matrix_proposed <- matrix(0, nrow = epidemic_size, ncol = epidemic_size)
     for (j in 1:epidemic_size) {
-      ind_matrix_proposed[j, ] = (infections_proposed[1:epidemic_size] < (infections_proposed[j] - lag)) * (removals_proposed > (infections_proposed[j] - lag))
+      ind_matrix_proposed[j, ] <- (infections[1:epidemic_size] < (infections[j] - lag)) * 
+        (removals_proposed > (infections[j] - lag))
     }
-    chi_prob_proposed = apply(ind_matrix_proposed, 1, sum)
-    chi_prob_proposed = chi_prob_proposed[chi_prob_proposed > 0]
+    chi_prob_proposed <- apply(ind_matrix_proposed, 1, sum)
+    chi_prob_proposed <- chi_prob_proposed[chi_prob_proposed > 0]
 
     ell_ratio <- sum(log(chi_prob_proposed)) - sum(log(chi_prob))
     ell_ratio <- ell_ratio + (beta_shape + epidemic_size - 1) *
