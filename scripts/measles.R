@@ -69,13 +69,17 @@ library(lubridate)
   epidemic_size <- length(removals)
 }
 
+write.table(measles,
+            "measles_hagelloch.csv",
+            sep=",",
+            row.names=FALSE
+            )
+
 # SEIR without classes ----------------------------------------------------
-
-
-# frequentist
 
 {
   num_boot <- 200
+  num_iter <- 200
   num_runs <- 5
   ps <- c()
   qs <- c()
@@ -97,6 +101,18 @@ library(lubridate)
   gammas_upper_center <- c()
   r0s_lower_center <- c()
   r0s_upper_center <- c()
+  bayes_beta_means <- c()
+  bayes_beta_medians <- c()
+  bayes_beta_lowers <- c()
+  bayes_beta_uppers <- c()
+  bayes_gamma_means <- c()
+  bayes_gamma_medians <- c()
+  bayes_gamma_lowers <- c()
+  bayes_gamma_uppers <- c()
+  bayes_r0_means <- c()
+  bayes_r0_medians <- c()
+  bayes_r0_lowers <- c()
+  bayes_r0_uppers <- c()
 }
 
 {
@@ -104,6 +120,8 @@ library(lubridate)
   start <- Sys.time()
 
   # complete data
+
+  # frequentist estimation
   result <- peirr_tau(removals,
                       infections,
                       population_size,
@@ -186,6 +204,45 @@ library(lubridate)
   gammas_upper_center <- c(gammas_upper_center, upper_reverse_gamma_center)
   r0s_lower_center <- c(r0s_lower_center, lower_reverse_r0_center)
   r0s_upper_center <- c(r0s_upper_center, upper_reverse_r0_center)
+
+  # bayesian estimation
+  result_bayes <- peirr_bayes(
+    removals,
+    infections,
+    population_size,
+    num_iter=10000,
+    lag=lag,
+    num_print=1e6
+  )
+
+  bayes_beta <- result_bayes$infection_rate[5001:10000]
+  bayes_gamma <- result_bayes$removal_rate[5001:10000]
+  bayes_r0 <- bayes_beta/bayes_gamma
+  bayes_beta_mean <- mean(bayes_beta)
+  bayes_gamma_mean <- mean(bayes_gamma)
+  bayes_r0_mean <- mean(bayes_r0)
+  bayes_beta_median <- median(bayes_beta)
+  bayes_gamma_median <- median(bayes_gamma)
+  bayes_r0_median <- median(bayes_r0)
+  bayes_beta_lower <- unname(quantile(bayes_beta, 0.025))
+  bayes_beta_upper <- unname(quantile(bayes_beta, 0.975))
+  bayes_gamma_lower <- unname(quantile(bayes_gamma, 0.025))
+  bayes_gamma_upper <- unname(quantile(bayes_gamma, 0.975))
+  bayes_r0_lower <- unname(quantile(bayes_r0, 0.025))
+  bayes_r0_upper <- unname(quantile(bayes_r0, 0.975))
+
+  bayes_beta_means <- c(bayes_beta_means, bayes_beta_mean)
+  bayes_beta_medians <- c(bayes_beta_medians, bayes_beta_median)
+  bayes_beta_lowers <- c(bayes_beta_lowers, bayes_beta_lower)
+  bayes_beta_uppers <- c(bayes_beta_uppers, bayes_beta_upper)
+  bayes_gamma_means <- c(bayes_gamma_means, bayes_gamma_mean)
+  bayes_gamma_medians <- c(bayes_gamma_medians, bayes_gamma_median)
+  bayes_gamma_lowers <- c(bayes_gamma_lowers, bayes_gamma_lower)
+  bayes_gamma_uppers <- c(bayes_gamma_uppers, bayes_gamma_upper)
+  bayes_r0_means <- c(bayes_r0_means, bayes_r0_mean)
+  bayes_r0_medians <- c(bayes_r0_medians, bayes_r0_median)
+  bayes_r0_lowers <- c(bayes_r0_lowers, bayes_r0_lower)
+  bayes_r0_uppers <- c(bayes_r0_uppers, bayes_r0_upper)
 
   end <- Sys.time()
   print(end - start)
@@ -298,6 +355,47 @@ for (run in 1:num_runs) {
       r0s_lower_center <- c(r0s_lower_center, lower_reverse_r0_center)
       r0s_upper_center <- c(r0s_upper_center, upper_reverse_r0_center)
 
+      # bayesian estimation
+      result_bayes <- peirr_bayes(
+        removals_d,
+        infections_d,
+        population_size,
+        num_iter=num_iter,
+        lag=lag,
+        num_print=1e1,
+        gamma_init=gamma_d,
+        beta_init=beta_d
+      )
+
+      bayes_beta <- result_bayes$infection_rate[ceiling(num_iter/2):num_iter]
+      bayes_gamma <- result_bayes$removal_rate[ceiling(num_iter/2):num_iter]
+      bayes_r0 <- bayes_beta/bayes_gamma
+      bayes_beta_mean <- mean(bayes_beta)
+      bayes_gamma_mean <- mean(bayes_gamma)
+      bayes_r0_mean <- mean(bayes_r0)
+      bayes_beta_median <- median(bayes_beta)
+      bayes_gamma_median <- median(bayes_gamma)
+      bayes_r0_median <- median(bayes_r0)
+      bayes_beta_lower <- unname(quantile(bayes_beta, 0.025))
+      bayes_beta_upper <- unname(quantile(bayes_beta, 0.975))
+      bayes_gamma_lower <- unname(quantile(bayes_gamma, 0.025))
+      bayes_gamma_upper <- unname(quantile(bayes_gamma, 0.975))
+      bayes_r0_lower <- unname(quantile(bayes_r0, 0.025))
+      bayes_r0_upper <- unname(quantile(bayes_r0, 0.975))
+
+      bayes_beta_means <- c(bayes_beta_means, bayes_beta_mean)
+      bayes_beta_medians <- c(bayes_beta_medians, bayes_beta_median)
+      bayes_beta_lowers <- c(bayes_beta_lowers, bayes_beta_lower)
+      bayes_beta_uppers <- c(bayes_beta_uppers, bayes_beta_upper)
+      bayes_gamma_means <- c(bayes_gamma_means, bayes_gamma_mean)
+      bayes_gamma_medians <- c(bayes_gamma_medians, bayes_gamma_median)
+      bayes_gamma_lowers <- c(bayes_gamma_lowers, bayes_gamma_lower)
+      bayes_gamma_uppers <- c(bayes_gamma_uppers, bayes_gamma_upper)
+      bayes_r0_means <- c(bayes_r0_means, bayes_r0_mean)
+      bayes_r0_medians <- c(bayes_r0_medians, bayes_r0_median)
+      bayes_r0_lowers <- c(bayes_r0_lowers, bayes_r0_lower)
+      bayes_r0_uppers <- c(bayes_r0_uppers, bayes_r0_upper)
+
       end <- Sys.time()
       print(paste0(end - start))
 
@@ -327,7 +425,19 @@ for (run in 1:num_runs) {
           unname(r0s_upper),
           r0s_center,
           unname(r0s_lower_center),
-          unname(r0s_upper_center)
+          unname(r0s_upper_center),
+          bayes_beta_means,
+          bayes_beta_medians,
+          bayes_beta_lowers,
+          bayes_beta_uppers,
+          bayes_gamma_means,
+          bayes_gamma_medians,
+          bayes_gamma_lowers,
+          bayes_gamma_uppers,
+          bayes_r0_means,
+          bayes_r0_medians,
+          bayes_r0_lowers,
+          bayes_r0_uppers
           )
   )
 
@@ -351,7 +461,19 @@ for (run in 1:num_runs) {
     "r0_upper",
     "r0_center",
     "r0_lower_center",
-    "r0_upper_center"
+    "r0_upper_center",
+    "bayes_beta_mean",
+    "bayes_beta_median",
+    "bayes_beta_lower",
+    "bayes_beta_upper",
+    "bayes_gamma_mean",
+    "bayes_gamma_median",
+    "bayes_gamma_lower",
+    "bayes_gamma_upper",
+    "bayes_r0_mean",
+    "bayes_r0_median",
+    "bayes_r0_lower",
+    "bayes_r0_upper"
   )
 
   View(table)
@@ -367,32 +489,13 @@ for (run in 1:num_runs) {
 
 # bayesian
 
-result_bayes <- peirr_bayes(
-  removals,
-  infections,
-  population_size,
-  num_iter=10000,
-  lag=lag,
-  num_print=1e6
-)
-
-bayes_beta <- result_bayes$infection_rate
-bayes_gamma <- result_bayes$removal_rate
-bayes_r0 <- bayes_beta/bayes_gamma
-bayes_beta_mean <- mean(bayes_beta)
-bayes_gamma_mean <- mean(bayes_gamma)
-bayes_r0_mean <- mean(bayes_r0)
-quantile(bayes_beta, c(0.025,0.975))
-quantile(bayes_gamma, c(0.025,0.975))
-quantile(bayes_r0, c(0.025,0.975))
-
 {
   start <- Sys.time()
   result_bayes <- peirr_bayes(
     removals_d,
     infections_d,
     population_size,
-    num_iter=1000,
+    num_iter=200,
     lag=lag,
     num_print=1,
     gamma_init=0.1,

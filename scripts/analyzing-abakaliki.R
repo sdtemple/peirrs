@@ -3,7 +3,6 @@
 library(pblas)
 library(peirrs)
 
-
 # Setup -------------------------------------------------------------------
 
 {
@@ -88,6 +87,7 @@ for (d in 1:num_datasets) {
         boot_beta <- boot$infection_rate[2:num_boot+1]
         boot_gamma <- boot$removal_rate[2:num_boot+1]
         boot_r0 <- boot_beta / boot_gamma
+        g2 <- gamma + mean(gamma - boot_gamma, na.rm=TRUE)
         beta2 <- beta + mean(beta - boot_beta, na.rm=TRUE)
         r02 <- r0 + mean(r0 - boot_r0, na.rm=TRUE)
         
