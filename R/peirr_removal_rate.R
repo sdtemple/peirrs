@@ -11,7 +11,7 @@
 #' @export
 peirr_removal_rate <- function(removals, 
                                 infections, 
-                                median_gamma = TRU
+                                median_gamma = TRUE
                                 ) {
 
   ind <- (!is.na(removals)) * (!is.na(infections))
