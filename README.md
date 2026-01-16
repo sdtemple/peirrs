@@ -29,12 +29,9 @@ Estimate infection and removal rates with partially observed removal and infecti
     - `peirr_tau()`
     - `peirr_bayes()`
     - `peirr_pbla_infection_rate()`
-    - `peirr_tau_multitype()`
-    - `peirr_bayes_multitype()`
-    - `peirr_pbla_infection_rate_multitype()`
+    - `peirr_bootstrap()`
 - Simulation experiments
     - `simulator()`
-    - `simulator_multitype()`
 
 All functions have docstrings. As a result, you can get help for instance with:
 ```
@@ -42,8 +39,10 @@ help(peirr_tau)
 ?peirr_tau
 ```
 
+There are also functions with the suffixes `*_multitype()` and `*_spatial()` for estimators with multiple classes and spatial kernels, respectively.
+
+The `peirr_bootstrap()` function does not provide a confidence intervals but bootstrap samples. You can perform bias correction or interval estimation according to [Wikipedia](https://en.wikipedia.org/wiki/Bootstrapping_(statistics)#Deriving_confidence_intervals_from_the_bootstrap_distribution).
+
 Some of the scripts for my analyses are under `scripts/`. These may provide examples of how to run the functions.
 
 The function `tau_moment()` calculates the complicated equations derived in our paper. It is not meant for users but invoked in the estimator functions.
-
-There are also functions with suffix `*_spatial()` for estimators with spatial kernels.
