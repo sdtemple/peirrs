@@ -364,7 +364,8 @@ for (run in 1:num_runs) {
         lag=lag,
         num_print=1e1,
         gamma_init=gamma_d,
-        beta_init=beta_d
+        beta_init=beta_d,
+        update_gamma=TRUE
       )
 
       bayes_beta <- result_bayes$infection_rate[ceiling(num_iter/2):num_iter]
@@ -486,25 +487,6 @@ for (run in 1:num_runs) {
   )
 
 }
-
-# bayesian
-
-{
-  start <- Sys.time()
-  result_bayes <- peirr_bayes(
-    removals_d,
-    infections_d,
-    population_size,
-    num_iter=200,
-    lag=lag,
-    num_print=1,
-    gamma_init=0.1,
-    update_gamma = TRUE
-  )
-  end <- Sys.time()
-  end - start
-}
-
 
 # Pair-based likelihood approximation
 
