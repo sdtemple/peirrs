@@ -70,10 +70,30 @@ library(lubridate)
 }
 
 write.table(measles,
-            "measles_hagelloch.csv",
+            "../data/measles_hagelloch.csv",
             sep=",",
             row.names=FALSE
             )
+
+
+# Load in after already processed -----------------------------------------
+
+{
+
+  measles <- read.table('../data/measles_hagelloch.csv',
+                        sep=',',
+                        header=TRUE
+                        )
+
+  # final form for package functions
+  lag <- 10
+  infections <- measles$infectious_time
+  removals <- measles$removal_time
+  removal_classes <- as.numeric(measles$class)
+  infection_classes <- as.numeric(measles$class)
+  infection_class_sizes <- c(90, 30, 65)
+  epidemic_size <- length(removals)
+}
 
 # SEIR without classes ----------------------------------------------------
 
@@ -539,5 +559,7 @@ result_bayes_multitype <- peirr_bayes_multitype(removals,
 )
 
 # may want to analyze the multitype with some partial data
+
+
 
 

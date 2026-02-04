@@ -41,7 +41,7 @@ help(peirr_tau)
 
 There are also functions with the suffixes `*_multitype()` and `*_spatial()` for estimators with multiple classes and spatial kernels, respectively.
 
-The `peirr_bootstrap()` function does not provide a confidence intervals but bootstrap samples. You can perform bias correction or interval estimation according to [Wikipedia](https://en.wikipedia.org/wiki/Bootstrapping_(statistics)#Deriving_confidence_intervals_from_the_bootstrap_distribution).
+The `peirr_bootstrap()` function does not provide confidence intervals but rather bootstrap samples. You can perform bias correction or interval estimation according to [Wikipedia](https://en.wikipedia.org/wiki/Bootstrapping_(statistics)#Deriving_confidence_intervals_from_the_bootstrap_distribution).
 
 Some of the scripts for my analyses are under `scripts/`. These may provide examples of how to run the functions.
 
