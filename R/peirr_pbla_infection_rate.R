@@ -9,7 +9,6 @@
 #' @param num_patient_zeros integer patient zeros
 #' @param lag numeric fixed lag
 #' @param known_gamma numeric: removal rate
-#' @param median_gamma bool: TRUE for median, and FALSE for mean in estimating the removal rate
 #'
 #' @return numeric list (infection_rate, removal_rate, effective_number)
 #'
@@ -20,8 +19,7 @@ peirr_pbla_infection_rate <- function(removals,
                                       num_renewals = 1,
                                       num_patient_zeros = 1,
                                       lag = 0,
-                                      known_gamma = NULL,
-                                      median_gamma = FALSE
+                                      known_gamma = NULL
                                       ) {
 
   # PBLA function with fixed removal rate
@@ -45,7 +43,7 @@ peirr_pbla_infection_rate <- function(removals,
 
   # estimate of removal rate
   if (is.null(known_gamma)) {
-    gamma_estim <- peirr_removal_rate(removals, infections, median_gamma=median_gamma)
+    gamma_estim <- peirr_removal_rate(removals, infections)
   } else {
     gamma_estim <- known_gamma
     if (length(known_gamma) > 1) {

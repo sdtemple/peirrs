@@ -10,9 +10,7 @@ peirr_tau_spatial(
   population_size,
   kernel_spatial,
   matrix_distance,
-  lag = 0,
-  median_tau = FALSE,
-  median_gamma = FALSE
+  lag = 0
 )
 }
 \arguments{
@@ -27,10 +25,6 @@ peirr_tau_spatial(
 \item{matrix_distance}{numeric: two-dimensional distance matrix}
 
 \item{lag}{numeric: fixed exposure period}
-
-\item{median_tau}{bool: use median imputation for tau if TRUE}
-
-\item{median_gamma}{bool: TRUE for median, and FALSE for mean in estimating the removal rate}
 }
 \value{
 numeric list (infection.rate, removal.rate)

@@ -7,8 +7,6 @@
 #' @param infections numeric vector: infection times
 #' @param population_size integer: population size
 #' @param lag numeric: fixed exposure period
-#' @param median_tau bool: use median imputation for tau if TRUE
-#' @param median_gamma bool: TRUE for median, and FALSE for mean in estimating the removal rate
 #'
 #' @return numeric list (infection.rate, removal.rate, R0)
 #'
@@ -16,9 +14,7 @@
 peirr_imputed <- function(removals,
                       infections,
                       population_size,
-                      lag = 0,
-                      median_tau = FALSE,
-                      median_gamma = FALSE
+                      lag = 0
                       ) {
 
   # make sure one of the other is finite
@@ -28,8 +24,7 @@ peirr_imputed <- function(removals,
 
   # estimate of removal rate
   gamma_estim <- peirr_removal_rate(removals,
-                                    infections,
-                                    median_gamma=median_gamma
+                                    infections
                                     )
 
   # number of infected
@@ -67,8 +62,7 @@ peirr_imputed <- function(removals,
                             infections_j,
                             gamma_estim,
                             gamma_estim,
-                            lag,
-                            median_tau
+                            lag
                             )
 
       if (is.na(tau_kj)) {
@@ -87,9 +81,7 @@ peirr_imputed <- function(removals,
 
   # only take expectation when we don't have the full period
   num_not_complete <- length(removals) - length(removals_complete)
-  median_scalar <- 1
-  if (median_tau) {median_scalar <- log(2)}
-  complete_period_sum <- num_not_complete / gamma_estim * median_scalar +
+  complete_period_sum <- num_not_complete / gamma_estim +
     sum(removals_complete - infections_complete)
 
   # maximizes give conditional expectations

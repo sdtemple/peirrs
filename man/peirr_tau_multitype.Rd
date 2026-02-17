@@ -10,9 +10,7 @@ peirr_tau_multitype(
   removal_classes,
   infection_classes,
   infection_class_sizes,
-  lag = 0,
-  median_tau = FALSE,
-  median_gamma = FALSE
+  lag = 0
 )
 }
 \arguments{
@@ -27,10 +25,6 @@ peirr_tau_multitype(
 \item{infection_class_sizes}{integer: population sizes for infection classes (sorted)}
 
 \item{lag}{numeric: fixed exposure period}
-
-\item{median_tau}{bool: use median imputation for tau if TRUE}
-
-\item{median_gamma}{bool: TRUE for median, and FALSE for mean in estimating the removal rate}
 }
 \value{
 numeric list (infection_rates, removal_rates, etc)

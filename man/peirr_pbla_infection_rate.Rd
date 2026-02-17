@@ -11,8 +11,7 @@ peirr_pbla_infection_rate(
   num_renewals = 1,
   num_patient_zeros = 1,
   lag = 0,
-  known_gamma = NULL,
-  median_gamma = FALSE
+  known_gamma = NULL
 )
 }
 \arguments{
@@ -29,8 +28,6 @@ peirr_pbla_infection_rate(
 \item{lag}{numeric fixed lag}
 
 \item{known_gamma}{numeric: removal rate}
-
-\item{median_gamma}{bool: TRUE for median, and FALSE for mean in estimating the removal rate}
 }
 \value{
 numeric list (infection_rate, removal_rate, effective_number)

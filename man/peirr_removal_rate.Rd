@@ -4,18 +4,16 @@
 \alias{peirr_removal_rate}
 \title{Removal rate estimator}
 \usage{
-peirr_removal_rate(removals, infections, median_gamma = TRUE)
+peirr_removal_rate(removals, infections)
 }
 \arguments{
 \item{removals}{numeric vector: removal times}
 
 \item{infections}{numeric vector: infection times}
-
-\item{median_gamma}{bool: TRUE for median, FALSE for mean}
 }
 \value{
 float: Removal rate estimate
 }
 \description{
-Estimate the removal rate as the inverse of the mean or median infection period.
+Estimate the removal rate as the inverse of the mean infectious period length.
 }

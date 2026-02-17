@@ -10,7 +10,6 @@
 #' @param num_patient_zeros integer: patient zeros
 #' @param lag numeric: fixed lag
 #' @param known_gamma numeric: removal rates
-#' @param median_gamma bool: TRUE for median, and FALSE for mean in estimating the removal rate
 #'
 #' @return numeric list (infection_rate, removal_rate)
 #'
@@ -22,8 +21,7 @@ peirr_pbla_infection_rate_multitype <- function(removals,
                                       num_renewals = 1,
                                       num_patient_zeros = 1,
                                       lag = 0,
-                                      known_gamma = NULL,
-                                      median_gamma = FALSE
+                                      known_gamma = NULL
                                       ) {
 
   # PBLA function with fixed removal rate
@@ -59,11 +57,7 @@ peirr_pbla_infection_rate_multitype <- function(removals,
       removals_kept_v2 <- removals_kept[filters]
       infections_kept_v2 <- infections_kept[filters]
       # estimate with complete obs
-      if(!median_gamma){
-        rate_estim <- length(removals_kept_v2) / sum(removals_kept_v2 - infections_kept_v2)
-      } else{
-        rate_estim <- 1 / median(removals_kept_v2 - infections_kept_v2) * log(2)
-      }
+      rate_estim <- length(removals_kept_v2) / sum(removals_kept_v2 - infections_kept_v2)
       removal_rates <- c(removal_rates, rate_estim)
     }
     gamma_estims <- removal_rates

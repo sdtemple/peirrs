@@ -9,8 +9,6 @@
 #' @param infection_classes numeric: infection time classes
 #' @param infection_class_sizes integer: population sizes for infection classes (sorted)
 #' @param lag numeric: fixed exposure period
-#' @param median_tau bool: use median imputation for tau if TRUE
-#' @param median_gamma bool: TRUE for median, and FALSE for mean in estimating the removal rate
 #'
 #' @return numeric list (infection_rates, removal_rates, etc)
 #'
@@ -20,9 +18,7 @@ peirr_tau_multitype <- function(removals,
                                 removal_classes, 
                                 infection_classes,
                                 infection_class_sizes,
-                                lag = 0,
-                                median_tau = FALSE,
-                                median_gamma = FALSE
+                                lag = 0
                                 ) {
 
   # make sure one or the other is finite
@@ -32,8 +28,6 @@ peirr_tau_multitype <- function(removals,
   infections <- infections[or.finite]
   removals <- removals[or.finite]
 
-  median_scalar <- 1
-  if (median_tau) {median_scalar <- log(2)}
 
   # number of infected
   epidemic_size <- sum(!is.na(removals) | !is.na(infections))
@@ -78,15 +72,12 @@ peirr_tau_multitype <- function(removals,
 
     # estimate with complete obs
     removal_full_sizes <- c(removal_full_sizes, length(removals_kept_v2))
-    if (!median_gamma) {
-      rate_estim <- length(removals_kept_v2) / sum(removals_kept_v2 - infections_kept_v2)
-    } else {
-      rate_estim <- 1 / median(removals_kept_v2 - infections_kept_v2) * log(2)
-    }
+    rate_estim <- length(removals_kept_v2) / sum(removals_kept_v2 - infections_kept_v2)
+
     removal_rates <- c(removal_rates, rate_estim)
     # compute expected value for incomplete obs
     num_not_complete <- length(removals_kept) - length(filter_by)
-    removal_partial_sum <- sum(removals_kept_v2 - infections_kept_v2) + num_not_complete / rate_estim * median_scalar
+    removal_partial_sum <- sum(removals_kept_v2 - infections_kept_v2) + num_not_complete / rate_estim
     removal_partial_sums <- c(removal_partial_sums, removal_partial_sum)
 
   }
@@ -124,7 +115,7 @@ peirr_tau_multitype <- function(removals,
           infection_k <- infections[k]
           # should be a scalar
           rate_k <- removal_rates[which(removal_classes_unique == removal_class_k)]
-          tau_kj <- tau_moment(removal_k, removal_j, infection_k, infection_j, rate_k, rate_j, lag, median_tau)
+          tau_kj <- tau_moment(removal_k, removal_j, infection_k, infection_j, rate_k, rate_j, lag)
           if (is.na(tau_kj)) {print(c(removal_k, removal_j, infection_k, infection_j, rate_k, rate_j))}
           tau_sum <- tau_sum + tau_kj
         }
