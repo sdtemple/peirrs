@@ -11,7 +11,7 @@
 #'
 #' @return numeric list: matrix of (infection times, removal times, classes and rates), matrix of (St, It, Et, Rt, Time)
 #'
-#' @export
+#' @keywords internal
 simulate_sem_multitype <- function(beta,
                                    gamma,
                                    infection_class_sizes,
@@ -155,7 +155,7 @@ simulate_sem_multitype <- function(beta,
     It = sum(is.finite(infections) & (infections <= t)) - sum(is.finite(removals))
     Rt = sum(is.finite(infections) & is.finite(removals))
     Et = sum(is.finite(infections) & (infections > t))
-    if (St + Rt + Et + It != N) {
+    if (St + Rt + Et + It != population_size) {
       stop("S(t) + I(t) + E(t) + R(t) do not equal N")
     }
     # & (i <= t) delays the infectious period after exposure

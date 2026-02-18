@@ -6,7 +6,7 @@
 #'
 #' @return matrix: infection times, removal times, (optional: infection classes)
 #'
-#' @export
+#' @keywords internal
 sort_sem <- function(matrix_time) {
   removals <- matrix_time[, 2]
   infections <- matrix_time[, 1]
@@ -21,11 +21,11 @@ sort_sem <- function(matrix_time) {
     removal_rates <- matrix_time[, 6][ind]
     population_size <- length(removals)
     # formatting
-    output <- matrix(c(infections, 
-                        removals, 
-                        infection_classes, 
-                        infection_rates, 
-                        removal_classes, 
+    output <- matrix(c(infections,
+                        removals,
+                        infection_classes,
+                        infection_rates,
+                        removal_classes,
                         removal_rates),
                         nrow = population_size,
                         ncol = 6,

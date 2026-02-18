@@ -32,3 +32,4 @@ numeric list: matrix of (infection times, removal times, classes and rates), mat
 \description{
 Draw infectious periods for general stochastic epidemic.
 }
+\keyword{internal}

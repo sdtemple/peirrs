@@ -12,7 +12,7 @@
 #'
 #' @return numeric: expectation of some pair-wise tau
 #'
-#' @export
+#' @keywords internal
 tau_moment <- function(rk,
                         rj,
                         ik,
@@ -134,7 +134,7 @@ tau_moment <- function(rk,
                             ) {
     val <- 1 / lambdak
     if (ij < rk) {
-      val <- val * exp(-lambdak * (rk - ik))
+      val <- val * exp(-lambdak * (rk - ij))
     }
     return(val)
   }

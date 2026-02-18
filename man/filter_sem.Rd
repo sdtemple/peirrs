@@ -15,3 +15,4 @@ matrix: infection times, removal times, (optional: infection classes)
 \description{
 Keep cases only.
 }
+\keyword{internal}

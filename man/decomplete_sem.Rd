@@ -19,3 +19,4 @@ matrix: infection times, removal times, (optional: infection classes)
 \description{
 Impute NAs for infection and removal times
 }
+\keyword{internal}

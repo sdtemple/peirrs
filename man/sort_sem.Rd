@@ -15,3 +15,4 @@ matrix: infection times, removal times, (optional: infection classes)
 \description{
 Sort matrix by increasing removal times.
 }
+\keyword{internal}

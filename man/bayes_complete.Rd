@@ -53,3 +53,4 @@ where the infections vector is of the same length as the population size.
 The rate priors for infection and removal rates are calculated based on initial estimates and shape priors.
 The rate prior is divided by the population size for infection rate.
 }
+\keyword{internal}

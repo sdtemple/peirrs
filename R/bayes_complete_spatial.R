@@ -19,10 +19,10 @@
 #'
 #' @return numeric list of exact posterior and prior parameters
 #'
-#' @export
-bayes_complete_spatial <- function(removals, 
-                                    infections, 
-                                    population_size, 
+#' @keywords internal
+bayes_complete_spatial <- function(removals,
+                                    infections,
+                                    population_size,
                                     kernel_spatial,
                                     matrix_distance,
                                     beta_init = 1,
@@ -33,7 +33,7 @@ bayes_complete_spatial <- function(removals,
                                     num_renewals = 1,
                                     lag = 0
                                     ) {
-  
+
   # initializations
   beta_rate <- beta_shape / beta_init
   gamma_rate <- gamma_shape / gamma_init
@@ -44,7 +44,7 @@ bayes_complete_spatial <- function(removals,
   infections_augmented <- c(infections, rep(Inf, population_size - epidemic_size))
   tau_matrix <- matrix(0, nrow = epidemic_size, ncol = population_size)
   for(j in 1:epidemic_size){
-      tau_matrix[j, ] <- (sapply(infections_augmented - lag, min, removals[j]) - 
+      tau_matrix[j, ] <- (sapply(infections_augmented - lag, min, removals[j]) -
         sapply(infections_augmented - lag, min, infections[j]))  * kernel_spatial(matrix_distance[j,])
   }
   tau_sum <- sum(tau_matrix)
@@ -61,7 +61,7 @@ bayes_complete_spatial <- function(removals,
                          rate=gamma_rate + period_sum,
                          shape=gamma_shape + epidemic_size * num_renewals
                          )
-                         
+
   return(list(infection_rate=beta_samples * population_size,
               removal_rate=gamma_samples
   ))

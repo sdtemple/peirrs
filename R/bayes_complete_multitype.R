@@ -27,7 +27,7 @@
 #' integer vectors of the same length as \code{infections} and \code{removals}, respectively.
 #' The rate priors for infection and removal rates are calculated based on initial estimates and shape priors.
 #' The rate priors are divided by the population size for infection rates.
-#' The priors and initial estimates should be provided as vectors 
+#' The priors and initial estimates should be provided as vectors
 #' of the same length as the number of unique classes.
 #'
 #' @examples
@@ -47,7 +47,7 @@
 #' hist(output$infection_rate[1,])
 #' hist(output$removal_rate[2,])
 #'
-#' @export
+#' @keywords internal
 bayes_complete_multitype <- function(removals,
                                     infections,
                                     removal_classes,
@@ -149,7 +149,7 @@ bayes_complete_multitype <- function(removals,
   # sample infection rates
   tau_matrix <- matrix(0, nrow = epidemic_size, ncol = epidemic_size)
   for (j in 1:epidemic_size) {
-    tau_matrix[j, 1:epidemic_size] <- (sapply(infections[1:epidemic_size] - lag, min, removals[j]) - 
+    tau_matrix[j, 1:epidemic_size] <- (sapply(infections[1:epidemic_size] - lag, min, removals[j]) -
       sapply(infections[1:epidemic_size] - lag, min, infections[j])
       )
   }
@@ -162,8 +162,8 @@ bayes_complete_multitype <- function(removals,
     num_not_infected <- sum(infection_classes == infection_class) - num_infected
     beta_samples[class_num, ] <- rgamma(num_iter,
                                       shape = beta_shape[class_num] + num_infected,
-                                      rate = beta_rate[class_num] + 
-                                        tau_filt_sum + 
+                                      rate = beta_rate[class_num] +
+                                        tau_filt_sum +
                                         num_not_infected * period_sum,
                                       )
   }

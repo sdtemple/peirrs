@@ -10,11 +10,11 @@
 #'
 #' @return numeric list: matrix of (infection times, removal times), matrix of (St, It, Et, Rt, Time)
 #'
-#' @export
-simulate_sem <- function(beta, 
-                          gamma, 
-                          population_size, 
-                          num_renewals = 1, 
+#' @keywords internal
+simulate_sem <- function(beta,
+                          gamma,
+                          population_size,
+                          num_renewals = 1,
                           lag = 0
                           ) {
 
@@ -45,8 +45,8 @@ simulate_sem <- function(beta,
 
     # closest infectious time after exposure
     min.time <- min(
-      infections[is.infinite(removals) & 
-        is.finite(infections) & 
+      infections[is.infinite(removals) &
+        is.finite(infections) &
         (infections > t)],
       Inf
     )
@@ -132,15 +132,15 @@ simulate_sem <- function(beta,
   # formatting
   output <- matrix(c(infections, removals),
                     nrow = population_size,
-                    ncol = 2, 
+                    ncol = 2,
                     byrow = FALSE
                     )
   colnames(output) <- c("infection", "removal")
 
-  recording <- matrix(c(susceptible_recording, 
-                        exposed_recording, 
-                        infection_recording, 
-                        removal_recording, 
+  recording <- matrix(c(susceptible_recording,
+                        exposed_recording,
+                        infection_recording,
+                        removal_recording,
                         time_recording),
                       nrow = ctr,
                       ncol = 5,

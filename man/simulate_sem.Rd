@@ -23,3 +23,4 @@ numeric list: matrix of (infection times, removal times), matrix of (St, It, Et,
 \description{
 Draw infectious periods for general stochastic epidemic.
 }
+\keyword{internal}

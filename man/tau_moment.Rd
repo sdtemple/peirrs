@@ -27,3 +27,4 @@ numeric: expectation of some pair-wise tau
 \description{
 Compute expectation of tau with (in)complete observations.
 }
+\keyword{internal}

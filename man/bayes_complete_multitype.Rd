@@ -77,3 +77,4 @@ hist(output$infection_rate[1,])
 hist(output$removal_rate[2,])
 
 }
+\keyword{internal}

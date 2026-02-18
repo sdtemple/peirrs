@@ -35,3 +35,4 @@ numeric list: matrix of (infection times, removal times, spatial coordinates), m
 \description{
 Draw infectious periods for stochastic epidemic with spatial effect.
 }
+\keyword{internal}

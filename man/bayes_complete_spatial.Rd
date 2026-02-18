@@ -51,3 +51,4 @@ You can sample from \code{rgamma()} with the posterior parameters to get the pos
 For the infection rate, you should scale the result of \code{rgamma()} by the population size.
 \code{infection.rate.samples} and \code{removal.rate.samples} contain the posterior samples.
 }
+\keyword{internal}

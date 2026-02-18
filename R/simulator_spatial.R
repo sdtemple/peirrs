@@ -18,17 +18,17 @@
 #'
 #' @export
 simulator_spatial <- function(beta,
-                      gamma,
-                      population_size,
-                      kernel_spatial,
-                      matrix_distance,
-                      num_renewals = 1,
-                      lag = 0,
-                      prop_complete = 0.5,
-                      prop_infection_missing = 1,
-                      min_epidemic_size = 10,
-                      max_epidemic_size = Inf
-                      ) {
+                              gamma,
+                              population_size,
+                              kernel_spatial,
+                              matrix_distance,
+                              num_renewals = 1,
+                              lag = 0,
+                              prop_complete = 0.5,
+                              prop_infection_missing = 1,
+                              min_epidemic_size = 10,
+                              max_epidemic_size = Inf
+                              ) {
 
   sample_size <- 0
   gamma_estim <- NA
@@ -36,24 +36,24 @@ simulator_spatial <- function(beta,
     stop("prop_complete <= 0 error. Must have some complete infectious periods.")
   }
 
-  while ((sample_size <= min_epidemic_size) || 
-    (sample_size >= max_epidemic_size) || 
+  while ((sample_size <= min_epidemic_size) ||
+    (sample_size >= max_epidemic_size) ||
     is.na(gamma_estim)
     ) {
     # main simulation
-    epidemic <- simulate_sem_spatial(beta, 
-                                      gamma, 
-                                      population_size, 
-                                      kernel_spatial, 
+    epidemic <- simulate_sem_spatial(beta,
+                                      gamma,
+                                      population_size,
+                                      kernel_spatial,
                                       matrix_distance,
-                                      num_renewals, 
+                                      num_renewals,
                                       lag)
-    filter_indices <- is.finite(epidemic$matrix_time[,1]) & 
+    filter_indices <- is.finite(epidemic$matrix_time[,1]) &
       is.finite(epidemic$matrix_time[,2])
     epidemic$matrix_time <- filter_sem(epidemic$matrix_time)
     epidemic$matrix_distance <- epidemic$matrix_distance[filter_indices, ]
-    epidemic$matrix_time <- decomplete_sem(epidemic$matrix_time, 
-                                            prop_complete=prop_complete, 
+    epidemic$matrix_time <- decomplete_sem(epidemic$matrix_time,
+                                            prop_complete=prop_complete,
                                             prop_infection_missing=prop_infection_missing
                                             )
     sort_indices <- order(epidemic$matrix_time[,2]) # sort the distance matrix
