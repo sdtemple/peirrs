@@ -2,7 +2,7 @@
 % Please edit documentation in R/bayes_complete_spatial.R
 \name{bayes_complete_spatial}
 \alias{bayes_complete_spatial}
-\title{Posterior parameters for spatially-varying infection and removal rates given complete data}
+\title{Posterior sampling for spatially-varying infection and removal rates given complete data}
 \usage{
 bayes_complete_spatial(
   removals,
@@ -30,25 +30,29 @@ bayes_complete_spatial(
 
 \item{matrix_distance}{numeric: two-dimensional distance matrix}
 
-\item{beta_init}{numeric}
+\item{beta_init}{numeric: initial infection rate estimate}
 
-\item{gamma_init}{numeric}
+\item{gamma_init}{numeric: initial removal rate estimate}
 
-\item{beta_shape}{numeric}
+\item{beta_shape}{numeric: shape of gamma distribution prior}
 
-\item{gamma_shape}{numeric}
+\item{gamma_shape}{numeric: shape of gamma distribution prior}
 
-\item{num_iter}{numeric}
+\item{num_iter}{numeric: number of samples}
 
 \item{lag}{numeric: fixed exposure period}
 }
 \value{
-numeric list of exact posterior and prior parameters
+numeric list of posterior samples for infection and removal rates
 }
 \description{
-Parameters for independent Gibbs sampling of the infection and removal rates.
-You can sample from \code{rgamma()} with the posterior parameters to get the posterior distribution.
-For the infection rate, you should scale the result of \code{rgamma()} by the population size.
-\code{infection.rate.samples} and \code{removal.rate.samples} contain the posterior samples.
+This function extends \code{bayes_complete()} to the spatial setting where
+infection rates vary by distance between individuals.
+}
+\details{
+The spatial kernel function modulates the infection rate based on distance between individuals.
+The infections vector is of the same length as the epidemic size (number of infected individuals).
+The rate priors for infection and removal rates are calculated based on initial estimates and shape priors.
+The rate priors are divided by the population size for infection rates.
 }
 \keyword{internal}

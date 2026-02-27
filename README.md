@@ -9,8 +9,8 @@
 Requires [`sdtemple/pblas`](https://github.com/sdtemple/pblas) as well.
 
 ```
-devtools::install_github("sdtemple/pblas")
-devtools::install_github("sdtemple/peirrs")
+remotes::install_github("sdtemple/pblas")
+remotes::install_github("sdtemple/peirrs")
 library(peirrs)
 library(pblas)
 ```

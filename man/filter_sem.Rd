@@ -13,6 +13,25 @@ filter_sem(matrix_time)
 matrix: infection times, removal times, (optional: infection classes)
 }
 \description{
-Keep cases only.
+Keep infected individuals only.
+}
+\details{
+Non-infected individuals are denoted as infinite values in the matrix_time.
+The matrix_time is either 2 columns if from the \code{simulator()} function
+or 6 columns if from the \code{simulator_multitype()} function.
+}
+\examples{
+# Basic SIR model
+epidemic <- simulator(beta = 2, gamma = 1, population_size = 100)
+infected_only <- filter_sem(epidemic$matrix_time)
+
+# Multi-type model
+beta <- c(3, 2)
+gamma <- c(1, 1)
+infection_class_sizes <- c(50, 50)
+removal_class_sizes <- c(50, 50)
+epidemic_mt <- simulator_multitype(beta, gamma, infection_class_sizes, removal_class_sizes)
+infected_only_mt <- filter_sem(epidemic_mt$matrix_time)
+
 }
 \keyword{internal}

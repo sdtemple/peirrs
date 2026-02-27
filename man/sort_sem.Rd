@@ -7,12 +7,33 @@
 sort_sem(matrix_time)
 }
 \arguments{
-\item{matrix_time}{matrix: infection times, removal times, (optional: infection classes)}
+\item{matrix_time}{matrix: infection times, removal times, (optional: infection and removal classes)}
 }
 \value{
-matrix: infection times, removal times, (optional: infection classes)
+matrix: infection times, removal times, (optional: infection and removal classes)
 }
 \description{
 Sort matrix by increasing removal times.
+}
+\details{
+The matrix_time is either 2 columns if from the \code{simulator()} function
+or 6 columns if from the \code{simulator_multitype()} function.
+For 2-column matrices: columns are infection and removal times.
+For 6-column matrices: columns are infection time, removal time, infection class,
+infection rate, removal class, and removal rate.
+}
+\examples{
+# Basic SIR model
+epidemic <- simulator(beta = 2, gamma = 1, population_size = 100)
+sorted_data <- sort_sem(epidemic$matrix_time)
+
+# Multi-type model
+beta <- c(3, 2)
+gamma <- c(1, 1)
+infection_class_sizes <- c(50, 50)
+removal_class_sizes <- c(50, 50)
+epidemic_mt <- simulator_multitype(beta, gamma, infection_class_sizes, removal_class_sizes)
+sorted_data_mt <- sort_sem(epidemic_mt$matrix_time)
+
 }
 \keyword{internal}

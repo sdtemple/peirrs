@@ -1,6 +1,6 @@
 Package: peirrs
 Title: Pair-based Estimators of Infection and Removal Rates
-Version: 0.1
+Version: 1.0
 Authors@R: 
     person("Seth", "Temple", , "sethtem@umich.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7651-6527"))

@@ -2,7 +2,7 @@
 % Please edit documentation in R/bayes_complete_multitype.R
 \name{bayes_complete_multitype}
 \alias{bayes_complete_multitype}
-\title{Posterior parameters for infection and removal rates given complete data}
+\title{Posterior sampling for multi-type infection and removal rates given complete data}
 \usage{
 bayes_complete_multitype(
   removals,
@@ -24,15 +24,15 @@ bayes_complete_multitype(
 
 \item{infections}{numeric vector: infection times}
 
-\item{beta_init}{numeric}
+\item{beta_init}{numeric: initial infection rate estimates}
 
-\item{beta_shape}{numeric}
+\item{beta_shape}{numeric: shape of gamma distribution prior}
 
-\item{gamma_init}{numeric}
+\item{gamma_init}{numeric: initial removal rate estimates}
 
-\item{gamma_shape}{numeric}
+\item{gamma_shape}{numeric: shape of gamma distribution prior}
 
-\item{num_iter}{numeric}
+\item{num_iter}{numeric: number of samples}
 
 \item{lag}{numeric: fixed exposure period}
 }
@@ -40,14 +40,10 @@ bayes_complete_multitype(
 numeric list of posterior samples for infection and removal rates
 }
 \description{
-Parameters for independent Gibbs sampling of the infection and removal rates.
-You can sample from \code{rgamma()} with the posterior parameters to get the posterior distribution.
-For the infection rate, you should scale the result of \code{rgamma()} by the population size.
-\code{infection.rate.samples} and \code{removal.rate.samples} contain the posterior samples.
-}
-\details{
 This function extends \code{bayes_complete()} to the multi-type setting where there are different
 infection and removal rates for different classes of individuals.
+}
+\details{
 The infections vector is of the same length as the population size (number of individuals).
 Note that this vector size differs from \code{bayes_complete()}, where the infections vector
 is of the same length as the epidemic size (number of infected individuals).
@@ -58,23 +54,5 @@ The rate priors for infection and removal rates are calculated based on initial 
 The rate priors are divided by the population size for infection rates.
 The priors and initial estimates should be provided as vectors
 of the same length as the number of unique classes.
-}
-\examples{
-# simulate data
-beta <- c(3, 2)
-gamma <- c(1, 1)
-infection_class_sizes <- c(50, 50)
-removal_class_sizes <- c(40, 60)
-epidemic <- simulator_multitype(beta, gamma, infection_class_sizes, removal_class_sizes, lag=0, prop_complete=1)
-X <- epidemic$matrix_time
-removals <- X[, 2]
-infections <- X[, 1]
-removal_classes <- X[, 5]
-infection_classes <- X[, 4]
-priors <- c(1, 1)
-output <- bayes_complete_multitype(removals, infections, removal_classes, infection_classes, infection_class_sizes, priors, priors, priors, priors, num_iter=1000, lag=0)
-hist(output$infection_rate[1,])
-hist(output$removal_rate[2,])
-
 }
 \keyword{internal}

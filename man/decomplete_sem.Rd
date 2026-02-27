@@ -2,7 +2,7 @@
 % Please edit documentation in R/decomplete_sem.R
 \name{decomplete_sem}
 \alias{decomplete_sem}
-\title{Missing epidemic data}
+\title{Insert missingness into epidemic data}
 \usage{
 decomplete_sem(matrix_time, prop_complete = 0, prop_infection_missing = 1)
 }
@@ -17,6 +17,29 @@ decomplete_sem(matrix_time, prop_complete = 0, prop_infection_missing = 1)
 matrix: infection times, removal times, (optional: infection classes)
 }
 \description{
-Impute NAs for infection and removal times
+Randomly insert NAs for infection and removal times to simulate incomplete observation.
+}
+\details{
+This function takes complete epidemic data and randomly inserts missing values (NAs)
+to simulate incomplete observation scenarios.
+The matrix_time is either 2 columns if from the \code{simulator()} function
+or 6 columns if from the \code{simulator_multitype()} function.
+For each individual, with probability \code{1 - prop_complete}, one time is set to NA.
+When a time is set to NA, it is the infection time with probability \code{prop_infection_missing},
+otherwise it is the removal time.
+}
+\examples{
+# Basic SIR model
+epidemic <- simulator(beta = 2, gamma = 1, population_size = 100)
+incomplete_data <- decomplete_sem(epidemic$matrix_time, prop_complete = 0.5, prop_infection_missing = 0.8)
+
+# Multi-type model
+beta <- c(3, 2)
+gamma <- c(1, 1)
+infection_class_sizes <- c(50, 50)
+removal_class_sizes <- c(50, 50)
+epidemic_mt <- simulator_multitype(beta, gamma, infection_class_sizes, removal_class_sizes)
+incomplete_data_mt <- decomplete_sem(epidemic_mt$matrix_time, prop_complete = 0.6)
+
 }
 \keyword{internal}

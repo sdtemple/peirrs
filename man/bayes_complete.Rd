@@ -2,7 +2,7 @@
 % Please edit documentation in R/bayes_complete.R
 \name{bayes_complete}
 \alias{bayes_complete}
-\title{Posterior parameters for infection and removal rates given complete data}
+\title{Posterior sampling for infection and removal rates given complete data}
 \usage{
 bayes_complete(
   removals,
@@ -24,32 +24,28 @@ bayes_complete(
 
 \item{population_size}{integer: population size}
 
-\item{beta_init}{numeric}
+\item{beta_init}{numeric: initial infection rate estimate}
 
-\item{gamma_init}{numeric}
+\item{gamma_init}{numeric: initial removal rate estimate}
 
-\item{beta_shape}{numeric}
+\item{beta_shape}{numeric: shape of gamma distribution prior}
 
-\item{gamma_shape}{numeric}
+\item{gamma_shape}{numeric: shape of gamma distribution prior}
 
-\item{num_iter}{numeric}
+\item{num_iter}{numeric: number of samples}
 
 \item{lag}{numeric: fixed exposure period}
 }
 \value{
-numeric list of exact posterior and prior parameters
+numeric list of posterior samples for infection and removal rates
 }
 \description{
-Parameters for independent Gibbs sampling of the infection and removal rates.
-You can sample from \code{rgamma()} with the posterior parameters to get the posterior distribution.
-For the infection rate, you should scale the result of \code{rgamma()} by the population size.
-\code{infection.rate.samples} and \code{removal.rate.samples} contain the posterior samples.
+This is the base function for Gibbs sampling of infection and removal rates
+when infection times and removal times are fully observed.
 }
 \details{
 This function assumes that the infections and removals vectors contain complete data
 and are of the same length as the epidemic size (number of infected individuals).
-Note that this vector size differs from \code{bayes_complete_multitype()},
-where the infections vector is of the same length as the population size.
 The rate priors for infection and removal rates are calculated based on initial estimates and shape priors.
 The rate prior is divided by the population size for infection rate.
 }
