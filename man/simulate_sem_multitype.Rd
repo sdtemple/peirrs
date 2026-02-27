@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulate_sem_multitype.R
 \name{simulate_sem_multitype}
 \alias{simulate_sem_multitype}
-\title{Simulate general stochastic epidemic model with different infection rates}
+\title{Simulate stochastic epidemic model with different infection and removal rates}
 \usage{
 simulate_sem_multitype(
   beta,
@@ -24,12 +24,64 @@ simulate_sem_multitype(
 
 \item{num_renewals}{integer: positive erlang shape}
 
-\item{lag}{numeric: fixed exposure period}
+\item{lag}{numeric: fixed incubation period}
 }
 \value{
-numeric list: matrix of (infection times, removal times, classes and rates), matrix of (St, It, Et, Rt, Time)
+A list with two elements:
+\itemize{
+\item \code{matrix_time}: an N x 6 matrix with columns infection, removal,
+infection_class, infection_rate, removal_class, removal_rate
+\item \code{matrix_record}: a T x 5 matrix with time-indexed columns St, Et, It, Rt, Time
+recording the susceptible, exposed, infectious, and removed counts plus elapsed time
+}
 }
 \description{
-Draw infectious periods for general stochastic epidemic.
+Draw infectious periods for the multi-type SEIR model.
+}
+\details{
+This function implements a multitype SIR epidemic model using an event-driven
+(Gillespie) algorithm. The key feature is that individuals have separate
+infection-class and removal-class assignments, each drawn from a stratified
+population structure.
+
+The \code{beta} vector gives class-specific infection rates; \code{gamma} vector gives
+class-specific removal rates. When a susceptible is infected, they are assigned
+an infection class (determining their infectiousness) and independently a
+removal class (determining how quickly they recover).
+
+Population structure:
+\itemize{
+\item \code{infection_class_sizes}: sizes of infection-rate subpopulations
+\item \code{removal_class_sizes}: sizes of removal-rate subpopulations
+\item Both must sum to the same total (the epidemic population size)
+}
+
+During the epidemic, individuals are assigned infection and removal classes
+with probability proportional to class sizes. The output matrix includes
+infection_class, infection_rate, removal_class, and removal_rate in addition
+to infection and removal times.
+}
+\examples{
+# Multitype epidemic with 2 infection classes and 2 removal classes
+set.seed(1)
+epi1 <- simulate_sem_multitype(beta = c(1.5, 2.0), gamma = c(0.8, 1.2),
+                               infection_class_sizes = c(50, 50),
+                               removal_class_sizes = c(50, 50))
+head(epi1$matrix_time)
+
+# Multitype epidemic with unequal class sizes
+set.seed(2)
+epi2 <- simulate_sem_multitype(beta = c(1.2, 2.5), gamma = c(0.7, 1.5),
+                               infection_class_sizes = c(70, 30),
+                               removal_class_sizes = c(60, 40),
+                               lag = 0.5, num_renewals = 2)
+# Compare infectious period distributions by removal class
+class1_periods <- epi2$matrix_time[epi2$matrix_time[, "removal_class"] == 1, "removal"] -
+                  epi2$matrix_time[epi2$matrix_time[, "removal_class"] == 1, "infection"]
+class2_periods <- epi2$matrix_time[epi2$matrix_time[, "removal_class"] == 2, "removal"] -
+                  epi2$matrix_time[epi2$matrix_time[, "removal_class"] == 2, "infection"]
+boxplot(list(class1 = class1_periods[is.finite(class1_periods)],
+             class2 = class2_periods[is.finite(class2_periods)]))
+
 }
 \keyword{internal}

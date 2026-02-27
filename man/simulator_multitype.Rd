@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulator_multitype.R
 \name{simulator_multitype}
 \alias{simulator_multitype}
-\title{Simulate multi-type stochastic epidemic model with formatting}
+\title{Simulate multi-type stochastic epidemic model with post-processing}
 \usage{
 simulator_multitype(
   beta,
@@ -28,19 +28,59 @@ simulator_multitype(
 
 \item{num_renewals}{integer: positive shape}
 
-\item{lag}{numeric: fixed exposure period}
+\item{lag}{numeric: fixed incubation period}
 
-\item{prop_complete}{expected proportion of complete pairs observed}
+\item{prop_complete}{numeric: expected proportion of complete pairs observed}
 
-\item{prop_infection_missing}{probability infection time missing}
+\item{prop_infection_missing}{numeric: expected proportion of missing infection times}
 
-\item{min_epidemic_size}{integer}
+\item{min_epidemic_size}{integer: epidemic is at least this large}
 
-\item{max_epidemic_size}{integer}
+\item{max_epidemic_size}{integer: epidemic is no larger than this}
 }
 \value{
 numeric list: matrix of (infection times, removal times), matrix of (St, It, Et, Rt, Time)
 }
 \description{
 Draw infectious periods for stochastic epidemic with different classes.
+}
+\details{
+The function repeatedly simulates epidemics until the observed epidemic size is
+between \code{min_epidemic_size} and \code{max_epidemic_size} and there is enough complete
+infection/removal information to estimate all removal rates (one per removal class).
+
+After simulation, the output is post-processed by:
+\itemize{
+\item removing non-infected individuals,
+\item inserting missingness, and
+\item sorting by removal time.
+}
+
+In the multitype setting, \code{beta} is a vector giving class-specific infection rates
+and \code{gamma} is a vector giving class-specific removal rates. The arguments
+\code{infection_class_sizes} and \code{removal_class_sizes} specify the population
+substructure for infection and removal classes, respectively.
+
+\code{prop_complete} controls the expected fraction of complete infection-removal pairs.
+If a pair is made incomplete, \code{prop_infection_missing} is the probability that the
+infection time (rather than the removal time) is set to \code{NA}.
+}
+\examples{
+# Basic complete-data simulation with two infection classes and two removal classes
+set.seed(1)
+epi1 <- simulator_multitype(beta = c(1.5, 2.0), gamma = c(0.8, 1.2),
+                            infection_class_sizes = c(50, 50),
+                            removal_class_sizes = c(50, 50),
+                            prop_complete = 1)
+head(epi1$matrix_time)
+
+# Multitype simulation with missingness and exposure lag
+set.seed(2)
+epi2 <- simulator_multitype(beta = c(1.5, 2.0), gamma = c(0.8, 1.2),
+                            infection_class_sizes = c(60, 40),
+                            removal_class_sizes = c(50, 50),
+                            lag = 0.5, prop_complete = 0.8,
+                            prop_infection_missing = 0.5)
+colSums(is.na(epi2$matrix_time))
+
 }

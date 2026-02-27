@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulate_sem_spatial.R
 \name{simulate_sem_spatial}
 \alias{simulate_sem_spatial}
-\title{Simulate stochastic epidemic model with spatial effect}
+\title{Simulate stochastic epidemic model with spatial distance effect}
 \usage{
 simulate_sem_spatial(
   beta,
@@ -27,12 +27,63 @@ simulate_sem_spatial(
 
 \item{num_renewals}{integer: positive shape}
 
-\item{lag}{numeric: fixed exposure period}
+\item{lag}{numeric: fixed incubation period}
 }
 \value{
-numeric list: matrix of (infection times, removal times, spatial coordinates), matrix of (St, It, Et, Rt, Time), matrix of N by N distances
+A list with three elements:
+\itemize{
+\item \code{matrix_time}: an N x 2 matrix with columns "infection" and "removal" containing
+exposure and removal times for each individual (Inf indicates never infected or still infectious)
+\item \code{matrix_record}: a T x 5 matrix with time-indexed columns St, Et, It, Rt, Time
+recording the susceptible, exposed, infectious, and removed counts plus elapsed time
+\item \code{matrix_distance}: the input distance matrix, returned for reference
+}
 }
 \description{
-Draw infectious periods for stochastic epidemic with spatial effect.
+Draw infectious periods for SEIR model with spatial effect.
+}
+\details{
+This function implements a spatial stochastic SIR epidemic model using an
+event-driven (Gillespie) algorithm. The key difference from non-spatial models
+is that the infection rate between individuals depends on their spatial distance
+via the \code{kernel_spatial} function.
+
+The infection rate at time t is computed as:
+beta/N * sum over (infectious, susceptible) pairs of kernel_spatial(distance).
+
+The \code{kernel_spatial} function should be a symmetric, non-negative function of
+distance (e.g., exponential decay, power law, or step function). Common choices
+include \code{function(d) exp(-lambda * d)} or \code{function(d) 1 / (1 + d^2)}.
+
+The \code{matrix_distance} is an N x N symmetric distance matrix where element (i, j)
+gives the distance between individuals i and j. Typically constructed via
+\code{as.matrix(dist(coordinates))} for coordinates in Euclidean space.
+}
+\examples{
+# Construct 2D spatial coordinates and distance matrix
+set.seed(1)
+n <- 50
+coords <- cbind(runif(n), runif(n))
+D <- as.matrix(dist(coords))
+
+# Define an exponential decay kernel
+kernel_spatial <- function(d) exp(-2 * d)
+
+# Simulate spatial epidemic
+epi1 <- simulate_sem_spatial(beta = 1.5, gamma = 1.0, population_size = n,
+                             kernel_spatial = kernel_spatial,
+                             matrix_distance = D)
+head(epi1$matrix_time)
+
+# Simulation with lag and multiple renewals
+set.seed(2)
+kernel_spatial2 <- function(d) 1 / (1 + d^2)  # Power-law kernel
+epi2 <- simulate_sem_spatial(beta = 2.0, gamma = 0.8, population_size = n,
+                             kernel_spatial = kernel_spatial2,
+                             matrix_distance = D,
+                             lag = 0.5, num_renewals = 2)
+hist(epi2$matrix_time[, "removal"] - epi2$matrix_time[, "infection"],
+     main = "Spatial epidemic: infectious period distribution")
+
 }
 \keyword{internal}

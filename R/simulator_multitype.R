@@ -1,4 +1,4 @@
-#' Simulate multi-type stochastic epidemic model with formatting
+#' Simulate multi-type stochastic epidemic model with post-processing
 #'
 #' Draw infectious periods for stochastic epidemic with different classes.
 #'
@@ -7,13 +7,52 @@
 #' @param infection_class_sizes integers: subpopulation sizes for infection rates
 #' @param removal_class_sizes integers: subpopulation sizes for removal rates
 #' @param num_renewals integer: positive shape
-#' @param lag numeric: fixed exposure period
-#' @param prop_complete expected proportion of complete pairs observed
-#' @param prop_infection_missing probability infection time missing
-#' @param min_epidemic_size integer
-#' @param max_epidemic_size integer
+#' @param lag numeric: fixed incubation period
+#' @param prop_complete numeric: expected proportion of complete pairs observed
+#' @param prop_infection_missing numeric: expected proportion of missing infection times
+#' @param min_epidemic_size integer: epidemic is at least this large
+#' @param max_epidemic_size integer: epidemic is no larger than this
+#'
+#' @details
+#' The function repeatedly simulates epidemics until the observed epidemic size is
+#' between `min_epidemic_size` and `max_epidemic_size` and there is enough complete
+#' infection/removal information to estimate all removal rates (one per removal class).
+#'
+#' After simulation, the output is post-processed by:
+#' \itemize{
+#'   \item removing non-infected individuals,
+#'   \item inserting missingness, and
+#'   \item sorting by removal time.
+#' }
+#'
+#' In the multitype setting, `beta` is a vector giving class-specific infection rates
+#' and `gamma` is a vector giving class-specific removal rates. The arguments
+#' `infection_class_sizes` and `removal_class_sizes` specify the population
+#' substructure for infection and removal classes, respectively.
+#'
+#' `prop_complete` controls the expected fraction of complete infection-removal pairs.
+#' If a pair is made incomplete, `prop_infection_missing` is the probability that the
+#' infection time (rather than the removal time) is set to `NA`.
 #'
 #' @return numeric list: matrix of (infection times, removal times), matrix of (St, It, Et, Rt, Time)
+#'
+#' @examples
+#' # Basic complete-data simulation with two infection classes and two removal classes
+#' set.seed(1)
+#' epi1 <- simulator_multitype(beta = c(1.5, 2.0), gamma = c(0.8, 1.2),
+#'                             infection_class_sizes = c(50, 50),
+#'                             removal_class_sizes = c(50, 50),
+#'                             prop_complete = 1)
+#' head(epi1$matrix_time)
+#'
+#' # Multitype simulation with missingness and exposure lag
+#' set.seed(2)
+#' epi2 <- simulator_multitype(beta = c(1.5, 2.0), gamma = c(0.8, 1.2),
+#'                             infection_class_sizes = c(60, 40),
+#'                             removal_class_sizes = c(50, 50),
+#'                             lag = 0.5, prop_complete = 0.8,
+#'                             prop_infection_missing = 0.5)
+#' colSums(is.na(epi2$matrix_time))
 #'
 #' @export
 simulator_multitype <- function(beta,

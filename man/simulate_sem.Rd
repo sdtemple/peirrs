@@ -15,12 +15,50 @@ simulate_sem(beta, gamma, population_size, num_renewals = 1, lag = 0)
 
 \item{num_renewals}{integer: positive shape}
 
-\item{lag}{numeric: fixed exposure period}
+\item{lag}{numeric: fixed incubation period}
 }
 \value{
-numeric list: matrix of (infection times, removal times), matrix of (St, It, Et, Rt, Time)
+A list with two elements:
+\itemize{
+\item \code{matrix_time}: an N x 2 matrix with columns "infection" and "removal" containing
+exposure and removal times for each individual (Inf indicates never infected or still infectious)
+\item \code{matrix_record}: a T x 5 matrix with time-indexed columns St, Et, It, Rt, Time
+recording the susceptible, exposed, infectious, and removed counts plus elapsed time
+}
 }
 \description{
-Draw infectious periods for general stochastic epidemic.
+Draw infectious periods for SEIR model.
+}
+\details{
+This function implements a stochastic SIR (Susceptible-Infected-Removed) epidemic
+model using an event-driven (Gillespie) algorithm. The simulation proceeds by
+sampling infection and removal events at random times according to their rates.
+
+The infection rate is \code{beta}, scaled by the number of susceptible-infectious pairs
+(beta\emph{S}I/N). The removal rate is \code{gamma} per infected individual.
+
+The \code{lag} parameter represents a fixed incubation period: when a susceptible is infected
+at time t, they become infectious at time t + lag.
+
+The \code{num_renewals} parameter allows for multiple stages of infection before removal,
+implementing a Negative Binomial infectious period distribution (mean 1/gamma per stage).
+
+The function returns both the infection/removal times for each individual and a
+time-indexed recording of the S, E, I, R counts throughout the epidemic.
+}
+\examples{
+# Basic SIR epidemic simulation
+set.seed(1)
+epi1 <- simulate_sem(beta = 1.5, gamma = 1.0, population_size = 100)
+head(epi1$matrix_time)
+tail(epi1$matrix_record)
+
+# Simulation with exposure lag and multiple infection renewals
+set.seed(2)
+epi2 <- simulate_sem(beta = 2.0, gamma = 0.8, population_size = 80,
+                     lag = 0.5, num_renewals = 2)
+hist(epi2$matrix_time[, "removal"] - epi2$matrix_time[, "infection"],
+     main = "Infectious period distribution")
+
 }
 \keyword{internal}

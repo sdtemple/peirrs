@@ -1,4 +1,4 @@
-#' Simulate general stochastic epidemic model with formatting
+#' Simulate general stochastic epidemic model with post-processing
 #'
 #' Draw infectious periods for general stochastic epidemic.
 #'
@@ -6,13 +6,41 @@
 #' @param gamma numeric: removal rate
 #' @param population_size integer: population size
 #' @param num_renewals integer: positive shape
-#' @param lag numeric: fixed exposure period
-#' @param prop_complete expected proportion of complete pairs observed
-#' @param prop_infection_missing probability infection time missing
-#' @param min_epidemic_size integer
-#' @param max_epidemic_size integer
+#' @param lag numeric: fixed incubation period
+#' @param prop_complete numeric: expected proportion of complete pairs observed
+#' @param prop_infection_missing numeric: expected proportion of missing infection times
+#' @param min_epidemic_size integer: epidemic is at least this large
+#' @param max_epidemic_size integer: epidemic is no larger than this
+#'
+#' @details
+#' The function repeatedly simulates epidemics until the observed epidemic size is
+#' between `min_epidemic_size` and `max_epidemic_size` and there is enough complete
+#' infection/removal information to estimate the removal rate.
+#'
+#' After simulation, the output is post-processed by:
+#' \itemize{
+#'   \item removing non-infected individuals,
+#'   \item inserting missingness, and
+#'   \item sorting by removal time.
+#' }
+#'
+#' `prop_complete` controls the expected fraction of complete infection-removal pairs.
+#' If a pair is made incomplete, `prop_infection_missing` is the probability that the
+#' infection time (rather than the removal time) is set to `NA`.
 #'
 #' @return numeric list: matrix of (infection times, removal times), matrix of (St, It, Et, Rt, Time)
+#'
+#' @examples
+#' # Basic complete-data simulation
+#' set.seed(1)
+#' epi1 <- simulator(beta = 2, gamma = 1, population_size = 100, prop_complete = 1)
+#' head(epi1$matrix_time)
+#'
+#' # Simulation with missingness and exposure lag
+#' set.seed(2)
+#' epi2 <- simulator(beta = 2, gamma = 1, population_size = 100,
+#'                   lag = 1, prop_complete = 0.7, prop_infection_missing = 0.4)
+#' colSums(is.na(epi2$matrix_time))
 #'
 #' @export
 simulator <- function(beta,

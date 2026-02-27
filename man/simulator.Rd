@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulator.R
 \name{simulator}
 \alias{simulator}
-\title{Simulate general stochastic epidemic model with formatting}
+\title{Simulate general stochastic epidemic model with post-processing}
 \usage{
 simulator(
   beta,
@@ -25,19 +25,48 @@ simulator(
 
 \item{num_renewals}{integer: positive shape}
 
-\item{lag}{numeric: fixed exposure period}
+\item{lag}{numeric: fixed incubation period}
 
-\item{prop_complete}{expected proportion of complete pairs observed}
+\item{prop_complete}{numeric: expected proportion of complete pairs observed}
 
-\item{prop_infection_missing}{probability infection time missing}
+\item{prop_infection_missing}{numeric: expected proportion of missing infection times}
 
-\item{min_epidemic_size}{integer}
+\item{min_epidemic_size}{integer: epidemic is at least this large}
 
-\item{max_epidemic_size}{integer}
+\item{max_epidemic_size}{integer: epidemic is no larger than this}
 }
 \value{
 numeric list: matrix of (infection times, removal times), matrix of (St, It, Et, Rt, Time)
 }
 \description{
 Draw infectious periods for general stochastic epidemic.
+}
+\details{
+The function repeatedly simulates epidemics until the observed epidemic size is
+between \code{min_epidemic_size} and \code{max_epidemic_size} and there is enough complete
+infection/removal information to estimate the removal rate.
+
+After simulation, the output is post-processed by:
+\itemize{
+\item removing non-infected individuals,
+\item inserting missingness, and
+\item sorting by removal time.
+}
+
+\code{prop_complete} controls the expected fraction of complete infection-removal pairs.
+If a pair is made incomplete, \code{prop_infection_missing} is the probability that the
+infection time (rather than the removal time) is set to \code{NA}.
+}
+\examples{
+# Basic complete-data simulation
+set.seed(1)
+epi1 <- simulator(beta = 2, gamma = 1, population_size = 100, prop_complete = 1)
+head(epi1$matrix_time)
+
+# Simulation with missingness and exposure lag
+set.seed(2)
+epi2 <- simulator(beta = 2, gamma = 1, population_size = 100,
+                  lag = 1, prop_complete = 0.7, prop_infection_missing = 0.4)
+colSums(is.na(epi2$matrix_time))
+
 }

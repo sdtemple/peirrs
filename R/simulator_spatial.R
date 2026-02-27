@@ -1,4 +1,4 @@
-#' Simulate spatial stochastic epidemic model with formatting
+#' Simulate spatial stochastic epidemic model with post-processing
 #'
 #' Draw infectious periods for spatial stochastic epidemic.
 #'
@@ -8,13 +8,60 @@
 #' @param kernel_spatial function: symmetric function of distance
 #' @param matrix_distance numeric: two-dimensional distance matrix
 #' @param num_renewals integer: positive shape
-#' @param lag numeric: fixed exposure period
-#' @param prop_complete expected proportion of complete pairs observed
-#' @param prop_infection_missing probability infection time missing
-#' @param min_epidemic_size integer
-#' @param max_epidemic_size integer
+#' @param lag numeric: fixed incubation period
+#' @param prop_complete numeric: expected proportion of complete pairs observed
+#' @param prop_infection_missing numeric: expected proportion of missing infection times
+#' @param min_epidemic_size integer: epidemic is at least this large
+#' @param max_epidemic_size integer: epidemic is no larger than this
+#'
+#' @details
+#' The function repeatedly simulates spatial epidemics until the observed epidemic
+#' size is between `min_epidemic_size` and `max_epidemic_size` and there is enough
+#' complete infection/removal information to estimate the removal rate.
+#'
+#' After simulation, the output is post-processed by:
+#' \itemize{
+#'   \item removing non-infected individuals,
+#'   \item subsetting the distance matrix to the retained individuals,
+#'   \item inserting missingness, and
+#'   \item sorting by removal time (with matching distance-matrix reordering).
+#' }
+#'
+#' `prop_complete` controls the expected fraction of complete infection-removal pairs.
+#' If a pair is made incomplete, `prop_infection_missing` is the probability that the
+#' infection time (rather than the removal time) is set to `NA`.
 #'
 #' @return numeric list: matrix of (infection times, removal times), matrix of (St, It, Et, Rt, Time), matrix of n by N distances
+#'
+#' @examples
+#' # Build a simple distance matrix
+#' set.seed(1)
+#' n <- 80
+#' coords <- cbind(runif(n), runif(n))
+#' D <- as.matrix(dist(coords))
+#'
+#' # Exponential spatial kernel
+#' kernel_spatial <- function(d) exp(-2 * d)
+#'
+#' # Basic complete-data spatial simulation
+#' epi1 <- simulator_spatial(beta = 2, gamma = 1,
+#'                           population_size = n,
+#'                           kernel_spatial = kernel_spatial,
+#'                           matrix_distance = D,
+#'                           prop_complete = 1)
+#' dim(epi1$matrix_time)
+#' dim(epi1$matrix_distance)
+#'
+#' # Spatial simulation with missingness and lag
+#' set.seed(2)
+#' epi2 <- simulator_spatial(beta = 2, gamma = 1,
+#'                           population_size = n,
+#'                           kernel_spatial = kernel_spatial,
+#'                           matrix_distance = D,
+#'                           lag = 1,
+#'                           prop_complete = 0.7,
+#'                           prop_infection_missing = 0.4)
+#' colSums(is.na(epi2$matrix_time))
 #'
 #' @export
 simulator_spatial <- function(beta,
