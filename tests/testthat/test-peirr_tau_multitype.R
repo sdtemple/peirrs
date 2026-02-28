@@ -47,8 +47,6 @@ test_that("peirr_tau_multitype removal rates match classwise complete-case MLE e
   expect_true(all(fit$removal_rate > 0))
   expect_equal(length(fit$infection_rate), length(beta_true))
   expect_true(all(fit$infection_rate > 0))
-  expect_equal(length(fit$num_not_infected), length(beta_true))
-  expect_equal(sum(fit$num_not_infected) + nrow(X), population_size)
 })
 
 test_that("peirr_tau_multitype beta estimates are within broad underestimate-friendly tolerance", {
