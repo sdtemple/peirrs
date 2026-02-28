@@ -29,10 +29,6 @@
 #'   \item `infection_rate`: estimated beta (infection rate)
 #'   \item `removal_rate`: estimated gamma (removal rate)
 #'   \item `effective_number`: estimated R0 = beta/gamma
-#'   \item `tau_sum`: sum of expected tau values (for diagnostics)
-#'   \item `not_infected_sum`: total infectious period among non-infected (for diagnostics)
-#'   \item `num_not_infected`: count of non-infected individuals (for diagnostics)
-#'   \item `num_complete`: count of originally complete infection-removal pairs (for diagnostics)
 #' }
 #'
 #' @examples
@@ -138,10 +134,6 @@ peirr_imputed <- function(removals,
 
   return(list(infection_rate = beta_estim * population_size,
               removal_rate = gamma_estim,
-              effective_number = beta_estim * population_size / gamma_estim,
-              tau_sum = tau_sum,
-              not_infected_sum = complete_period_sum,
-              num_not_infected = population_size - epidemic_size,
-              num_complete = length(removals_complete)
+              effective_number = beta_estim * population_size / gamma_estim
               ))
 }
