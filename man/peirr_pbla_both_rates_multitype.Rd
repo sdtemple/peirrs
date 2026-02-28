@@ -2,7 +2,7 @@
 % Please edit documentation in R/peirr_pbla_both_rates_multitype.R
 \name{peirr_pbla_both_rates_multitype}
 \alias{peirr_pbla_both_rates_multitype}
-\title{PBLA estimators of infection rates and removal rates}
+\title{PBLA joint estimator of infection rates and removal rates}
 \usage{
 peirr_pbla_both_rates_multitype(
   removals,
@@ -27,8 +27,8 @@ peirr_pbla_both_rates_multitype(
 \item{lag}{numeric: fixed lag}
 }
 \value{
-numeric list (infection_rate, removal_rate_)
+numeric list (infection_rate, removal_rate)
 }
 \description{
-Estimate multiple infection and removal rates with PBLA
+Joint estimate multiple infection and removal rates with PBLA
 }

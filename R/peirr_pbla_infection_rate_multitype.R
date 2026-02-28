@@ -1,4 +1,4 @@
-#' PEIRR likelihood estimator of infection rates and MLE removal rates
+#' PBLA estimator of infection rates and MLE removal rates
 #'
 #' Estimate multiple removal rates with duration date and multiple infection rates with PBLA
 #'

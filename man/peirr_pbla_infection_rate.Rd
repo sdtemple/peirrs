@@ -2,7 +2,7 @@
 % Please edit documentation in R/peirr_pbla_infection_rate.R
 \name{peirr_pbla_infection_rate}
 \alias{peirr_pbla_infection_rate}
-\title{PEIRR likelihood estimator of infection rate with MLE removal rate}
+\title{PBLA estimator of infection rate conditional on MLE removal rate}
 \usage{
 peirr_pbla_infection_rate(
   removals,

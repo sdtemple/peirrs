@@ -1,10 +1,7 @@
 
-#' Bayesian Inference for Spatial Epidemic Parameters using MCMC
+#' Bayesian inference for spatial epidemic with partial data
 #'
-#' Performs Bayesian inference for the transmission rate (beta) and recovery rate (gamma)
-#' parameters of a spatial epidemic model using Markov Chain Monte Carlo (MCMC) sampling.
-#' Implements data augmentation for missing infection and removal times via Metropolis-Hastings
-#' updates, with a Gibbs step for the beta parameter.
+#' Sample posterior of infection and removal rates with spatial effect.
 #'
 #' @param removals A numeric vector of removal/recovery times. NA values indicate unobserved times.
 #' @param infections A numeric vector of infection times. NA values indicate unobserved times.
@@ -12,37 +9,35 @@
 #' @param kernel_spatial function: symmetric function of distance
 #' @param matrix_distance numeric: two-dimensional distance matrix
 #' @param num_renewals A numeric shape parameter for the gamma distribution used in data augmentation.
-#'          Default is 1.
 #' @param beta_init A numeric initial estimate for the beta (transmission rate) parameter.
-#'              Default is 1.
 #' @param gamma_init A numeric initial estimate for the gamma (recovery rate) parameter.
-#'              Default is 1.
-#' @param beta_shape A numeric shape parameter for the gamma prior on beta. Default is 1.
-#' @param gamma_shape A numeric shape parameter for the gamma prior on gamma. Default is 1.
+#' @param beta_shape A numeric shape parameter for the gamma prior on beta.
+#' @param gamma_shape A numeric shape parameter for the gamma prior on gamma.
 #' @param num_update An integer specifying the number of Metropolis-Hastings updates
-#'                        for infection and removal times per iteration. Default is 10.
-#' @param num_iter An integer specifying the total number of MCMC iterations. Default is 500.
+#'                        for infection and removal times per iteration.
+#' @param num_iter An integer specifying the total number of MCMC iterations.
 #' @param num_print An integer specifying the print frequency for iteration progress.
-#'                  Default is 100.
 #' @param num_tries An integer specifying the total number of draws
 #'                  to check if proposal is consistent with an epidemic.
-#'                  Default is 5.
 #' @param update_gamma bool: TRUE to update removal rate estimate from initial estimate
-#'                  Default is FALSE.
-#' @param lag numeric: fixed exposure period
+#' @param lag numeric: fixed incubation period
 #'
-#' @return A numeric matrix with 2 rows and num_iter columns containing posterior samples.
-#'         Row 1 contains samples for beta (transmission rate).
-#'         Row 2 contains samples for gamma (recovery rate).
-#'         Row 3 contains proportion of infection times augmented/updated.
-#'         Row 4 contains proportion of removal times augmented/updated.
+#' @return A list with the following elements:
+#' \itemize{
+#'   \item `infection_rate`: vector of posterior samples for beta (infection rate)
+#'   \item `removal_rate`: vector of posterior samples for gamma (removal rate)
+#'   \item `prop_infection_updated`: proportion of infection times accepted per iteration
+#'   \item `prop_removal_updated`: proportion of removal times accepted per iteration
+#' }
 #'
 #' @details
 #' The function implements a data augmentation MCMC algorithm for epidemic models.
-#' It alternates between: (1) updating gamma via Gibbs sampling,
+#' It alternates between: 
+#' (1) updating gamma via Gibbs sampling,
 #' (2) updating missing infection times via Metropolis-Hastings,
 #' (3) updating missing removal times via Metropolis-Hastings, and
-#' (4) updating beta via Gibbs sampling. All epidemic configurations are validated
+#' (4) updating beta via Gibbs sampling. 
+#' All epidemic configurations are validated
 #' to ensure consistency with epidemic dynamics.
 #' @export
 peirr_bayes_spatial <- function(removals,

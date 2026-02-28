@@ -2,7 +2,7 @@
 % Please edit documentation in R/peirr_pbla_infection_rate_multitype.R
 \name{peirr_pbla_infection_rate_multitype}
 \alias{peirr_pbla_infection_rate_multitype}
-\title{PEIRR likelihood estimator of infection rates and MLE removal rates}
+\title{PBLA estimator of infection rates and MLE removal rates}
 \usage{
 peirr_pbla_infection_rate_multitype(
   removals,

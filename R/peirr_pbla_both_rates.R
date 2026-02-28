@@ -1,6 +1,6 @@
-#' PBLA estimator of infection rate and removal rate
+#' PBLA joint estimator of infection rate and removal rate
 #' 
-#' Estimate infection and removal rates with PBLA 
+#' Joint estimate infection and removal rates with PBLA
 #' 
 #' @param removals numeric: removal times
 #' @param population_size integer: population size

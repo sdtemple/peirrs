@@ -2,7 +2,7 @@
 % Please edit documentation in R/peirr_bayes_spatial.R
 \name{peirr_bayes_spatial}
 \alias{peirr_bayes_spatial}
-\title{Bayesian Inference for Spatial Epidemic Parameters using MCMC}
+\title{Bayesian inference for spatial epidemic with partial data}
 \usage{
 peirr_bayes_spatial(
   removals,
@@ -34,54 +34,49 @@ peirr_bayes_spatial(
 
 \item{matrix_distance}{numeric: two-dimensional distance matrix}
 
-\item{beta_init}{A numeric initial estimate for the beta (transmission rate) parameter.
-Default is 1.}
+\item{beta_init}{A numeric initial estimate for the beta (transmission rate) parameter.}
 
-\item{gamma_init}{A numeric initial estimate for the gamma (recovery rate) parameter.
-Default is 1.}
+\item{gamma_init}{A numeric initial estimate for the gamma (recovery rate) parameter.}
 
-\item{beta_shape}{A numeric shape parameter for the gamma prior on beta. Default is 1.}
+\item{beta_shape}{A numeric shape parameter for the gamma prior on beta.}
 
-\item{gamma_shape}{A numeric shape parameter for the gamma prior on gamma. Default is 1.}
+\item{gamma_shape}{A numeric shape parameter for the gamma prior on gamma.}
 
 \item{num_update}{An integer specifying the number of Metropolis-Hastings updates
-for infection and removal times per iteration. Default is 10.}
+for infection and removal times per iteration.}
 
-\item{num_iter}{An integer specifying the total number of MCMC iterations. Default is 500.}
+\item{num_iter}{An integer specifying the total number of MCMC iterations.}
 
-\item{num_print}{An integer specifying the print frequency for iteration progress.
-Default is 100.}
+\item{num_print}{An integer specifying the print frequency for iteration progress.}
 
 \item{num_tries}{An integer specifying the total number of draws
-to check if proposal is consistent with an epidemic.
-Default is 5.}
+to check if proposal is consistent with an epidemic.}
 
-\item{update_gamma}{bool: TRUE to update removal rate estimate from initial estimate
-Default is FALSE.}
+\item{update_gamma}{bool: TRUE to update removal rate estimate from initial estimate}
 
-\item{num_renewals}{A numeric shape parameter for the gamma distribution used in data augmentation.
-Default is 1.}
+\item{num_renewals}{A numeric shape parameter for the gamma distribution used in data augmentation.}
 
-\item{lag}{numeric: fixed exposure period}
+\item{lag}{numeric: fixed incubation period}
 }
 \value{
-A numeric matrix with 2 rows and num_iter columns containing posterior samples.
-Row 1 contains samples for beta (transmission rate).
-Row 2 contains samples for gamma (recovery rate).
-Row 3 contains proportion of infection times augmented/updated.
-Row 4 contains proportion of removal times augmented/updated.
+A list with the following elements:
+\itemize{
+\item \code{infection_rate}: vector of posterior samples for beta (infection rate)
+\item \code{removal_rate}: vector of posterior samples for gamma (removal rate)
+\item \code{prop_infection_updated}: proportion of infection times accepted per iteration
+\item \code{prop_removal_updated}: proportion of removal times accepted per iteration
+}
 }
 \description{
-Performs Bayesian inference for the transmission rate (beta) and recovery rate (gamma)
-parameters of a spatial epidemic model using Markov Chain Monte Carlo (MCMC) sampling.
-Implements data augmentation for missing infection and removal times via Metropolis-Hastings
-updates, with a Gibbs step for the beta parameter.
+Sample posterior of infection and removal rates with spatial effect.
 }
 \details{
 The function implements a data augmentation MCMC algorithm for epidemic models.
-It alternates between: (1) updating gamma via Gibbs sampling,
+It alternates between:
+(1) updating gamma via Gibbs sampling,
 (2) updating missing infection times via Metropolis-Hastings,
 (3) updating missing removal times via Metropolis-Hastings, and
-(4) updating beta via Gibbs sampling. All epidemic configurations are validated
+(4) updating beta via Gibbs sampling.
+All epidemic configurations are validated
 to ensure consistency with epidemic dynamics.
 }

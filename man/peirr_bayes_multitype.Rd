@@ -2,7 +2,7 @@
 % Please edit documentation in R/peirr_bayes_mutlitype.R
 \name{peirr_bayes_multitype}
 \alias{peirr_bayes_multitype}
-\title{Bayesian Inference for Epidemic Parameters using MCMC}
+\title{Bayesian inference for multitype epidemic with partial data}
 \usage{
 peirr_bayes_multitype(
   removals,
@@ -28,56 +28,82 @@ peirr_bayes_multitype(
 
 \item{infections}{A numeric vector of infection times. NA values indicate unobserved times.}
 
-\item{beta_init}{A numeric initial estimate for the beta (transmission rate) parameter.
-Default is 1.}
+\item{beta_init}{Numeric initial estimates for the beta (infection rates) parameter.}
 
-\item{gamma_init}{A numeric initial estimate for the gamma (recovery rate) parameter.
-Default is 1.}
+\item{gamma_init}{Numeric initial estimates for the gamma (removal rates) parameter.}
 
-\item{beta_shape}{A numeric shape parameter for the gamma prior on beta. Default is 1.}
+\item{beta_shape}{A numeric shape parameter for the gamma prior on beta.}
 
-\item{gamma_shape}{A numeric shape parameter for the gamma prior on gamma. Default is 1.}
+\item{gamma_shape}{A numeric shape parameter for the gamma prior on gamma.}
 
-\item{num_iter}{An integer specifying the total number of MCMC iterations. Default is 500.}
+\item{num_iter}{An integer specifying the total number of MCMC iterations.}
 
 \item{num_update}{An integer specifying the number of Metropolis-Hastings updates
-for infection and removal times per iteration. Default is 10.}
+for infection and removal times per iteration.}
 
 \item{num_tries}{An integer specifying the total number of draws
-to check if proposal is consistent with an epidemic.
-Default is 20.}
+to check if proposal is consistent with an epidemic.}
 
-\item{num_print}{An integer specifying the print frequency for iteration progress.
-Default is 100.}
+\item{num_print}{An integer specifying the print frequency for iteration progress.}
 
-\item{update_gamma}{bool: TRUE to update removal rate estimate from initial estimate
-Default is FALSE.}
+\item{update_gamma}{bool: TRUE to update removal rate estimate from initial estimate}
 
-\item{num_renewals}{A numeric shape parameter for the gamma distribution used in data augmentation.
-Default is 1.}
+\item{num_renewals}{A numeric shape parameter for the gamma distribution used in data augmentation.}
 
-\item{lag}{numeric: fixed exposure period}
+\item{lag}{numeric: fixed incubation period}
 
 \item{population_size}{An integer specifying the total population size.}
 }
 \value{
-A numeric matrix with 2 rows and num_iter columns containing posterior samples.
-Row 1 contains samples for beta (transmission rate).
-Row 2 contains samples for gamma (recovery rate).
-Row 3 contains proportion of infection times augmented/updated.
-Row 4 contains proportion of removal times augmented/updated.
+A list with the following elements:
+\itemize{
+\item \code{infection_rate}: matrix of posterior samples for class-specific beta (infection rates)
+\item \code{removal_rate}: matrix of posterior samples for class-specific gamma (removal rates)
+\item \code{prop_infection_updated}: vector of proportion of infection times accepted per iteration
+\item \code{prop_removal_updated}: vector of proportion of removal times accepted per iteration
+}
 }
 \description{
-Performs Bayesian inference for the transmission rate (beta) and recovery rate (gamma)
-parameters of an epidemic model using Markov Chain Monte Carlo (MCMC) sampling.
-Implements data augmentation for missing infection and removal times via Metropolis-Hastings
-updates, with a Gibbs step for the beta parameter.
+Sample posterior of group-specific infection rates and removal rates with partial data.
 }
 \details{
 The function implements a data augmentation MCMC algorithm for epidemic models.
-It alternates between: (1) updating gamma via Gibbs sampling,
+It alternates between:
+(1) updating gamma via Gibbs sampling,
 (2) updating missing infection times via Metropolis-Hastings,
 (3) updating missing removal times via Metropolis-Hastings, and
-(4) updating beta via Gibbs sampling. All epidemic configurations are validated
+(4) updating beta via Gibbs sampling.
+All epidemic configurations are validated
 to ensure consistency with epidemic dynamics.
+}
+\examples{
+# Bayesian inference with missing data
+set.seed(2)
+epi2 <- simulator_multitype(beta = c(1.2, 2.5), gamma = c(0.7, 1.5),
+                            infection_class_sizes = c(60, 40),
+                            removal_class_sizes = c(50, 50),
+                            prop_complete = 0.7, prop_infection_missing = 0.6)
+
+fit2 <- peirr_bayes_multitype(
+  removals = epi2$matrix_time[, "removal"],
+  infections = epi2$matrix_time[, "infection"],
+  removal_classes = epi2$matrix_time[, "removal_class"],
+  infection_classes = epi2$matrix_time[, "infection_class"],
+  infection_class_sizes = c(60, 40),
+  beta_init = c(1.0, 2.0),
+  gamma_init = c(0.7, 1.0),
+  beta_shape = c(0.1, 0.1),
+  gamma_shape = c(0.1, 0.1),
+  num_iter = 200,
+  num_update = 10,
+  num_tries = 5,
+  num_print = 100,
+  update_gamma = FALSE,
+  lag = 0
+)
+
+# Check data augmentation efficiency
+mean(fit2$prop_infection_updated, na.rm = TRUE)  # Mean acceptance rates
+mean(fit2$prop_removal_updated, na.rm = TRUE)
+
 }

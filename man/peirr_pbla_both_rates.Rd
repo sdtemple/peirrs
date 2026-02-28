@@ -2,7 +2,7 @@
 % Please edit documentation in R/peirr_pbla_both_rates.R
 \name{peirr_pbla_both_rates}
 \alias{peirr_pbla_both_rates}
-\title{PBLA estimator of infection rate and removal rate}
+\title{PBLA joint estimator of infection rate and removal rate}
 \usage{
 peirr_pbla_both_rates(
   removals,
@@ -28,5 +28,5 @@ peirr_pbla_both_rates(
 numeric list (infection_rate, removal_rate, effective_number)
 }
 \description{
-Estimate infection and removal rates with PBLA
+Joint estimate infection and removal rates with PBLA
 }

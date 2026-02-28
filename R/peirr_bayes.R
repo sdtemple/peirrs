@@ -1,47 +1,69 @@
 
-#' Bayesian Inference for Epidemic Parameters using MCMC
+#' Bayesian inference for simple stochastic epidemic with partial data
 #'
-#' Performs Bayesian inference for the transmission rate (beta) and recovery rate (gamma)
-#' parameters of an epidemic model using Markov Chain Monte Carlo (MCMC) sampling.
-#' Implements data augmentation for missing infection and removal times via Metropolis-Hastings
-#' updates, with a Gibbs step for the beta parameter.
+#' Sample posterior of global infection and removal rates with partial data.
 #'
 #' @param removals A numeric vector of removal/recovery times. NA values indicate unobserved times.
 #' @param infections A numeric vector of infection times. NA values indicate unobserved times.
 #' @param population_size An integer specifying the total population size.
 #' @param num_renewals A numeric shape parameter for the gamma distribution used in data augmentation.
-#'          Default is 1.
-#' @param beta_init A numeric initial estimate for the beta (transmission rate) parameter.
-#'              Default is 1.
-#' @param gamma_init A numeric initial estimate for the gamma (recovery rate) parameter.
-#'              Default is 1.
-#' @param beta_shape A numeric shape parameter for the gamma prior on beta. Default is 1.
-#' @param gamma_shape A numeric shape parameter for the gamma prior on gamma. Default is 1.
+#' @param beta_init A numeric initial estimate for the beta (infection rate) parameter.
+#' @param gamma_init A numeric initial estimate for the gamma (removal rate) parameter.
+#' @param beta_shape A numeric shape parameter for the gamma prior on beta.
+#' @param gamma_shape A numeric shape parameter for the gamma prior on gamma.
 #' @param num_update An integer specifying the number of Metropolis-Hastings updates
-#'                        for infection and removal times per iteration. Default is 10.
-#' @param num_iter An integer specifying the total number of MCMC iterations. Default is 500.
+#'                        for infection and removal times per iteration.
+#' @param num_iter An integer specifying the total number of MCMC iterations.
 #' @param num_print An integer specifying the print frequency for iteration progress.
-#'                  Default is 100.
 #' @param num_tries An integer specifying the total number of draws
 #'                  to check if proposal is consistent with an epidemic.
-#'                  Default is 20.
 #' @param update_gamma bool: TRUE to update removal rate estimate from initial estimate
-#'                  Default is FALSE.
-#' @param lag numeric: fixed exposure period
+#' @param lag numeric: fixed incubation period
 #'
-#' @return A numeric matrix with 2 rows and num_iter columns containing posterior samples.
-#'         Row 1 contains samples for beta (transmission rate).
-#'         Row 2 contains samples for gamma (recovery rate).
-#'         Row 3 contains proportion of infection times augmented/updated.
-#'         Row 4 contains proportion of removal times augmented/updated.
+#' @return A list with the following elements:
+#' \itemize{
+#'   \item `infection_rate`: vector of posterior samples for beta (infection rate)
+#'   \item `removal_rate`: vector of posterior samples for gamma (removal rate)
+#'   \item `prop_infection_updated`: vector of proportion of infection times accepted per iteration
+#'   \item `prop_removal_updated`: vector of proportion of removal times accepted per iteration
+#' }
 #'
 #' @details
 #' The function implements a data augmentation MCMC algorithm for epidemic models.
-#' It alternates between: (1) updating gamma via Gibbs sampling,
+#' It alternates between: 
+#' (1) updating gamma via Gibbs sampling,
 #' (2) updating missing infection times via Metropolis-Hastings,
 #' (3) updating missing removal times via Metropolis-Hastings, and
-#' (4) updating beta via Gibbs sampling. All epidemic configurations are validated
+#' (4) updating beta via Gibbs sampling. 
+#' All epidemic configurations are validated
 #' to ensure consistency with epidemic dynamics.
+#'
+#' @examples
+#' # Bayesian inference with missing data
+#' set.seed(2)
+#' epi2 <- simulator(beta = 1.5, gamma = 0.8, population_size = 80,
+#'                   prop_complete = 0.7, prop_infection_missing = 0.6)
+#' 
+#' fit2 <- peirr_bayes(
+#'   removals = epi2$matrix_time[, "removal"],
+#'   infections = epi2$matrix_time[, "infection"],
+#'   population_size = 80,
+#'   beta_init = 1.0,
+#'   gamma_init = 0.8,
+#'   beta_shape = 0.1,
+#'   gamma_shape = 0.1,
+#'   num_iter = 200,
+#'   num_update = 10,
+#'   num_tries = 5,
+#'   num_print = 100,
+#'   update_gamma = FALSE,
+#'   lag = 0
+#' )
+#' 
+#' # Check data augmentation efficiency
+#' mean(fit2$prop_infection_updated, na.rm = TRUE)  # Mean acceptance rates
+#' mean(fit2$prop_removal_updated, na.rm = TRUE)
+#'
 #' @export
 peirr_bayes <- function(removals,
                         infections,

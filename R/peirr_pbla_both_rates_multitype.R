@@ -1,6 +1,6 @@
-#' PBLA estimators of infection rates and removal rates
+#' PBLA joint estimator of infection rates and removal rates
 #'
-#' Estimate multiple infection and removal rates with PBLA
+#' Joint estimate multiple infection and removal rates with PBLA
 #'
 #' @param removals numeric: removal times (as large a vector as population size, with NAs for uninfected)
 #' @param removal_classes numeric: removal time classes (as large a vector as population size, with NAs for uninfected)
@@ -9,7 +9,7 @@
 #' @param num_patient_zeros integer: patient zeros
 #' @param lag numeric: fixed lag
 #'
-#' @return numeric list (infection_rate, removal_rate_)
+#' @return numeric list (infection_rate, removal_rate)
 #'
 #' @export
 peirr_pbla_both_rates_multitype <- function(removals,
@@ -51,6 +51,6 @@ peirr_pbla_both_rates_multitype <- function(removals,
   # estimate of infection rate
   beta_estims <- pbla.estimates$estimate[1:num_beta_rates]
 
-  return(list(infection.rate=beta_estims,
-              removal.rate=gamma_estims))
+  return(list(infection_rate=beta_estims,
+              removal_rate=gamma_estims))
 }
