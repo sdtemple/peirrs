@@ -24,12 +24,39 @@ peirr_tau_spatial(
 
 \item{matrix_distance}{numeric: two-dimensional distance matrix}
 
-\item{lag}{numeric: fixed exposure period}
+\item{lag}{numeric: fixed incubation period}
 }
 \value{
-numeric list (infection.rate, removal.rate)
+A list with the following elements:
+\itemize{
+\item \code{infection_rate}: estimated beta (spatial infection rate)
+\item \code{removal_rate}: estimated gamma (removal rate)
+}
 }
 \description{
 Estimate infection and removal rates with tau-based expectation-maximization.
-The output value \code{tau.sum} is useful for debugging.
+}
+\details{
+This function extends \code{peirr_tau()} to account for spatial heterogeneity in
+transmission rates. The infection rate between individuals depends on their spatial
+distance via the \code{kernel_spatial} function.
+
+Step 1: Estimate the removal rate (gamma) using maximum likelihood on complete
+infection-removal pairs via \code{peirr_removal_rate()}.
+
+Step 2: Estimate the infection rate (beta) using expectation-maximization (EM)
+with spatially-weighted pairwise transmission indicators.
+
+The \code{kernel_spatial} function should be a symmetric, non-negative function of
+distance. Common choices include exponential decay (e.g., exp(-lambda*d)) or
+power law (e.g., 1/(1+d^2)).
+
+\strong{Important:} The \code{matrix_distance} should be an N x N matrix (where N is
+the total population size), structured such that the first n rows/columns correspond
+to infected individuals (those with finite infection or removal times) and the
+remaining N-n rows/columns correspond to susceptibles (never infected). This allows
+the function to compute spatial weights between infected individuals (for tau terms)
+and between infected and susceptible individuals (for the denominator adjustment).
+The distance matrix is typically constructed via \code{as.matrix(dist(coordinates))},
+with rows/columns reordered to place infected individuals first.
 }

@@ -11,12 +11,11 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Imports: 
   pblas,
-  matrixStats,
-  outbreaks
+  matrixStats
 Suggests:
   foreach,
   doParallel,
   parallel,
-  stargazer
+  outbreaks
 Remotes: 
   sdtemple/pblas

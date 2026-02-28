@@ -13,12 +13,61 @@ peirr_imputed(removals, infections, population_size, lag = 0)
 
 \item{population_size}{integer: population size}
 
-\item{lag}{numeric: fixed exposure period}
+\item{lag}{numeric: fixed incubation period}
 }
 \value{
-numeric list (infection.rate, removal.rate, R0)
+A list with the following elements:
+\itemize{
+\item \code{infection_rate}: estimated beta (infection rate)
+\item \code{removal_rate}: estimated gamma (removal rate)
+\item \code{effective_number}: estimated R0 = beta/gamma
+\item \code{tau_sum}: sum of expected tau values (for diagnostics)
+\item \code{not_infected_sum}: total infectious period among non-infected (for diagnostics)
+\item \code{num_not_infected}: count of non-infected individuals (for diagnostics)
+\item \code{num_complete}: count of originally complete infection-removal pairs (for diagnostics)
+}
 }
 \description{
-Estimate infection and removal rates with tau-based expectation-maximization.
-The output value \code{tau.sum} is useful for debugging.
+Maximum likelihood estimates of infection and removal rates with imputed times.
+}
+\details{
+This function provides an alternative approach to \code{peirr_tau()} for handling
+missing infection and removal times. Instead of computing conditional expectations
+for each missingness pattern, it uses a simple imputation strategy followed by
+standard tau-based estimation.
+
+Step 1: Estimate the removal rate (gamma) using maximum likelihood on complete
+infection-removal pairs via \code{peirr_removal_rate()}.
+
+Step 2: Impute missing times using the mean infectious period (1/gamma):
+\itemize{
+\item If infection time is missing: impute as \code{removal - 1/gamma}
+\item If removal time is missing: impute as \code{infection + 1/gamma}
+}
+
+Step 3: MLE of the infection rate (beta) from the imputed complete dataset.
+}
+\examples{
+# Simulate epidemic with missing data
+set.seed(1)
+epi1 <- simulator(beta = 2.0, gamma = 1.0, population_size = 100,
+                  prop_complete = 0.7, prop_infection_missing = 0.6)
+
+# Estimate with imputation approach
+fit1 <- peirr_imputed(removals = epi1$matrix_time[, "removal"],
+                      infections = epi1$matrix_time[, "infection"],
+                      population_size = 100, lag = 0)
+fit1$infection_rate     # Should be near 2.0
+fit1$removal_rate       # Should be near 1.0
+fit1$effective_number   # Should be near 2.0
+
+# Compare with peirr_tau on same data
+fit1_tau <- peirr_tau(removals = epi1$matrix_time[, "removal"],
+                      infections = epi1$matrix_time[, "infection"],
+                      population_size = 100, lag = 0)
+
+# Compare estimates
+c(imputed = fit1$infection_rate, tau = fit1_tau$infection_rate)
+c(imputed = fit1$removal_rate, tau = fit1_tau$removal_rate)
+
 }

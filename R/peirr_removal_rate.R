@@ -1,11 +1,54 @@
-#' Removal rate estimator
+#' Pair-based removal rate estimator
 #'
 #' Estimate the removal rate as the inverse of the mean infectious period length.
 #'
-#' @param removals numeric vector: removal times
-#' @param infections numeric vector: infection times
+#' @param removals numeric: removal times
+#' @param infections numeric: infection times
 #'
-#' @return float: Removal rate estimate
+#' @details
+#' This function computes the maximum likelihood estimate (MLE) of the removal rate
+#' (gamma) for exponentially distributed infectious periods.
+#'
+#' The estimator is:
+#' \deqn{\hat{\gamma} = \frac{n}{\sum_{i=1}^{n} (r_i - i_i)}}
+#' where n is the number of complete infection-removal pairs and (r_i - i_i) is the
+#' infectious period for individual i.
+#'
+#' The function automatically filters to retain only complete pairs where both
+#' infection and removal times are observed (non-NA). Incomplete pairs are excluded
+#' from the calculation.
+#'
+#' This is a closed-form estimator requiring no iteration. Under the exponential
+#' model, it is the exact MLE and is unbiased conditional on the observed infectious
+#' periods.
+#'
+#' @return numeric: Removal rate estimate (gamma)
+#'
+#' @examples
+#' # Complete data: all infection and removal times observed
+#' set.seed(1)
+#' n <- 50
+#' infections <- cumsum(rexp(n, rate = 0.5))
+#' periods <- rexp(n, rate = 1.2)  # True gamma = 1.2
+#' removals <- infections + periods
+#' gamma_hat <- peirr_removal_rate(removals, infections)
+#' gamma_hat  # Should be close to 1.2
+#'
+#' # Incomplete data: some times are missing
+#' set.seed(2)
+#' infections_incomplete <- infections
+#' removals_incomplete <- removals
+#' infections_incomplete[sample(n, 15)] <- NA  # 15 missing infection times
+#' removals_incomplete[sample(n, 10)] <- NA    # 10 missing removal times
+#' gamma_hat2 <- peirr_removal_rate(removals_incomplete, infections_incomplete)
+#' gamma_hat2  # Based only on complete pairs
+#'
+#' # Using simulated epidemic data
+#' set.seed(3)
+#' epi <- simulator(beta = 2.0, gamma = 1.5, population_size = 80, prop_complete = 0.75)
+#' gamma_hat3 <- peirr_removal_rate(epi$matrix_time[, "removal"],
+#'                                  epi$matrix_time[, "infection"])
+#' gamma_hat3  # Should be close to 1.5
 #'
 #' @export
 peirr_removal_rate <- function(removals, 

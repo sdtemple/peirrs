@@ -1,14 +1,64 @@
 #' Pair-based tau estimator of common infection and removal rates
 #'
 #' Estimate infection and removal rates with tau-based expectation-maximization.
-#' The output value \code{tau.sum} is useful for debugging.
 #'
-#' @param removals numeric vector: removal times
-#' @param infections numeric vector: infection times
+#' @param removals numeric: removal times
+#' @param infections numeric: infection times
 #' @param population_size integer: population size
-#' @param lag numeric: fixed exposure period
+#' @param lag numeric: fixed incubation period
 #'
-#' @return numeric list (infection.rate, removal.rate, R0)
+#' @details
+#' This function implements a two-step estimation procedure for epidemic parameters
+#' when infection and/or removal times may be partially missing.
+#'
+#' Step 1: Estimate the removal rate (gamma) using maximum likelihood on complete
+#' infection-removal pairs.
+#'
+#' Step 2: Estimate the infection rate (beta) using expectation-maximization (EM)
+#' with pairwise transmission indicators (tau). For each pair (k, j), the function
+#' computes the expected overlap time when k is infectious and j is susceptible,
+#' accounting for missing data.
+#'
+#' The infection rate is estimated by maximizing the pseudo-likelihood:
+#' \deqn{\hat{\beta} = \frac{n-1}{\sum_{j \neq \alpha, k} E[\tau_{kj}] + (N-n) \sum_i (r_i - i_i)}}
+#' where n is the epidemic size, N is the population size, and alpha is the index
+#' of the first infected individual.
+#'
+#' @return A list with the following elements:
+#' \itemize{
+#'   \item `infection_rate`: estimated beta (infection rate)
+#'   \item `removal_rate`: estimated gamma (removal rate)
+#'   \item `effective_number`: estimated R0 = beta/gamma
+#' }
+#'
+#' @examples
+#' # Simulate complete epidemic data
+#' set.seed(1)
+#' epi1 <- simulator(beta = 2.0, gamma = 1.0, population_size = 100, prop_complete = 1)
+#' fit1 <- peirr_tau(removals = epi1$matrix_time[, "removal"],
+#'                   infections = epi1$matrix_time[, "infection"],
+#'                   population_size = 100, lag = 0)
+#' fit1$infection_rate  # Should be near 2.0
+#' fit1$removal_rate    # Should be near 1.0
+#' fit1$effective_number  # Should be near 2.0
+#'
+#' # Simulate epidemic with missing data
+#' set.seed(2)
+#' epi2 <- simulator(beta = 1.5, gamma = 0.8, population_size = 80,
+#'                   prop_complete = 0.7, prop_infection_missing = 0.6)
+#' fit2 <- peirr_tau(removals = epi2$matrix_time[, "removal"],
+#'                   infections = epi2$matrix_time[, "infection"],
+#'                   population_size = 80, lag = 0)
+#' fit2$effective_number
+#'
+#' # Epidemic with exposure lag
+#' set.seed(3)
+#' epi3 <- simulator(beta = 2.5, gamma = 1.2, population_size = 60,
+#'                   lag = 0.5, prop_complete = 0.8)
+#' fit3 <- peirr_tau(removals = epi3$matrix_time[, "removal"],
+#'                   infections = epi3$matrix_time[, "infection"],
+#'                   population_size = 60, lag = 0.5)
+#' fit3$effective_number
 #'
 #' @export
 peirr_tau <- function(removals, 
@@ -87,10 +137,6 @@ peirr_tau <- function(removals,
 
   return(list(infection_rate = beta_estim * population_size,
               removal_rate = gamma_estim,
-              effective_number = beta_estim * population_size / gamma_estim,
-              tau_sum = tau_sum,
-              not_infected_sum = complete_period_sum,
-              num_not_infected = population_size - epidemic_size,
-              num_complete = length(removals_complete)
+              effective_number = beta_estim * population_size / gamma_estim
               ))
 }

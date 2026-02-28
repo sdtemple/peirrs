@@ -2,7 +2,7 @@
 % Please edit documentation in R/peirr_bootstrap.R
 \name{peirr_bootstrap}
 \alias{peirr_bootstrap}
-\title{Bootstrap pair-based estimators for epidemic parameters}
+\title{Bootstrap pair-based estimators for stochastic epidemic model}
 \usage{
 peirr_bootstrap(
   num_bootstrap,
@@ -38,11 +38,10 @@ bootstrap replicate.}
 \item{peirr}{Function (default \code{peirr_tau}). A function that estimates infection and removal
 rates given infection and removal time data (e.g., \code{peirr()}).}
 
-\item{lag}{Numeric (default = 0). Fixed exposure period duration.}
+\item{lag}{Numeric (default = 0). Fixed incubation period.}
 
 \item{within}{Numeric (default = 0.1). Fractional range around
-\code{sample.size} used to generate random sample sizes in each
-bootstrap replicate.}
+of bootstrap epidemic size close to real epidemic size.}
 
 \item{etc}{List (default = NULL). Additional arguments passed to
 \code{peirr()} via \code{do.call()}.}
@@ -52,8 +51,8 @@ bootstrap replicate.}
 \value{
 A numeric matrix with \code{num.bootstrap + 1} rows and 2 columns:
 \itemize{
-\item Column 1: Estimated infection rates (\code{beta}).
-\item Column 2: Estimated removal rates (\code{gamma}).
+\item Column 1: Estimated infection rates.
+\item Column 2: Estimated removal rates.
 }
 The first row contains the true values used for simulation.
 }
@@ -64,20 +63,17 @@ infection and removal rate estimates of an epidemic model.
 \details{
 This function repeatedly simulates epidemic data under the specified
 model parameters, applies a user-specified estimator function (typically
-\code{peirr}), and stores the resulting infection and removal rate
+\code{peirr_tau()}), and stores the resulting infection and removal rate
 estimates for each bootstrap iteration.
 
-For each bootstrap iteration, this function:
+For each bootstrap iteration, the algorithm:
 \enumerate{
-\item Simulates an epidemic using \code{simulator(beta, gamma, N, m, e, p, q, min.sample.size, max.sample.size)}.
+\item Simulates an epidemic using \code{simulator()}.
 \item Extracts infection and removal times from the simulated data.
-\item Applies \code{peirr()} (or a user-supplied estimator) to obtain
+\item Applies \code{peirr()} to obtain
 infection and removal rate estimates.
-\item Stores the resulting parameter estimates in a matrix.
+\item Stores the resulting parameter estimates.
 }
-
-The first row of the returned matrix stores the true values of
-\code{beta} and \code{gamma}.
 }
 \examples{
 \dontrun{

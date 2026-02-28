@@ -7,18 +7,69 @@
 peirr_tau(removals, infections, population_size, lag = 0)
 }
 \arguments{
-\item{removals}{numeric vector: removal times}
+\item{removals}{numeric: removal times}
 
-\item{infections}{numeric vector: infection times}
+\item{infections}{numeric: infection times}
 
 \item{population_size}{integer: population size}
 
-\item{lag}{numeric: fixed exposure period}
+\item{lag}{numeric: fixed incubation period}
 }
 \value{
-numeric list (infection.rate, removal.rate, R0)
+A list with the following elements:
+\itemize{
+\item \code{infection_rate}: estimated beta (infection rate)
+\item \code{removal_rate}: estimated gamma (removal rate)
+\item \code{effective_number}: estimated R0 = beta/gamma
+}
 }
 \description{
 Estimate infection and removal rates with tau-based expectation-maximization.
-The output value \code{tau.sum} is useful for debugging.
+}
+\details{
+This function implements a two-step estimation procedure for epidemic parameters
+when infection and/or removal times may be partially missing.
+
+Step 1: Estimate the removal rate (gamma) using maximum likelihood on complete
+infection-removal pairs.
+
+Step 2: Estimate the infection rate (beta) using expectation-maximization (EM)
+with pairwise transmission indicators (tau). For each pair (k, j), the function
+computes the expected overlap time when k is infectious and j is susceptible,
+accounting for missing data.
+
+The infection rate is estimated by maximizing the pseudo-likelihood:
+\deqn{\hat{\beta} = \frac{n-1}{\sum_{j \neq \alpha, k} E[\tau_{kj}] + (N-n) \sum_i (r_i - i_i)}}
+where n is the epidemic size, N is the population size, and alpha is the index
+of the first infected individual.
+}
+\examples{
+# Simulate complete epidemic data
+set.seed(1)
+epi1 <- simulator(beta = 2.0, gamma = 1.0, population_size = 100, prop_complete = 1)
+fit1 <- peirr_tau(removals = epi1$matrix_time[, "removal"],
+                  infections = epi1$matrix_time[, "infection"],
+                  population_size = 100, lag = 0)
+fit1$infection_rate  # Should be near 2.0
+fit1$removal_rate    # Should be near 1.0
+fit1$effective_number  # Should be near 2.0
+
+# Simulate epidemic with missing data
+set.seed(2)
+epi2 <- simulator(beta = 1.5, gamma = 0.8, population_size = 80,
+                  prop_complete = 0.7, prop_infection_missing = 0.6)
+fit2 <- peirr_tau(removals = epi2$matrix_time[, "removal"],
+                  infections = epi2$matrix_time[, "infection"],
+                  population_size = 80, lag = 0)
+fit2$effective_number
+
+# Epidemic with exposure lag
+set.seed(3)
+epi3 <- simulator(beta = 2.5, gamma = 1.2, population_size = 60,
+                  lag = 0.5, prop_complete = 0.8)
+fit3 <- peirr_tau(removals = epi3$matrix_time[, "removal"],
+                  infections = epi3$matrix_time[, "infection"],
+                  population_size = 60, lag = 0.5)
+fit3$effective_number
+
 }

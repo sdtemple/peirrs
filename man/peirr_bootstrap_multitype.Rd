@@ -38,7 +38,7 @@ peirr_bootstrap_multitype(
 
 \item{num_renewals}{Integer: positive shape parameter for infectious period distribution (default 1).}
 
-\item{lag}{Numeric: fixed exposure period (default 0).}
+\item{lag}{Numeric: fixed incubation period (default 0).}
 
 \item{within}{Numeric: acceptable proportional deviation from the target sample size (default 0.1).}
 
@@ -51,15 +51,12 @@ contain bootstrap estimates of infection and removal rates.
 }
 \description{
 Perform parametric bootstrapping to estimate infection and removal rates
-in a multitype stochastic epidemic model. Each bootstrap replicate simulates
-a new epidemic under the given parameters, re-estimates rates using
-\code{peirr_tau_multitype}, and stores the results.
+in a multitype stochastic epidemic model.
 }
 \details{
 Each bootstrap replicate:
 \enumerate{
 \item Simulates a multitype epidemic using \code{simulator_multitype}.
-\item Filters and extracts infection and removal times by type.
 \item Re-estimates rates with \code{peirr_tau_multitype}.
 }
 The resulting matrix can be used to assess estimation uncertainty.

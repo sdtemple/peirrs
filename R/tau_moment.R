@@ -10,7 +10,53 @@
 #' @param lambdaj numeric: removal rate of j
 #' @param lag numeric: fixed exposure period
 #'
+#' @details
+#' This function computes the conditional expectation of the pairwise transmission
+#' time indicator tau_{kj}, given the observed infection and removal times for
+#' individuals k and j. The indicator tau measures the period during which k is
+#' infectious and j is susceptible.
+#'
+#' The function handles 9 different missingness patterns, depending on which of
+#' the four times (rk, rj, ik, ij) are observed (finite) versus missing (NA):
+#' \enumerate{
+#'   \item Both rk and rj observed, ik and ij missing
+#'   \item rj and ik observed, rk and ij missing
+#'   \item rk and ij observed, rj and ik missing
+#'   \item ik and ij observed, rk and rj missing
+#'   \item rj, ik, ij observed, rk missing
+#'   \item rk, ik, ij observed, rj missing
+#'   \item rk, rj, ij observed, ik missing
+#'   \item rk, rj, ik observed, ij missing
+#'   \item All four times observed (complete data)
+#' }
+#'
+#' The expectations are derived assuming exponential infectious periods with rates
+#' lambdak and lambdaj. The function computes integrals analytically.
+#'
+#' When `lag > 0`, infection times are adjusted by subtracting the lag to account
+#' for a fixed exposure period before becoming infectious.
+#'
+#' The function includes error checking to ensure exactly one case is triggered and
+#' that the resulting tau value is non-negative.
+#'
 #' @return numeric: expectation of some pair-wise tau
+#'
+#' @examples
+#' # Case 9: Complete data (all times observed)
+#' tau_moment(rk = 5.0, rj = 4.0, ik = 2.0, ij = 3.0,
+#'            lambdak = 1.0, lambdaj = 1.0, lag = 0)
+#'
+#' # Case 1: Only removal times observed
+#' tau_moment(rk = 5.0, rj = 4.0, ik = NA, ij = NA,
+#'            lambdak = 1.0, lambdaj = 1.5, lag = 0)
+#'
+#' # Case 6: rk, ik, ij observed (rj missing)
+#' tau_moment(rk = 6.0, rj = NA, ik = 2.0, ij = 3.5,
+#'            lambdak = 1.2, lambdaj = 0.8, lag = 0)
+#'
+#' # Case 8: rk, rj, ik observed with exposure lag
+#' tau_moment(rk = 5.5, rj = 4.5, ik = 2.0, ij = NA,
+#'            lambdak = 1.0, lambdaj = 1.0, lag = 0.5)
 #'
 #' @keywords internal
 tau_moment <- function(rk,

@@ -1,9 +1,7 @@
 #' Bootstrap pair-based estimators for multitype epidemic model
 #'
 #' Perform parametric bootstrapping to estimate infection and removal rates
-#' in a multitype stochastic epidemic model. Each bootstrap replicate simulates
-#' a new epidemic under the given parameters, re-estimates rates using
-#' \code{peirr_tau_multitype}, and stores the results.
+#' in a multitype stochastic epidemic model.
 #'
 #' @param num_bootstrap Integer: number of bootstrap replicates.
 #' @param beta Numeric vector: infection rates for each infection type.
@@ -14,7 +12,7 @@
 #' @param prop_complete Numeric: expected proportion of complete pairs observed.
 #' @param prop_infection_missing Numeric: probability that infection time is missing (conditional on missingness).
 #' @param num_renewals Integer: positive shape parameter for infectious period distribution (default 1).
-#' @param lag Numeric: fixed exposure period (default 0).
+#' @param lag Numeric: fixed incubation period (default 0).
 #' @param within Numeric: acceptable proportional deviation from the target sample size (default 0.1).
 #' @param etc List or NULL: additional arguments passed to \code{peirr_tau_multitype}.
 #'
@@ -26,7 +24,6 @@
 #' Each bootstrap replicate:
 #' \enumerate{
 #'   \item Simulates a multitype epidemic using \code{simulator_multitype}.
-#'   \item Filters and extracts infection and removal times by type.
 #'   \item Re-estimates rates with \code{peirr_tau_multitype}.
 #' }
 #' The resulting matrix can be used to assess estimation uncertainty.
