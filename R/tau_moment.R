@@ -74,21 +74,6 @@ tau_moment <- function(rk,
     ij <- ij - lag
   }
 
-  # Hypoexponential CDF with two different rates
-  hypo2.cdf <- function(x, lambdak, lambdaj) {
-    if (lambdak == lambdaj) {
-      return(pgamma(x, shape=2, rate=lambdaj))
-    }
-    first <- lambdaj / (lambdaj - lambdak) * exp(-lambdak * x)
-    second <- lambdak / (lambdak - lambdaj) * exp(- lambdaj * x)
-    return(1 - first - second)
-  }
-
-  # Hypoexponential survival with two different rates
-  hypo2.sf <- function(x, lambdak, lambdaj) {
-    return(1 - hypo2.cdf(x, lambdak, lambdaj))
-  }
-
   # Expected tau: rk, rj, ik, ij observed
   E.tau.rk.rj.ik.ij <- function(rk,
                                 rj,
@@ -221,8 +206,8 @@ tau_moment <- function(rk,
 
 
   # integral from a to b
-  integral.upp.low <- function(func, low, upp, rate1, rate2, rate3) {
-    return(func(upp, rate1, rate2, rate3) - func(low, rate1, rate2, rate3))
+  integral.upp.low <- function(func, low, upp, rate1, rate2) {
+    return(func(upp, rate1, rate2) - func(low, rate1, rate2))
   }
 
   # Expected tau: rj, ik observed
@@ -235,10 +220,10 @@ tau_moment <- function(rk,
                           lambdaj
                           ) {
     val <- 0
-    func1 <- function(x, rate1, rate2, rate3) {
+    func1 <- function(x, rate1, rate2) {
       return((1 - (rate2 - rate1) * x) * exp((rate2 - rate1) * x))
     }
-    func2 <- function(x, rate1, rate2, rate3) {
+    func2 <- function(x, rate1, rate2) {
       return(exp((rate2 - rate1) * x) / (rate2 - rate1))
     }
     if (rj < ik) {
@@ -251,9 +236,9 @@ tau_moment <- function(rk,
         H27 <- rj - ik
       } else {
         H15 <- lambdak / ((lambdaj - lambdak)^2) *
-          integral.upp.low(func1, ik, rj, lambdak, lambdaj, 0)
+          integral.upp.low(func1, rj, ik, lambdak, lambdaj)
         H14 <- H15
-        H13 <- integral.upp.low(func2, rj, ik, lambdak, lambdaj, 0)
+        H13 <- integral.upp.low(func2, ik, rj, lambdak, lambdaj)
         H27 <- (exp((lambdaj - lambdak) * rj) -
           exp((lambdaj - lambdak) * ik)) /
           (lambdaj - lambdak)
@@ -276,7 +261,7 @@ tau_moment <- function(rk,
 
       # ik < ij < rj < rk case
       H18 <- exp(- lambdak * rj) *
-        integral.upp.low(func1, rj, ik, 0, lambdaj, 0) /
+        integral.upp.low(func1, rj, ik, 0, lambdaj) /
         lambdak /
         (lambdaj^2)
       H19 <- ik / lambdak / lambdaj *
@@ -292,7 +277,7 @@ tau_moment <- function(rk,
         H22 <- (rj^2 - ik^2) / 2
         H25 <- rj - ik
       } else {
-        H24 <- integral.upp.low(func1, ik, rj, lambdak, lambdaj, 0) /
+        H24 <- integral.upp.low(func1, rj, ik, lambdak, lambdaj) /
           ((lambdaj - lambdak)^2)
         H22 <- H24
         H25 <- (exp((lambdaj - lambdak) * rj) -
@@ -303,7 +288,7 @@ tau_moment <- function(rk,
         exp(-lambdak * rj) /
         lambdaj
       H21 <- ik * (H25 - H26) / lambdak
-      H23 <- integral.upp.low(func1, rj, ik, 0, lambdaj, 0) /
+      H23 <- integral.upp.low(func1, rj, ik, 0, lambdaj) /
         (lambdaj^2) *
         exp(-lambdak * rj)
       H20 <- (H22 - H23) / lambdak
