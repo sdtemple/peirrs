@@ -21,10 +21,6 @@ A list with the following elements:
 \item \code{infection_rate}: estimated beta (infection rate)
 \item \code{removal_rate}: estimated gamma (removal rate)
 \item \code{effective_number}: estimated R0 = beta/gamma
-\item \code{tau_sum}: sum of expected tau values (for diagnostics)
-\item \code{not_infected_sum}: total infectious period among non-infected (for diagnostics)
-\item \code{num_not_infected}: count of non-infected individuals (for diagnostics)
-\item \code{num_complete}: count of originally complete infection-removal pairs (for diagnostics)
 }
 }
 \description{
